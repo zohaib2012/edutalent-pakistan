@@ -1,0 +1,81 @@
+const mongoose = require('mongoose');
+
+const studentSchema = new mongoose.Schema({
+  fullName: { type: String, required: true, trim: true },
+  fatherName: { type: String, required: true, trim: true },
+  cnicOrBform: { type: String, required: true, unique: true, trim: true },
+  dateOfBirth: { type: Date, required: true },
+  grade: { type: String, required: true },
+  phaseId: { type: mongoose.Schema.Types.ObjectId, ref: 'Phase', required: true },
+  schoolOrCollege: { type: String, required: true },
+  province: { type: String, required: true, enum: ['Sindh', 'Punjab', 'KPK', 'Balochistan', 'AJK', 'GB', 'Islamabad'] },
+  city: { type: String, required: true },
+  mobileNumber: { type: String, required: true },
+  email: { type: String, required: true, lowercase: true },
+  address: { type: String, required: true },
+  photoUrl: { type: String },
+  photoPublicId: { type: String },
+  registrationNumber: { type: String, unique: true },
+  password: { type: String },
+  registrationDate: { type: Date, default: Date.now },
+  challan: {
+    challanNumber: { type: String },
+    generatedAt: { type: Date },
+    dueDate: { type: Date },
+    amount: { type: Number },
+    pdfUrl: { type: String },
+    isPaid: { type: Boolean, default: false },
+    paidChallanImageUrl: { type: String },
+    paymentVerified: { type: Boolean, default: false },
+    paymentVerifiedAt: { type: Date },
+    paymentVerifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
+    rejectionReason: { type: String },
+  },
+  rollNoSlip: {
+    rollNumber: { type: String },
+    testDate: { type: Date },
+    testTime: { type: String },
+    slipPdfUrl: { type: String },
+    username: { type: String },
+    passwordGiven: { type: String },
+    issuedAt: { type: Date },
+  },
+  test: {
+    attempted: { type: Boolean, default: false },
+    sessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestSession' },
+    resultId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestResult' },
+    score: { type: Number },
+    percentage: { type: Number },
+    position: { type: Number },
+    phaseWisePosition: { type: Number },
+  },
+  award: {
+    type: { type: String, enum: ['laptop', 'chromebook', 'shield', 'certificate', 'participation', null] },
+    title: { type: String },
+    issuedAt: { type: Date },
+    delivered: { type: Boolean, default: false },
+    deliveryAddress: { type: String },
+    trackingNumber: { type: String },
+  },
+  certificate: {
+    type: { type: String, enum: ['1st_position', 'top5', 'shield', 'top20', 'appreciation', 'participation', null] },
+    certificateNumber: { type: String },
+    issuedAt: { type: Date },
+    pdfUrl: { type: String },
+    qrCodeUrl: { type: String },
+  },
+  status: {
+    type: String,
+    enum: ['registered', 'challan_issued', 'payment_pending', 'payment_verified', 'slip_issued', 'test_completed', 'result_published'],
+    default: 'registered',
+  },
+  isActive: { type: Boolean, default: true },
+}, { timestamps: true });
+
+studentSchema.index({ cnicOrBform: 1 });
+studentSchema.index({ registrationNumber: 1 });
+studentSchema.index({ email: 1 });
+studentSchema.index({ status: 1 });
+studentSchema.index({ phaseId: 1 });
+
+module.exports = mongoose.model('Student', studentSchema);
