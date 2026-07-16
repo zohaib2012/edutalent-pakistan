@@ -18,7 +18,12 @@ app.use(helmet({ crossOriginResourcePolicy: false }));
 
 app.use(cors({
   origin: function (origin, callback) {
-    if (!origin || /^http:\/\/localhost:\d+$/.test(origin)) {
+    const allowedOrigins = [
+      /^http:\/\/localhost:\d+$/,
+      /^https?:\/\/.*\.vercel\.app$/,
+      /^https:\/\/.*\.edutalent.*$/,
+    ];
+    if (!origin || allowedOrigins.some(r => r.test(origin))) {
       callback(null, true);
     } else {
       callback(new Error('Not allowed by CORS'));
@@ -35,6 +40,10 @@ app.use('/api/v1', routes);
 
 app.get('/health', (req, res) => {
   res.json({ status: 'ok', message: 'EduTalent Pakistan API is running' });
+});
+
+app.use((req, res) => {
+  res.status(404).json({ message: `Route not found: ${req.method} ${req.originalUrl}` });
 });
 
 app.use(errorHandler);

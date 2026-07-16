@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd client && npm install && npm run build && cd ../server && npm install --legacy-peer-deps",
+  "buildCommand": "npm install && cd client && npm install && npm run build",
   "outputDirectory": "client/dist",
   "framework": "vite",
   "rewrites": [
@@ -8,10 +8,5 @@
       "source": "/((?!api/).*)",
       "destination": "/index.html"
     }
-  ],
-  "functions": {
-    "api/[...path].js": {
-      "includeFiles": "server/**"
-    }
-  }
+  ]
 }
