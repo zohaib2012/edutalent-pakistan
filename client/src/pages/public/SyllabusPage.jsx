@@ -61,6 +61,84 @@ const phases = [
 const SyllabusPage = () => {
   const [activeTab, setActiveTab] = useState(0);
 
+  const downloadPDF = () => {
+    const phase = phases[activeTab];
+    const totalMCQs = phase.subjects.reduce((sum, s) => sum + s.mcqs, 0);
+
+    const tableRows = phase.subjects.map((s, i) => `
+      <tr>
+        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-size: 13px;">${i + 1}</td>
+        <td style="padding: 8px; border: 1px solid #ddd; font-size: 13px; font-weight: 600;">${s.subject}</td>
+        <td style="padding: 8px; border: 1px solid #ddd; font-size: 12px; color: #555;">${s.topics}</td>
+        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-size: 13px; font-weight: 600; color: #1e40af;">${s.mcqs}</td>
+        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-size: 12px;"><span style="background: #e0e7ff; color: #1e40af; padding: 2px 8px; border-radius: 12px; font-weight: 600;">${s.weightage}</span></td>
+      </tr>
+    `).join('');
+
+    const totalRow = `
+      <tr>
+        <td colspan="3" style="padding: 8px; border: 1px solid #ddd; text-align: right; font-size: 13px; font-weight: 700;">Total</td>
+        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-size: 13px; font-weight: 700; color: #1e40af;">${totalMCQs}</td>
+        <td style="padding: 8px; border: 1px solid #ddd; text-align: center; font-size: 13px;"><span style="font-weight: 700; color: #1e40af;">100%</span></td>
+      </tr>
+    `;
+
+    const html = `
+      <html>
+        <head>
+          <meta charset="utf-8">
+          <title>EduTalent Pakistan - ${phase.name} Syllabus</title>
+          <style>
+            body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; color: #333; }
+            .header { text-align: center; margin-bottom: 30px; }
+            .header h1 { color: #1e3a5f; font-size: 24px; margin-bottom: 4px; }
+            .header h2 { color: #1e40af; font-size: 18px; margin-bottom: 4px; }
+            .header p { color: #666; font-size: 14px; }
+            table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+            th { background: #1e3a5f; color: white; padding: 10px 8px; text-align: left; font-size: 12px; text-transform: uppercase; }
+            .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 15px; }
+          </style>
+        </head>
+        <body>
+          <div class="header">
+            <h1>EduTalent Pakistan</h1>
+            <h2>${phase.name} - ${phase.sub}</h2>
+            <p>Complete Syllabus Breakdown</p>
+          </div>
+          <table>
+            <thead>
+              <tr>
+                <th style="text-align: center;">#</th>
+                <th>Subject</th>
+                <th>Topics</th>
+                <th style="text-align: center;">MCQs</th>
+                <th style="text-align: center;">Weightage</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${tableRows}
+              ${totalRow}
+            </tbody>
+          </table>
+          <div class="footer">
+            <p>EduTalent Pakistan | National Digital Scholarship Platform | www.edutalent.pk</p>
+            <p>Generated on ${new Date().toLocaleDateString()}</p>
+          </div>
+        </body>
+      </html>
+    `;
+
+    const blob = new Blob([html], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `EduTalent_${phase.name.replace(' ', '_')}_Syllabus.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
   return (
     <div>
       <section className="bg-gradient-to-br from-primary via-primary-700 to-primary-900 text-white py-20 md:py-28">
@@ -99,8 +177,8 @@ const SyllabusPage = () => {
                 <h2 className="font-heading font-bold text-xl">{phases[activeTab].name}</h2>
                 <p className="text-sm text-gray-500">{phases[activeTab].sub}</p>
               </div>
-              <button className="btn-outline text-sm">
-                <Download size={16} /> Download Syllabus
+              <button onClick={downloadPDF} className="btn-primary text-sm">
+                <Download size={16} /> Download Syllabus PDF
               </button>
             </div>
             <div className="overflow-x-auto">

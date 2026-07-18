@@ -2,6 +2,54 @@ const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const Admin = require('../models/Admin');
 const Student = require('../models/Student');
+const Phase = require('../models/Phase');
+
+exports.studentRegister = async (req, res) => {
+  try {
+    const { fullName, fatherName, cnicOrBform, dateOfBirth, mobileNumber, email } = req.body;
+
+    if (!fullName || !fatherName || !cnicOrBform || !dateOfBirth || !mobileNumber || !email) {
+      return res.status(400).json({ message: 'All fields are required' });
+    }
+
+    const existingStudent = await Student.findOne({ cnicOrBform });
+    if (existingStudent) return res.status(400).json({ message: 'Student with this CNIC/B-Form already registered' });
+
+    const phase = await Phase.findOne({});
+    if (!phase) return res.status(400).json({ message: 'No phase available for registration' });
+
+    const count = await Student.countDocuments({ phaseId: phase._id });
+    const registrationNumber = `ETP-${new Date().getFullYear()}-P${phase.slug?.split('-')[1] || 'X'}-${String(count + 1).padStart(4, '0')}`;
+
+    const tempPassword = Math.random().toString(36).slice(-8) + '!A1';
+    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+
+    const student = await Student.create({
+      fullName, fatherName, cnicOrBform, dateOfBirth,
+      grade: '13', phaseId: phase._id,
+      schoolOrCollege: '', province: 'Islamabad', city: '', mobileNumber,
+      email, address: '',
+      registrationNumber, password: hashedPassword,
+      status: 'registered', registrationDate: new Date()
+    });
+
+    const token = jwt.sign({ id: student._id }, process.env.JWT_SECRET, { expiresIn: process.env.JWT_EXPIRE || '30d' });
+
+    res.status(201).json({
+      message: 'Registration successful',
+      token,
+      student: {
+        id: student._id,
+        fullName: student.fullName,
+        registrationNumber: student.registrationNumber,
+        tempPassword
+      }
+    });
+  } catch (error) {
+    if (error.code === 11000) return res.status(400).json({ message: 'Duplicate entry' });
+    res.status(500).json({ message: error.message });
+  }
+};
 
 exports.studentLogin = async (req, res) => {
   try {

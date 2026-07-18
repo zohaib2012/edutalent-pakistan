@@ -28,6 +28,11 @@ export const getMe = () => api.get('/auth/me');
 // ---- REGISTRATION ----
 export const registerStudent = (data) => api.post('/registration', data);
 export const checkCNIC = (cnic) => api.get(`/registration/check-cnic/${cnic}`);
+export const createAccount = (data) => api.post('/registration/create-account', data);
+export const submitApplication = (formData) => api.post('/registration/submit-application', formData, {
+  headers: { 'Content-Type': 'multipart/form-data' }
+});
+export const getApplicationForm = () => api.get('/registration/application-form');
 
 // ---- STUDENTS ----
 export const getStudents = (params) => api.get('/students', { params });
@@ -70,8 +75,10 @@ export const getMyAward = () => api.get('/awards/my-award');
 
 // ---- CERTIFICATES ----
 export const getMyCertificate = () => api.get('/certificates/my-certificate');
+export const getMyCertificates = () => api.get('/certificates/my-certificates');
 export const verifyCertificate = (certNumber) => api.get(`/certificates/verify/${certNumber}`);
 export const getCertificateTypes = () => api.get('/certificates/types');
+export const generateCertificate = (studentId) => api.post(studentId ? `/certificates/generate/${studentId}` : '/certificates/generate');
 
 // ---- ANNOUNCEMENTS ----
 export const getAnnouncements = () => api.get('/announcements');

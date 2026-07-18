@@ -2,50 +2,30 @@ import { Laptop, Shield, Award, Star, Trophy, Quote } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const awardTypes = [
-  { icon: Laptop, title: 'Laptops', count: '4 Winners', desc: '1 Laptop per Phase — 1st Position', color: 'text-primary', bg: 'bg-primary-50' },
-  { icon: Laptop, title: 'Chromebooks', count: '16 Winners', desc: '4 Chromebooks per Phase — 2nd to 5th', color: 'text-success', bg: 'bg-green-50' },
-  { icon: Shield, title: 'Shields', count: '20 Winners', desc: '5 Shields per Phase — 6th to 10th', color: 'text-gold', bg: 'bg-gold/10' },
+  { icon: Laptop, title: 'Laptops', count: '4 Winners', desc: 'Scholarship Awards — Top Performers', color: 'text-primary', bg: 'bg-primary-50' },
+  { icon: Laptop, title: 'Chromebooks', count: '16 Winners', desc: 'Scholarship Awards — Outstanding Achievers', color: 'text-success', bg: 'bg-green-50' },
+  { icon: Shield, title: 'Shields', count: '20 Winners', desc: 'Scholarship Awards — Top Contenders', color: 'text-gold', bg: 'bg-gold/10' },
   { icon: Award, title: 'Certificates', count: 'Top 20 + All', desc: 'Appreciation + Participation with QR', color: 'text-primary', bg: 'bg-primary-50' },
 ];
 
-const phaseWinners = [
-  { phase: 'Phase 1', sub: 'Primary Level', winners: [
-    { name: 'Ahmed Khan', award: 'Laptop', pos: '1st' },
-    { name: 'Fatima Ali', award: 'Chromebook', pos: '2nd' },
-    { name: 'Usman Raza', award: 'Chromebook', pos: '3rd' },
-    { name: 'Ayesha Khan', award: 'Shield', pos: 'Top 10' },
-  ]},
-  { phase: 'Phase 2', sub: 'Middle Level', winners: [
-    { name: 'Hira Batool', award: 'Laptop', pos: '1st' },
-    { name: 'Zain Ali', award: 'Chromebook', pos: '2nd' },
-    { name: 'Sara Khan', award: 'Chromebook', pos: '3rd' },
-    { name: 'Ali Raza', award: 'Shield', pos: 'Top 10' },
-  ]},
-  { phase: 'Phase 3', sub: 'Matric Level', winners: [
-    { name: 'Ali Raza', award: 'Laptop', pos: '1st' },
-    { name: 'Mahnoor Fatima', award: 'Chromebook', pos: '2nd' },
-    { name: 'Hassan Ali', award: 'Chromebook', pos: '3rd' },
-    { name: 'Iqra Shah', award: 'Shield', pos: 'Top 10' },
-  ]},
-  { phase: 'Phase 4', sub: 'Senior Level', winners: [
-    { name: 'Omar Farooq', award: 'Laptop', pos: '1st' },
-    { name: 'Zainab Malik', award: 'Chromebook', pos: '2nd' },
-    { name: 'Tariq Mehmood', award: 'Chromebook', pos: '3rd' },
-    { name: 'Amina Tariq', award: 'Shield', pos: 'Top 10' },
-  ]},
+const phases = [
+  { phase: 'Phase 1', sub: 'Primary Level' },
+  { phase: 'Phase 2', sub: 'Middle Level' },
+  { phase: 'Phase 3', sub: 'Matric Level' },
+  { phase: 'Phase 4', sub: 'Senior Level' },
 ];
 
 const hallOfFame = [
-  { name: 'Ahmed Khan', phase: 'Phase 1', year: '2025', achievement: '1st Position — Laptop Winner' },
-  { name: 'Hira Batool', phase: 'Phase 2', year: '2025', achievement: '1st Position — Laptop Winner' },
-  { name: 'Ali Raza', phase: 'Phase 3', year: '2025', achievement: '1st Position — Laptop Winner' },
-  { name: 'Omar Farooq', phase: 'Phase 4', year: '2025', achievement: '1st Position — Laptop Winner' },
+  { name: 'Ahmed Khan', phase: 'Phase 1', year: '2025', achievement: 'Position Holder — Scholarship Award' },
+  { name: 'Hira Batool', phase: 'Phase 2', year: '2025', achievement: 'Position Holder — Scholarship Award' },
+  { name: 'Ali Raza', phase: 'Phase 3', year: '2025', achievement: 'Position Holder — Scholarship Award' },
+  { name: 'Omar Farooq', phase: 'Phase 4', year: '2025', achievement: 'Position Holder — Scholarship Award' },
 ];
 
 const successStories = [
-  { name: 'Fatima Ali', grade: 'Phase 1 — 2nd Position', quote: 'Winning the Chromebook was a dream come true. EduTalent gave me the confidence to aim higher.', award: 'Chromebook Winner' },
-  { name: 'Usman Raza', grade: 'Phase 3 — Shield Holder', quote: 'The test was challenging but fair. I am proud to be recognized among Pakistan&apos;s brightest students.', award: 'Shield Winner' },
-  { name: 'Mahnoor Fatima', grade: 'Phase 3 — 2nd Position', quote: 'This scholarship changed my family&apos;s perspective on education. Thank you EduTalent!', award: 'Chromebook Winner' },
+  { name: 'Fatima Ali', grade: 'Phase 1 — Position Holder', quote: 'Winning the scholarship award was a dream come true. EduTalent gave me the confidence to aim higher.', award: 'Scholarship Winner' },
+  { name: 'Usman Raza', grade: 'Phase 3 — Award Recipient', quote: 'The test was challenging but fair. I am proud to be recognized among Pakistan&apos;s brightest students.', award: 'Scholarship Winner' },
+  { name: 'Mahnoor Fatima', grade: 'Phase 3 — Position Holder', quote: 'This scholarship changed my family&apos;s perspective on education. Thank you EduTalent!', award: 'Scholarship Winner' },
 ];
 
 const AwardsPage = () => {
@@ -65,7 +45,7 @@ const AwardsPage = () => {
 
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-heading font-bold text-center mb-10">Award Categories</h2>
+          <h2 className="text-2xl font-heading font-bold text-center mb-10">Scholarship Awards</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
             {awardTypes.map((a, i) => (
               <div key={i} className="text-center p-6 rounded-xl border-2 border-gray-100 hover:border-gold/30 transition-all hover:shadow-lg">
@@ -79,29 +59,53 @@ const AwardsPage = () => {
             ))}
           </div>
 
-          <h2 className="text-2xl font-heading font-bold text-center mb-8">Per-Phase Winner Gallery</h2>
+          <h2 className="text-2xl font-heading font-bold text-center mb-8">Per-Phase Award Categories</h2>
           <div className="grid md:grid-cols-2 gap-6 mb-16">
-            {phaseWinners.map((pw, i) => (
+            {phases.map((pw, i) => (
               <div key={i} className="bg-gray-50 rounded-xl p-6 border border-gray-100">
                 <h3 className="font-heading font-bold text-primary mb-1">{pw.phase}</h3>
                 <p className="text-sm text-gray-500 mb-4">{pw.sub}</p>
                 <div className="grid gap-3">
-                  {pw.winners.map((w, j) => (
-                    <div key={j} className="flex items-center justify-between bg-white rounded-lg p-3 border border-gray-100">
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 bg-primary-50 rounded-full flex items-center justify-center text-primary font-bold text-xs">{w.name[0]}</div>
-                        <div>
-                          <p className="text-sm font-semibold text-gray-900">{w.name}</p>
-                          <p className="text-xs text-gray-500">{w.pos}</p>
-                        </div>
+                  <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <Laptop size={20} className="text-primary" />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">Laptop</p>
+                        <p className="text-xs text-gray-500">Top Position</p>
                       </div>
-                      <span className={`text-xs font-semibold px-3 py-1 rounded-full ${
-                        w.award === 'Laptop' ? 'bg-primary-50 text-primary' :
-                        w.award === 'Chromebook' ? 'bg-green-50 text-success' :
-                        'bg-gold/10 text-gold'
-                      }`}>{w.award}</span>
                     </div>
-                  ))}
+                    <span className="ml-auto bg-primary-50 text-primary text-xs font-semibold px-3 py-1 rounded-full">1 Award</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <Laptop size={20} className="text-success" />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">Chromebooks</p>
+                        <p className="text-xs text-gray-500">Outstanding Achievers</p>
+                      </div>
+                    </div>
+                    <span className="ml-auto bg-green-50 text-success text-xs font-semibold px-3 py-1 rounded-full">4 Awards</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <Shield size={20} className="text-gold" />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">Shields</p>
+                        <p className="text-xs text-gray-500">Top Contenders</p>
+                      </div>
+                    </div>
+                    <span className="ml-auto bg-gold/10 text-gold text-xs font-semibold px-3 py-1 rounded-full">5 Awards</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white rounded-lg p-3 border border-gray-100">
+                    <div className="flex items-center gap-3">
+                      <Award size={20} className="text-primary" />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900">Certificates</p>
+                        <p className="text-xs text-gray-500">Top 20 + All Participants</p>
+                      </div>
+                    </div>
+                    <span className="ml-auto bg-primary-50 text-primary text-xs font-semibold px-3 py-1 rounded-full">With QR Code</span>
+                  </div>
                 </div>
               </div>
             ))}

@@ -14,11 +14,11 @@ const FindSlipPage = () => {
     setSlipData({
       studentName: 'Ahmed Khan',
       fatherName: 'Muhammad Ali',
-      rollNumber: 'ET-2025-0042',
+      rollNumber: 'ETP-2025-0042',
       testDate: 'August 25, 2025',
       testTime: '10:00 AM (PST)',
       phase: 'Phase 2 — Middle Level',
-      username: 'ET-2025-0042',
+      username: 'ETP-2025-0042',
       password: 'Ahmed@2025',
     });
   };

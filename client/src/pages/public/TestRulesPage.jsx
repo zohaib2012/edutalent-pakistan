@@ -1,4 +1,5 @@
-import { Camera, Mic, MessageSquare, UserX, Monitor, CameraOff, AlertTriangle, Clock, MonitorSmartphone, ShieldCheck, Laptop, Wifi } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { Camera, Mic, MessageSquare, UserX, Monitor, CameraOff, AlertTriangle, Clock, MonitorSmartphone, ShieldCheck, Laptop, Wifi, Smartphone, Tablet, ArrowRight } from 'lucide-react';
 
 const rules = [
   { icon: Camera, title: 'Camera & Mic Must Stay ON', desc: 'Your camera and microphone must remain active throughout the entire test duration. Any interruption may result in disqualification.' },
@@ -31,6 +32,29 @@ const TestRulesPage = () => {
           <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto">
             Please read and follow all rules carefully. Violations lead to automatic disqualification.
           </p>
+        </div>
+      </section>
+
+      <section className="py-8 md:py-10 bg-white border-b border-gray-100">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-primary-50 border border-primary-200 rounded-2xl p-5 md:p-7">
+            <div className="flex flex-col md:flex-row items-center gap-4 md:gap-6">
+              <div className="flex items-center gap-3 flex-shrink-0">
+                <div className="flex -space-x-2">
+                  <Laptop size={24} className="text-primary" />
+                  <Smartphone size={20} className="text-primary" />
+                  <Tablet size={20} className="text-primary" />
+                </div>
+              </div>
+              <div className="flex-1 text-center md:text-left">
+                <h3 className="font-heading font-bold text-primary text-base md:text-lg mb-1">Works on All Devices</h3>
+                <p className="text-sm text-gray-600">Our online test supports: Laptop, Desktop Computer, Mobile Phone, Tablet, and Chromebook</p>
+              </div>
+              <Link to="/demo-test" className="btn-primary text-sm py-2.5 px-6 w-full md:w-auto justify-center flex-shrink-0">
+                Try Demo Test <ArrowRight size={16} />
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
 

@@ -1,6 +1,5 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { Calendar, Clock, ArrowRight, ChevronLeft, ChevronRight, Megaphone } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { ArrowLeft, Calendar, Megaphone, Clock } from 'lucide-react';
 
 const announcements = [
   { slug: 'scholarship-test-2025-announced', date: 'July 15, 2025', title: 'Scholarship Test 2025 Announced', excerpt: 'Applications are now open for all phases. Last date to apply is August 15, 2025. Register now to secure your spot.', gradient: 'from-primary to-primary-600', content: 'We are thrilled to announce the opening of applications for the EduTalent Pakistan Scholarship Test 2025. This year, we have expanded our reach to all four phases covering students from Grade 1 to University level. The test will be conducted online with state-of-the-art proctoring technology to ensure fairness and transparency. All eligible students across Pakistan are encouraged to apply before the deadline. Detailed guidelines, syllabus, and test schedules are available on our website. Don\'t miss this opportunity to win laptops, Chromebooks, shields, and certificates!' },
@@ -11,86 +10,62 @@ const announcements = [
   { slug: 'date-sheet-2025-released', date: 'June 15, 2025', title: 'Date Sheet for 2025 Released', excerpt: 'The complete test date schedule for all four phases has been published on the Date Sheet page.', gradient: 'from-rose-500 to-rose-600', content: 'The complete date sheet for EduTalent Pakistan Scholarship Test 2025 has been released. Phase 1 and Phase 2 tests will be held on August 24, 2025, while Phase 3 and Phase 4 tests will be conducted on August 25, 2025. Detailed timing for each phase is available on the Date Sheet page. Students are advised to mark their calendars and prepare accordingly. Any changes to the schedule will be communicated through official announcements on this page.' },
 ];
 
-const ITEMS_PER_PAGE = 4;
+const AnnouncementDetailPage = () => {
+  const { slug } = useParams();
+  const announcement = announcements.find(a => a.slug === slug);
 
-const AnnouncementsPage = () => {
-  const [currentPage, setCurrentPage] = useState(1);
-  const totalPages = Math.ceil(announcements.length / ITEMS_PER_PAGE);
-  const paginated = announcements.slice((currentPage - 1) * ITEMS_PER_PAGE, currentPage * ITEMS_PER_PAGE);
+  if (!announcement) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center">
+        <div className="text-center">
+          <Megaphone size={48} className="text-gray-300 mx-auto mb-4" />
+          <h1 className="text-2xl font-heading font-bold text-gray-700 mb-2">Announcement Not Found</h1>
+          <p className="text-gray-500 mb-6">The announcement you are looking for does not exist or has been removed.</p>
+          <Link to="/announcements" className="btn-primary">Back to Announcements</Link>
+        </div>
+      </div>
+    );
+  }
+
+  const contentParagraphs = announcement.content.split('. ').filter(p => p.trim());
 
   return (
     <div>
       <section className="bg-gradient-to-br from-primary via-primary-700 to-primary-900 text-white py-20 md:py-28">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="w-16 h-16 bg-white/10 rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <Megaphone size={36} className="text-gold" />
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <Link to="/announcements" className="inline-flex items-center gap-2 text-white/70 hover:text-white mb-6 transition-colors">
+            <ArrowLeft size={16} /> Back to Announcements
+          </Link>
+          <div className="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm rounded-full px-4 py-2 text-sm mb-4">
+            <Calendar size={14} className="text-gold" />
+            <span>{announcement.date}</span>
           </div>
-          <h1 className="text-4xl md:text-5xl font-heading font-bold mb-4">Announcements</h1>
-          <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto">
-            Stay updated with the latest scholarship programs and test schedules.
-          </p>
+          <h1 className="text-3xl md:text-5xl font-heading font-bold mb-6">{announcement.title}</h1>
+          <p className="text-lg md:text-xl text-white/80 max-w-3xl">{announcement.excerpt}</p>
         </div>
       </section>
 
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid gap-6">
-            {paginated.map((item, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow flex flex-col md:flex-row">
-                <div className={`bg-gradient-to-r ${item.gradient} md:w-48 flex items-center justify-center p-6 text-white`}>
-                  <div className="text-center">
-                    <Calendar size={32} className="mx-auto mb-2 opacity-80" />
-                    <p className="text-sm font-semibold">{item.date}</p>
-                  </div>
-                </div>
-                <div className="p-6 flex-1">
-                  <h3 className="font-heading font-bold text-lg mb-2">{item.title}</h3>
-                  <p className="text-gray-600 text-sm mb-4">{item.excerpt}</p>
-                  <Link to={`/announcements/${item.slug}`} className="text-primary text-sm font-semibold flex items-center gap-1 hover:gap-2 transition-all">
-                    Read More <ArrowRight size={14} />
-                  </Link>
-                </div>
-              </div>
-            ))}
-          </div>
-
-          {totalPages > 1 && (
-            <div className="flex justify-center items-center gap-4 mt-10">
-              <button
-                onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="btn-outline disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              >
-                <ChevronLeft size={16} /> Previous
-              </button>
-              <div className="flex gap-2">
-                {Array.from({ length: totalPages }, (_, i) => i + 1).map(p => (
-                  <button
-                    key={p}
-                    onClick={() => setCurrentPage(p)}
-                    className={`w-10 h-10 rounded-lg font-semibold text-sm transition-all ${
-                      currentPage === p
-                        ? 'bg-primary text-white'
-                        : 'bg-white text-gray-700 border border-gray-200 hover:bg-primary-50'
-                    }`}
-                  >
-                    {p}
-                  </button>
-                ))}
-              </div>
-              <button
-                onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages}
-                className="btn-outline disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-              >
-                Next <ChevronRight size={16} />
-              </button>
+          <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-12">
+            <div className="prose prose-gray max-w-none">
+              {contentParagraphs.map((para, i) => (
+                <p key={i} className="text-gray-700 text-base leading-relaxed mb-4">{para}.</p>
+              ))}
             </div>
-          )}
+            <div className="mt-8 pt-6 border-t border-gray-100 flex items-center gap-4">
+              <Link to="/announcements" className="btn-outline text-sm">
+                <ArrowLeft size={16} /> All Announcements
+              </Link>
+              <Link to="/apply" className="btn-primary text-sm">
+                Apply Now
+              </Link>
+            </div>
+          </div>
         </div>
       </section>
     </div>
   );
 };
 
-export default AnnouncementsPage;
+export default AnnouncementDetailPage;

@@ -3,14 +3,14 @@ import { Link } from 'react-router-dom';
 import { Search, Filter, Medal, ArrowRight } from 'lucide-react';
 
 const placeholderResults = [
-  { pos: 1, roll: 'ET-2025-001', name: 'Ahmed Khan', phase: 'Phase 1', score: 96, percentage: '96%' },
-  { pos: 2, roll: 'ET-2025-002', name: 'Fatima Ali', phase: 'Phase 1', score: 94, percentage: '94%' },
-  { pos: 3, roll: 'ET-2025-003', name: 'Usman Raza', phase: 'Phase 1', score: 92, percentage: '92%' },
-  { pos: 4, roll: 'ET-2025-004', name: 'Ayesha Khan', phase: 'Phase 1', score: 90, percentage: '90%' },
-  { pos: 5, roll: 'ET-2025-005', name: 'Bilal Ahmed', phase: 'Phase 1', score: 88, percentage: '88%' },
-  { pos: 6, roll: 'ET-2025-006', name: 'Hira Batool', phase: 'Phase 2', score: 91, percentage: '91%' },
-  { pos: 7, roll: 'ET-2025-007', name: 'Zain Ali', phase: 'Phase 2', score: 89, percentage: '89%' },
-  { pos: 8, roll: 'ET-2025-008', name: 'Sara Khan', phase: 'Phase 2', score: 87, percentage: '87%' },
+  { pos: 1, roll: 'ETP-2025-001', name: 'Ahmed Khan', phase: 'Phase 1', score: 96, percentage: '96%' },
+  { pos: 2, roll: 'ETP-2025-002', name: 'Fatima Ali', phase: 'Phase 1', score: 94, percentage: '94%' },
+  { pos: 3, roll: 'ETP-2025-003', name: 'Usman Raza', phase: 'Phase 1', score: 92, percentage: '92%' },
+  { pos: 4, roll: 'ETP-2025-004', name: 'Ayesha Khan', phase: 'Phase 1', score: 90, percentage: '90%' },
+  { pos: 5, roll: 'ETP-2025-005', name: 'Bilal Ahmed', phase: 'Phase 1', score: 88, percentage: '88%' },
+  { pos: 6, roll: 'ETP-2025-006', name: 'Hira Batool', phase: 'Phase 2', score: 91, percentage: '91%' },
+  { pos: 7, roll: 'ETP-2025-007', name: 'Zain Ali', phase: 'Phase 2', score: 89, percentage: '89%' },
+  { pos: 8, roll: 'ETP-2025-008', name: 'Sara Khan', phase: 'Phase 2', score: 87, percentage: '87%' },
 ];
 
 const ResultsPage = () => {

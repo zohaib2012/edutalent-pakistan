@@ -12,6 +12,7 @@ import ApplyNowPage from './pages/public/ApplyNowPage';
 import StudentLoginPage from './pages/public/StudentLoginPage';
 import SyllabusPage from './pages/public/SyllabusPage';
 import TestRulesPage from './pages/public/TestRulesPage';
+import DemoTestPage from './pages/public/DemoTestPage';
 import DateSheetPage from './pages/public/DateSheetPage';
 import ResultsPage from './pages/public/ResultsPage';
 import MeritListPage from './pages/public/MeritListPage';
@@ -28,6 +29,7 @@ import TrackJourneyPage from './pages/public/TrackJourneyPage';
 import FindCertificatePage from './pages/public/FindCertificatePage';
 import FindSlipPage from './pages/public/FindSlipPage';
 import WinnersPage from './pages/public/WinnersPage';
+import AnnouncementDetailPage from './pages/public/AnnouncementDetailPage';
 
 import RegisterPage from './pages/student/RegisterPage';
 import RegistrationSuccessPage from './pages/student/RegistrationSuccessPage';
@@ -64,11 +66,13 @@ function App() {
         <Route path="/vision" element={<Layout><VisionPage /></Layout>} />
         <Route path="/values" element={<Layout><ValuesPage /></Layout>} />
         <Route path="/announcements" element={<Layout><AnnouncementsPage /></Layout>} />
+        <Route path="/announcements/:slug" element={<Layout><AnnouncementDetailPage /></Layout>} />
         <Route path="/scholarships" element={<Layout><ScholarshipsPage /></Layout>} />
         <Route path="/apply" element={<Layout><ApplyNowPage /></Layout>} />
         <Route path="/login" element={<Layout><StudentLoginPage /></Layout>} />
         <Route path="/syllabus" element={<Layout><SyllabusPage /></Layout>} />
         <Route path="/test-rules" element={<Layout><TestRulesPage /></Layout>} />
+        <Route path="/demo-test" element={<Layout><DemoTestPage /></Layout>} />
         <Route path="/datesheet" element={<Layout><DateSheetPage /></Layout>} />
         <Route path="/results" element={<Layout><ResultsPage /></Layout>} />
         <Route path="/merit-list" element={<Layout><MeritListPage /></Layout>} />

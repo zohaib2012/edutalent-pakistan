@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Medal, Award, ArrowRight } from 'lucide-react';
+import { Medal, Award, ArrowRight, Search } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const phases = ['Phase 1', 'Phase 2', 'Phase 3', 'Phase 4'];
@@ -14,7 +14,7 @@ const generateMerit = (phase) => {
   const n = names[phase] || names['Phase 1'];
   return n.slice(0, 15).map((name, i) => ({
     pos: i + 1,
-    roll: `ET-2025-${String(100 + i).padStart(3, '0')}`,
+    roll: `ETP-2025-${String(100 + i).padStart(3, '0')}`,
     name,
     score: Math.max(50, 98 - i * 3 - Math.floor(Math.random() * 2)),
     percentage: `${Math.max(50, 98 - i * 3 - Math.floor(Math.random() * 2))}%`,
@@ -23,7 +23,12 @@ const generateMerit = (phase) => {
 
 const MeritListPage = () => {
   const [activeTab, setActiveTab] = useState(0);
+  const [searchQuery, setSearchQuery] = useState('');
   const meritData = generateMerit(phases[activeTab]);
+
+  const filteredData = meritData.filter(r =>
+    r.roll.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <div>
@@ -41,20 +46,32 @@ const MeritListPage = () => {
 
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap gap-2 mb-8">
-            {phases.map((phase, i) => (
-              <button
-                key={phase}
-                onClick={() => setActiveTab(i)}
-                className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all ${
-                  activeTab === i
-                    ? 'bg-primary text-white shadow-lg'
-                    : 'bg-white text-gray-700 border border-gray-200 hover:bg-primary-50'
-                }`}
-              >
-                {phase}
-              </button>
-            ))}
+          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+            <div className="flex flex-wrap gap-2">
+              {phases.map((phase, i) => (
+                <button
+                  key={phase}
+                  onClick={() => setActiveTab(i)}
+                  className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all ${
+                    activeTab === i
+                      ? 'bg-primary text-white shadow-lg'
+                      : 'bg-white text-gray-700 border border-gray-200 hover:bg-primary-50'
+                  }`}
+                >
+                  {phase}
+                </button>
+              ))}
+            </div>
+            <div className="relative w-full sm:w-auto">
+              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search by Registration ID..."
+                className="w-full sm:w-64 pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
+              />
+            </div>
           </div>
 
           <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
@@ -63,14 +80,14 @@ const MeritListPage = () => {
                 <thead>
                   <tr className="bg-primary text-white">
                     <th className="text-left px-6 py-4 text-sm font-semibold">Position</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold">Roll No</th>
+                    <th className="text-left px-6 py-4 text-sm font-semibold">Registration ID</th>
                     <th className="text-left px-6 py-4 text-sm font-semibold">Name</th>
                     <th className="text-center px-6 py-4 text-sm font-semibold">Score</th>
                     <th className="text-center px-6 py-4 text-sm font-semibold">Percentage</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {meritData.map((r, i) => (
+                  {filteredData.length > 0 ? filteredData.map((r, i) => (
                     <tr
                       key={i}
                       className={`border-t border-gray-100 hover:bg-gray-50 transition-colors ${
@@ -91,11 +108,9 @@ const MeritListPage = () => {
                           }`}>{r.pos}</span>
                         </div>
                       </td>
-                      <td className="px-6 py-4 text-sm text-gray-700">{r.roll}</td>
+                      <td className="px-6 py-4 text-sm text-gray-700 font-mono">{r.roll}</td>
                       <td className="px-6 py-4">
-                        <span className={`text-sm font-semibold ${
-                          i < 3 ? 'text-gray-900' : 'text-gray-900'
-                        }`}>{r.name}</span>
+                        <span className="text-sm font-semibold text-gray-900">{r.name}</span>
                       </td>
                       <td className="px-6 py-4 text-sm text-center font-semibold text-primary">{r.score}/100</td>
                       <td className="px-6 py-4 text-sm text-center">
@@ -106,7 +121,13 @@ const MeritListPage = () => {
                         }`}>{r.percentage}</span>
                       </td>
                     </tr>
-                  ))}
+                  )) : (
+                    <tr>
+                      <td colSpan="5" className="px-6 py-12 text-center text-gray-500 text-sm">
+                        No results found for "{searchQuery}"
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>

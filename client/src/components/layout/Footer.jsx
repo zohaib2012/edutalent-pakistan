@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
+import logo from '../../assets/images/logo.jpeg';
 
 const Footer = () => {
   return (
@@ -7,10 +8,8 @@ const Footer = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
           <div className="lg:col-span-2">
-            <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-primary rounded-lg flex items-center justify-center">
-                <span className="text-white font-heading font-bold text-lg">ET</span>
-              </div>
+            <div className="mb-4">
+              <img src={logo} alt="EduTalent Pakistan" className="h-10 w-auto mb-3" />
               <div>
                 <span className="text-white font-heading font-bold text-xl">EduTalent</span>
                 <span className="text-gray-400 font-heading text-xl"> Pakistan</span>

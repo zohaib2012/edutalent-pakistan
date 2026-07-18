@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { LogIn, AlertCircle } from 'lucide-react';
 import { studentLogin } from '../../services/api';
+import logo from '../../assets/images/logo.jpeg';
 
 const StudentLoginPage = () => {
   const [regNumber, setRegNumber] = useState('');
@@ -39,9 +40,7 @@ const StudentLoginPage = () => {
       <div className="w-full max-w-md mx-auto px-4">
         <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
           <div className="text-center mb-8">
-            <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
-              <span className="text-white font-heading font-bold text-2xl">ET</span>
-            </div>
+            <img src={logo} alt="EduTalent Pakistan" className="h-16 w-auto mx-auto mb-4" />
             <h1 className="text-2xl font-heading font-bold text-gray-900">Student Login</h1>
             <p className="text-gray-500 text-sm mt-1">Enter your credentials to access your dashboard</p>
           </div>

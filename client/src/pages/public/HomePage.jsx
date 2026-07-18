@@ -9,16 +9,16 @@ const stats = [
 ];
 
 const phases = [
-  { title: 'Phase 1', sub: 'Primary Level', grades: 'Grades 1–5', awards: 'Laptop, Chromebook, Shield', color: 'from-blue-500 to-blue-600' },
-  { title: 'Phase 2', sub: 'Middle Level', grades: 'Grades 6–8', awards: 'Laptop, Chromebook, Shield', color: 'from-emerald-500 to-emerald-600' },
-  { title: 'Phase 3', sub: 'Matric Level', grades: 'Grades 9–10', awards: 'Laptop, Chromebook, Shield', color: 'from-purple-500 to-purple-600' },
-  { title: 'Phase 4', sub: 'Senior Level', grades: 'Grade 11–12 & Uni', awards: 'Laptop, Chromebook, Shield', color: 'from-gold to-yellow-600' },
+  { title: 'Phase 1', sub: 'Primary Level', grades: 'Grades 1-5', awards: 'Laptops, Chromebooks, Shields, Certificates', color: 'from-blue-500 to-blue-600' },
+  { title: 'Phase 2', sub: 'Middle Level', grades: 'Grades 6-8', awards: 'Laptops, Chromebooks, Shields, Certificates', color: 'from-emerald-500 to-emerald-600' },
+  { title: 'Phase 3', sub: 'Matric Level', grades: 'Grades 9-10', awards: 'Laptops, Chromebooks, Shields, Certificates', color: 'from-purple-500 to-purple-600' },
+  { title: 'Phase 4', sub: 'Senior Level', grades: 'Grade 11-12 & Uni', awards: 'Laptops, Chromebooks, Shields, Certificates', color: 'from-gold to-yellow-600' },
 ];
 
 const awards = [
-  { icon: Laptop, title: 'Laptops', count: '4 Winners', desc: '1 Laptop per Phase — Top Position', color: 'text-primary' },
-  { icon: Laptop, title: 'Chromebooks', count: '16 Winners', desc: '4 Chromebooks per Phase — 2nd to 5th', color: 'text-success' },
-  { icon: Shield, title: 'Shields', count: '20 Winners', desc: '5 Shields per Phase — 6th to 10th', color: 'text-gold' },
+  { icon: Laptop, title: 'Laptops', count: '4 Winners', desc: 'Awarded to top performers in each phase', color: 'text-primary' },
+  { icon: Laptop, title: 'Chromebooks', count: '16 Winners', desc: 'Awarded to outstanding achievers across phases', color: 'text-success' },
+  { icon: Shield, title: 'Shields', count: '20 Winners', desc: 'Awarded to top contenders per phase', color: 'text-gold' },
   { icon: Award, title: 'Certificates', count: 'Top 20 + All', desc: 'Appreciation + Participation with QR', color: 'text-primary' },
 ];
 
@@ -27,13 +27,13 @@ const steps = [
   { icon: FileCheck, step: '02', title: 'Register Online', desc: 'Fill form with your personal & academic details' },
   { icon: Shield, step: '03', title: 'Pay Fee', desc: 'Download challan, pay at bank, upload receipt' },
   { icon: CheckCircle, step: '04', title: 'Get Roll No Slip', desc: 'Receive roll number, test date & login credentials' },
-  { icon: Laptop, step: '05', title: 'Take Online Test', desc: '100 MCQs, camera & mic ON, anti-cheat active' },
+  { icon: Laptop, step: '05', title: 'Take Online Test', desc: '100 MCQs on any device — mobile, tablet, laptop, or desktop' },
 ];
 
 const testimonials = [
-  { name: 'Ahmed Khan', grade: 'Phase 2 — 1st Position', quote: 'EduTalent gave me the confidence to compete at a national level. Winning a laptop changed my life!', award: 'Laptop Winner' },
-  { name: 'Fatima Ali', grade: 'Phase 1 — 2nd Position', quote: 'My first Chromebook! Thank you EduTalent for recognizing my hard work and talent.', award: 'Chromebook Winner' },
-  { name: 'Usman Raza', grade: 'Phase 3 — Shield Holder', quote: 'The test was fair and transparent. I felt proud to be among the top 10 in my phase.', award: 'Shield Winner' },
+  { name: 'Ahmed Khan', grade: 'Phase 1 — Top Performer', quote: 'EduTalent gave me the confidence to compete at a national level. The scholarship awards are truly life-changing!', award: 'Scholarship Winner' },
+  { name: 'Fatima Ali', grade: 'Phase 1 — Outstanding Achiever', quote: 'Thank you EduTalent for recognizing my hard work and talent. The transparent testing system is commendable.', award: 'Scholarship Winner' },
+  { name: 'Usman Raza', grade: 'Phase 3 — Top Performer', quote: 'The test was fair and transparent. I felt proud to be among the top performers in my phase.', award: 'Scholarship Winner' },
 ];
 
 const HomePage = () => {
@@ -72,7 +72,7 @@ const HomePage = () => {
                 <div className="w-80 h-80 bg-white/5 rounded-full border border-white/10 flex items-center justify-center">
                   <div className="text-center">
                     <div className="w-24 h-24 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl">
-                      <span className="text-white font-heading font-bold text-3xl">ET</span>
+                      <span className="text-white font-heading font-bold text-3xl">ETP</span>
                     </div>
                     <p className="text-gold font-heading font-bold text-lg">EduTalent Pakistan</p>
                     <p className="text-white/60 text-sm">Est. 2025</p>

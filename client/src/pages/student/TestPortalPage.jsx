@@ -226,6 +226,13 @@ const TestPortalPage = () => {
     return (
       <div className="min-h-screen bg-gray-50 py-12 md:py-20">
         <div className="max-w-xl mx-auto px-4">
+          <div className="bg-primary-50 border border-primary-200 rounded-xl p-4 mb-6">
+            <div className="flex items-start gap-3">
+              <Smartphone size={20} className="text-primary flex-shrink-0 mt-0.5" />
+              <p className="text-sm text-primary-800">This test supports all devices including mobile phones and tablets. Ensure you have a stable internet connection.</p>
+            </div>
+          </div>
+
           <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
             <div className="text-center mb-8">
               <Monitor size={40} className="text-primary mx-auto mb-3" />
