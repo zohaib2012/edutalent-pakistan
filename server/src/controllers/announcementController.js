@@ -7,6 +7,16 @@ exports.getAll = async (req, res) => {
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
+exports.getAllAdmin = async (req, res) => {
+  try {
+    const announcements = await Announcement.find()
+      .sort({ createdAt: -1 })
+      .populate('createdBy', 'fullName')
+      .populate('targetPhase', 'name');
+    res.json(announcements);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
 exports.getFeatured = async (req, res) => {
   try {
     const announcements = await Announcement.find({ isActive: true, isFeatured: true }).sort({ createdAt: -1 }).limit(3);
@@ -25,9 +35,16 @@ exports.getBySlug = async (req, res) => {
 exports.create = async (req, res) => {
   try {
     const slug = req.body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
-    const announcement = await Announcement.create({ ...req.body, slug, createdBy: req.adminId });
+    const payload = { ...req.body, slug, createdBy: req.adminId };
+    if (payload.targetPhase === '' || payload.targetPhase === 'All' || payload.targetPhase === null) {
+      payload.targetPhase = null;
+    }
+    const announcement = await Announcement.create(payload);
     res.status(201).json(announcement);
-  } catch (error) { res.status(500).json({ message: error.message }); }
+  } catch (error) {
+    if (error.code === 11000) return res.status(400).json({ message: 'Announcement with this title already exists' });
+    res.status(500).json({ message: error.message });
+  }
 };
 
 exports.update = async (req, res) => {

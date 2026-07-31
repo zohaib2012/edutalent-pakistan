@@ -36,6 +36,7 @@ api.interceptors.request.use((config) => {
     url.includes('/settings') ||
     url.includes('/phases') ||
     url.includes('/students') ||
+    url.includes('/announcements/admin') ||
     (url.includes('/announcements') && method !== 'get')
   );
 
@@ -109,7 +110,9 @@ export const generateCertificate = (studentId) => api.post(studentId ? `/certifi
 
 // ---- ANNOUNCEMENTS ----
 export const getAnnouncements = () => api.get('/announcements');
+export const getAnnouncementBySlug = (slug) => api.get(`/announcements/${slug}`);
 export const getFeaturedAnnouncements = () => api.get('/announcements/featured');
+export const getAdminAnnouncements = () => api.get('/announcements/admin/all');
 export const createAnnouncement = (data) => api.post('/announcements', data);
 export const updateAnnouncement = (id, data) => api.put(`/announcements/${id}`, data);
 export const deleteAnnouncement = (id) => api.delete(`/announcements/${id}`);

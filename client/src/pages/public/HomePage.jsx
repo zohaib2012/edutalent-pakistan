@@ -1,5 +1,7 @@
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Users, Award, FileCheck, Globe, BookOpen, Laptop, Shield, ChevronRight, Clock, CheckCircle } from 'lucide-react';
+import { ArrowRight, Users, Award, FileCheck, Globe, BookOpen, Laptop, Shield, ChevronRight, Clock, CheckCircle, Megaphone, Loader2 } from 'lucide-react';
+import { getAnnouncements } from '../../services/api';
 
 const stats = [
   { icon: Users, value: '10,000+', label: 'Students Registered' },
@@ -37,6 +39,18 @@ const testimonials = [
 ];
 
 const HomePage = () => {
+  const [announcements, setAnnouncements] = useState([]);
+  const [announcementsLoading, setAnnouncementsLoading] = useState(true);
+
+  useEffect(() => {
+    getAnnouncements()
+      .then((res) => setAnnouncements(res.data || []))
+      .catch(() => setAnnouncements([]))
+      .finally(() => setAnnouncementsLoading(false));
+  }, []);
+
+  const latestAnnouncements = announcements.slice(0, 3);
+
   return (
     <div>
       <section className="relative bg-gradient-to-br from-primary via-primary-700 to-primary-900 text-white overflow-hidden">
@@ -184,25 +198,35 @@ const HomePage = () => {
             <h2 className="section-title">Latest Announcements</h2>
             <p className="section-subtitle">Stay updated with the latest scholarship programs and test schedules.</p>
           </div>
-          <div className="grid md:grid-cols-3 gap-6">
-            {[1, 2, 3].map((_, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow">
-                <div className="bg-gradient-to-r from-primary to-primary-600 h-40 flex items-center justify-center">
-                  <Clock size={48} className="text-white/30" />
-                </div>
-                <div className="p-5">
-                  <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
-                    <Clock size={12} /> July 2025
+          {announcementsLoading ? (
+            <div className="flex justify-center py-16"><Loader2 size={28} className="animate-spin text-primary" /></div>
+          ) : latestAnnouncements.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-12 text-center">
+              <Megaphone size={40} className="text-gray-300 mx-auto mb-3" />
+              <p className="text-gray-500">No announcements yet. Please check back soon.</p>
+            </div>
+          ) : (
+            <div className="grid md:grid-cols-3 gap-6">
+              {latestAnnouncements.map((item) => (
+                <div key={item._id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow flex flex-col">
+                  <div className="bg-gradient-to-r from-primary to-primary-600 h-28 flex items-center justify-center">
+                    <Megaphone size={44} className="text-white/40" />
                   </div>
-                  <h3 className="font-heading font-bold text-lg mb-2">Scholarship Test 2025 Announced</h3>
-                  <p className="text-gray-600 text-sm mb-4">Applications are now open for all phases. Last date to apply is August 15, 2025.</p>
-                  <Link to="/announcements" className="text-primary text-sm font-semibold flex items-center gap-1">
-                    Read More <ArrowRight size={14} />
-                  </Link>
+                  <div className="p-5 flex-1 flex flex-col">
+                    <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
+                      <Clock size={12} />
+                      {new Date(item.publishDate || item.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })}
+                    </div>
+                    <h3 className="font-heading font-bold text-lg mb-2">{item.title}</h3>
+                    <p className="text-gray-600 text-sm mb-4 flex-1">{item.summary || item.content?.slice(0, 120)}{!item.summary && (item.content?.length || 0) > 120 ? '...' : ''}</p>
+                    <Link to={`/announcements/${item.slug}`} className="text-primary text-sm font-semibold flex items-center gap-1">
+                      Read More <ArrowRight size={14} />
+                    </Link>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
           <div className="text-center mt-8">
             <Link to="/announcements" className="btn-outline">View All Announcements</Link>
           </div>

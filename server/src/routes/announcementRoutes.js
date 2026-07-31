@@ -5,6 +5,7 @@ const announcementController = require('../controllers/announcementController');
 
 router.get('/', announcementController.getAll);
 router.get('/featured', announcementController.getFeatured);
+router.get('/admin/all', adminAuth, announcementController.getAllAdmin);
 router.get('/:slug', announcementController.getBySlug);
 router.post('/', adminAuth, announcementController.create);
 router.put('/:id', adminAuth, announcementController.update);
