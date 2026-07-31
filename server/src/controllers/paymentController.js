@@ -45,6 +45,25 @@ exports.getPending = async (req, res) => {
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
+exports.getAllPayments = async (req, res) => {
+  try {
+    const { status } = req.query;
+    let filter = { 'challan.challanNumber': { $ne: null } };
+    if (status === 'pending') {
+      filter['challan.isPaid'] = true;
+      filter['challan.paymentVerified'] = false;
+      filter['challan.rejectionReason'] = { $exists: false };
+    } else if (status === 'verified') {
+      filter['challan.paymentVerified'] = true;
+    } else if (status === 'rejected') {
+      filter['challan.isPaid'] = true;
+      filter['challan.rejectionReason'] = { $exists: true };
+    }
+    const students = await Student.find(filter).populate('phaseId').sort({ 'challan.generatedAt': -1 });
+    res.json(students);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
 exports.getStats = async (req, res) => {
   try {
     const total = await Student.countDocuments({ 'challan.challanNumber': { $ne: null } });

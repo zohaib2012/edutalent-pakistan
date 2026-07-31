@@ -18,6 +18,7 @@ const dropdownLinks = [
   { name: 'Track Journey', path: '/track-journey' },
   { name: 'Find Certificate', path: '/find-certificate' },
   { name: 'Find Roll No Slip', path: '/find-slip' },
+  { name: 'Demo Test', path: '/demo-test' },
   { name: 'Award Winners', path: '/winners' },
   { name: 'Merit List', path: '/merit-list' },
   { name: 'Test Rules', path: '/test-rules' },
@@ -26,7 +27,12 @@ const dropdownLinks = [
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem('token'));
   const location = useLocation();
+
+  useEffect(() => {
+    setIsLoggedIn(!!localStorage.getItem('token'));
+  }, [location]);
 
   useEffect(() => {
     const handleScroll = () => setScrolled(window.scrollY > 20);
@@ -64,9 +70,15 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
-            <Link to="/login" className="btn-primary ml-4 text-sm py-2 px-4">
-              Student Login
-            </Link>
+            {isLoggedIn ? (
+              <Link to="/profile" className="btn-primary ml-4 text-sm py-2 px-4">
+                Dashboard
+              </Link>
+            ) : (
+              <Link to="/login" className="btn-primary ml-4 text-sm py-2 px-4">
+                Student Login
+              </Link>
+            )}
           </div>
 
           <button className="lg:hidden p-2" onClick={() => setIsOpen(!isOpen)}>
@@ -91,9 +103,15 @@ const Navbar = () => {
                 {link.name}
               </Link>
             ))}
-            <Link to="/login" className="block btn-primary text-center text-sm mt-4">
-              Student Login
-            </Link>
+            {isLoggedIn ? (
+              <Link to="/profile" className="block btn-primary text-center text-sm mt-4">
+                Dashboard
+              </Link>
+            ) : (
+              <Link to="/login" className="block btn-primary text-center text-sm mt-4">
+                Student Login
+              </Link>
+            )}
           </div>
         </div>
       )}

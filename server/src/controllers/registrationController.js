@@ -20,8 +20,8 @@ exports.create = async (req, res) => {
     const phase = await Phase.findOne({ 'gradeRange.min': phaseGrade.min, 'gradeRange.max': phaseGrade.max });
     if (!phase) return res.status(400).json({ message: 'Invalid grade - no matching phase found' });
 
-    const count = await Student.countDocuments({ phaseId: phase._id });
-    const registrationNumber = `ETP-${new Date().getFullYear()}-P${phase.slug?.split('-')[1] || 'X'}-${String(count + 1).padStart(4, '0')}`;
+    const regCount = await Student.countDocuments({ phaseId: phase._id });
+    const registrationNumber = `ETP-${new Date().getFullYear()}-P${phase.slug?.split('-')[1] || 'X'}-${String(regCount + 1).padStart(4, '0')}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
     const tempPassword = Math.random().toString(36).slice(-8) + '!A1';
     const hashedPassword = await bcrypt.hash(tempPassword, 10);
@@ -36,7 +36,7 @@ exports.create = async (req, res) => {
       photoUrl: photoUrl || '', registrationNumber, password: hashedPassword,
       status: 'challan_issued', registrationDate: new Date(),
       challan: {
-        challanNumber, generatedAt: new Date(), dueDate, amount: phase.fee || 500,
+        challanNumber, generatedAt: new Date(), dueDate, amount: phase.fee || 1200,
         isPaid: false, paymentVerified: false
       }
     });
@@ -60,7 +60,7 @@ exports.create = async (req, res) => {
 
 exports.createAccount = async (req, res) => {
   try {
-    const { fullName, fatherName, cnicOrBform, dateOfBirth, mobileNumber, email } = req.body;
+    const { fullName, fatherName, cnicOrBform, dateOfBirth, mobileNumber, email, password } = req.body;
 
     if (!fullName || !fatherName || !cnicOrBform || !dateOfBirth || !mobileNumber || !email) {
       return res.status(400).json({ message: 'Full name, father name, CNIC/B-Form, date of birth, mobile number, and email are required' });
@@ -74,11 +74,11 @@ exports.createAccount = async (req, res) => {
     const phase = await Phase.findOne({ 'gradeRange.min': phaseGrade.min, 'gradeRange.max': phaseGrade.max });
     if (!phase) return res.status(400).json({ message: 'No matching phase found' });
 
-    const count = await Student.countDocuments({ phaseId: phase._id });
-    const registrationNumber = `ETP-${new Date().getFullYear()}-P${phase.slug?.split('-')[1] || 'X'}-${String(count + 1).padStart(4, '0')}`;
+    const regCount = await Student.countDocuments({ phaseId: phase._id });
+    const registrationNumber = `ETP-${new Date().getFullYear()}-P${phase.slug?.split('-')[1] || 'X'}-${String(regCount + 1).padStart(4, '0')}-${Math.random().toString(36).slice(2, 6).toUpperCase()}`;
 
-    const tempPassword = Math.random().toString(36).slice(-8) + '!A1';
-    const hashedPassword = await bcrypt.hash(tempPassword, 10);
+    const userPassword = password || Math.random().toString(36).slice(-8) + '!A1';
+    const hashedPassword = await bcrypt.hash(userPassword, 10);
 
     const student = await Student.create({
       fullName, fatherName, cnicOrBform, dateOfBirth,
@@ -94,12 +94,16 @@ exports.createAccount = async (req, res) => {
       student: {
         id: student._id,
         registrationNumber: student.registrationNumber,
-        tempPassword,
+        tempPassword: userPassword,
         fullName: student.fullName
       }
     });
   } catch (error) {
-    if (error.code === 11000) return res.status(400).json({ message: 'Duplicate entry' });
+    if (error.code === 11000) {
+      console.error('Duplicate key error:', JSON.stringify(error.keyValue || {}));
+      return res.status(400).json({ message: 'Duplicate entry', field: Object.keys(error.keyValue || {})[0] || 'unknown' });
+    }
+    console.error('Create account error:', error.message);
     res.status(500).json({ message: error.message });
   }
 };
@@ -111,18 +115,21 @@ exports.submitApplication = async (req, res) => {
     if (!student) return res.status(404).json({ message: 'Student not found' });
 
     const {
-      grade, gender, district, schoolOrCollege, institutionName,
-      province, city, address, whatsappNumber, fatherMobile,
-      facebook, instagram, tiktok,
-      lastQualification, totalMarks, obtainedMarks, currentQualification,
-      documents
+      fullName, fatherName, cnicOrBform, dateOfBirth,
+      gender, province, district, city,
+      residentialAddress, mobileNumber, email,
+      currentClass,
+      schoolName, currentQualification, totalMarks,
+      obtainedMarks, lastQualification,
+      studentMobile, fatherMobile, whatsappNumber,
+      studentEmail, facebookUrl, instagramUrl, tiktokUrl,
     } = req.body;
 
-    if (!grade || !province || !city || !address) {
-      return res.status(400).json({ message: 'Grade, province, city, and address are required' });
+    if (!currentClass || !province || !city || !residentialAddress) {
+      return res.status(400).json({ message: 'Current class, province, city, and address are required' });
     }
 
-    let gradeNum = parseInt(grade);
+    let gradeNum = parseInt(currentClass);
     if (isNaN(gradeNum)) gradeNum = 13;
 
     let phaseGrade = { min: 1, max: 5 };
@@ -137,21 +144,28 @@ exports.submitApplication = async (req, res) => {
     student.phaseId = phase._id;
     student.gender = gender || student.gender;
     student.district = district || student.district;
-    student.schoolOrCollege = schoolOrCollege || student.schoolOrCollege;
-    student.institutionName = institutionName || student.institutionName;
+    student.schoolOrCollege = schoolName || student.schoolOrCollege;
     student.province = province;
     student.city = city;
-    student.address = address;
+    student.address = residentialAddress;
     student.whatsappNumber = whatsappNumber || student.whatsappNumber;
     student.fatherMobile = fatherMobile || student.fatherMobile;
-    student.facebook = facebook || student.facebook;
-    student.instagram = instagram || student.instagram;
-    student.tiktok = tiktok || student.tiktok;
+    student.facebook = facebookUrl || student.facebook;
+    student.instagram = instagramUrl || student.instagram;
+    student.tiktok = tiktokUrl || student.tiktok;
     student.lastQualification = lastQualification || student.lastQualification;
     student.totalMarks = totalMarks !== undefined ? totalMarks : student.totalMarks;
     student.obtainedMarks = obtainedMarks !== undefined ? obtainedMarks : student.obtainedMarks;
     student.currentQualification = currentQualification || student.currentQualification;
-    if (documents) student.documents = { ...student.documents, ...documents };
+    if (req.files && req.files.length > 0) {
+      const docMap = { 'documents[cnicFront]': 'cnicFront', 'documents[cnicBack]': 'cnicBack', 'documents[bform]': 'bform', 'documents[markSheet]': 'markSheet', 'documents[certificate]': 'certificate', 'documents[photo]': 'photo' };
+      const docs = {};
+      req.files.forEach(f => {
+        const key = docMap[f.fieldname];
+        if (key) docs[key] = { url: f.path, publicId: f.filename };
+      });
+      if (Object.keys(docs).length > 0) student.documents = { ...student.documents, ...docs };
+    }
 
     const challanNumber = `ETP-CH-${Date.now()}`;
     const dueDate = new Date();
@@ -171,6 +185,7 @@ exports.submitApplication = async (req, res) => {
 
     res.status(200).json({
       message: 'Application submitted successfully',
+      registrationNumber: student.registrationNumber,
       challan: {
         challanNumber: student.challan.challanNumber,
         amount: student.challan.amount,
@@ -197,21 +212,20 @@ exports.getApplicationForm = async (req, res) => {
       cnicOrBform: student.cnicOrBform,
       dateOfBirth: student.dateOfBirth,
       gender: student.gender,
-      grade: student.grade,
+      currentClass: student.grade,
       phase: student.phaseId ? { id: student.phaseId._id, name: student.phaseId.name, slug: student.phaseId.slug } : null,
-      schoolOrCollege: student.schoolOrCollege,
-      institutionName: student.institutionName,
+      schoolName: student.schoolOrCollege,
       province: student.province,
       district: student.district,
       city: student.city,
+      residentialAddress: student.address,
       mobileNumber: student.mobileNumber,
       whatsappNumber: student.whatsappNumber,
       fatherMobile: student.fatherMobile,
       email: student.email,
-      address: student.address,
-      facebook: student.facebook,
-      instagram: student.instagram,
-      tiktok: student.tiktok,
+      facebookUrl: student.facebook,
+      instagramUrl: student.instagram,
+      tiktokUrl: student.tiktok,
       lastQualification: student.lastQualification,
       totalMarks: student.totalMarks,
       obtainedMarks: student.obtainedMarks,

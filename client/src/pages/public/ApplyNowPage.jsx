@@ -2,10 +2,10 @@ import { Link } from 'react-router-dom';
 import { ArrowRight, CheckCircle, AlertTriangle, BookOpen, FileCheck, Shield, Laptop, Award, ChevronRight } from 'lucide-react';
 
 const phases = [
-  { title: 'Phase 1 — Primary Level', grades: 'Grades 1-5', awards: 'Laptop, Chromebook, Shield', fee: 'PKR 500', color: 'from-blue-500 to-blue-600' },
-  { title: 'Phase 2 — Middle Level', grades: 'Grades 6-8', awards: 'Laptop, Chromebook, Shield', fee: 'PKR 500', color: 'from-emerald-500 to-emerald-600' },
-  { title: 'Phase 3 — Matric Level', grades: 'Grades 9-10', awards: 'Laptop, Chromebook, Shield', fee: 'PKR 500', color: 'from-purple-500 to-purple-600' },
-  { title: 'Phase 4 — Senior Level', grades: 'Grade 11-12 & University', awards: 'Laptop, Chromebook, Shield', fee: 'PKR 500', color: 'from-amber-500 to-amber-600' },
+  { title: 'Phase 1 — Primary Level', grades: 'Grades 1-5', awards: 'Laptops, Chromebooks, Shields, Certificates', fee: 'PKR 1,200', color: 'from-blue-500 to-blue-600' },
+  { title: 'Phase 2 — Middle Level', grades: 'Grades 6-8', awards: 'Laptops, Chromebooks, Shields, Certificates', fee: 'PKR 1,200', color: 'from-emerald-500 to-emerald-600' },
+  { title: 'Phase 3 — Matric Level', grades: 'Grades 9-10', awards: 'Laptops, Chromebooks, Shields, Certificates', fee: 'PKR 1,200', color: 'from-purple-500 to-purple-600' },
+  { title: 'Phase 4 — Senior Level', grades: 'Grade 11-12 & University', awards: 'Laptops, Chromebooks, Shields, Certificates', fee: 'PKR 1,200', color: 'from-amber-500 to-amber-600' },
 ];
 
 const steps = [

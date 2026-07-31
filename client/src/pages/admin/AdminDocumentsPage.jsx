@@ -1,22 +1,11 @@
 import { useState } from 'react';
 import {
   FileText, Upload, Trash2, Download, Eye,
-  File, FileSpreadsheet, FileImage, FileArchive, FileCode
+  File, FileSpreadsheet, FileImage, FileArchive
 } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 
 const tabs = ['All', 'Policies', 'Reports', 'Notices'];
-
-const documentsData = [
-  { id: 1, title: 'Anti-Cheating Policy', type: 'Policy', fileName: 'anti-cheating-policy-v2.pdf', size: '245 KB', uploadedDate: '2026-06-01', ext: 'pdf' },
-  { id: 2, title: 'Phase 1 Result Report', type: 'Report', fileName: 'phase1-results-2026.xlsx', size: '1.2 MB', uploadedDate: '2026-06-15', ext: 'xlsx' },
-  { id: 3, title: 'Phase 2 Test Schedule', type: 'Notice', fileName: 'phase2-schedule.docx', size: '180 KB', uploadedDate: '2026-06-20', ext: 'docx' },
-  { id: 4, title: 'Refund Policy 2026', type: 'Policy', fileName: 'refund-policy-2026.pdf', size: '310 KB', uploadedDate: '2026-07-01', ext: 'pdf' },
-  { id: 5, title: 'Phase 3 Merit List', type: 'Report', fileName: 'phase3-merit-list.xlsx', size: '890 KB', uploadedDate: '2026-07-05', ext: 'xlsx' },
-  { id: 6, title: 'Exam Day Instructions', type: 'Notice', fileName: 'exam-day-notice.pdf', size: '154 KB', uploadedDate: '2026-07-08', ext: 'pdf' },
-  { id: 7, title: 'Scholarship Guidelines', type: 'Policy', fileName: 'scholarship-guidelines.pdf', size: '420 KB', uploadedDate: '2026-07-10', ext: 'pdf' },
-  { id: 8, title: 'Student Statistics Q2', type: 'Report', fileName: 'stats-q2-2026.xlsx', size: '2.1 MB', uploadedDate: '2026-07-10', ext: 'xlsx' },
-];
 
 const typeBadgeColors = {
   Policy: 'bg-[#1A73E8]/10 text-[#1A73E8] border-[#1A73E8]/20',
@@ -36,6 +25,8 @@ const fileIcons = {
   zip: { icon: FileArchive, color: 'text-amber-500' },
   rar: { icon: FileArchive, color: 'text-amber-500' },
 };
+
+const documentsData = [];
 
 const inputClass = "w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8] focus:border-[#1A73E8] bg-white transition-colors";
 
@@ -117,14 +108,15 @@ export default function AdminDocumentsPage() {
                   </label>
                 </div>
               </div>
-              <button className="bg-[#1A73E8] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#1557B0] transition-colors flex items-center gap-2">
+              <button className="bg-[#1A73E8] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#1557B0] transition-colors flex items-center gap-2 opacity-60 cursor-not-allowed">
                 <Upload size={16} />
                 Upload Document
               </button>
             </div>
+            <p className="text-xs text-gray-400 mt-3">Document upload backend coming soon. Files will be stored securely.</p>
           </div>
 
-          <div className="bg-white rounded-xl border border-gray-200 mb-6">
+          <div className="bg-white rounded-xl border border-gray-200">
             <div className="flex border-b border-gray-100">
               {tabs.map((tab) => (
                 <button
@@ -188,39 +180,13 @@ export default function AdminDocumentsPage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {filtered.map((doc, i) => {
-                    const fi = getFileIcon(doc.ext);
-                    return (
-                      <tr key={doc.id} className="border-b border-gray-50 hover:bg-gray-50 cursor-pointer" onClick={() => setPreviewDoc(doc)}>
-                        <td className="px-5 py-3 text-gray-500">{i + 1}</td>
-                        <td className="px-5 py-3 font-medium text-gray-900 flex items-center gap-2">
-                          <fi.icon size={16} className={fi.color} />
-                          {doc.title}
-                        </td>
-                        <td className="px-5 py-3">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium border ${typeBadgeColors[doc.type] || typeBadgeColors.Other}`}>
-                            {doc.type}
-                          </span>
-                        </td>
-                        <td className="px-5 py-3 text-gray-600">{doc.fileName}</td>
-                        <td className="px-5 py-3 text-gray-600">{doc.size}</td>
-                        <td className="px-5 py-3 text-gray-600">{doc.uploadedDate}</td>
-                        <td className="px-5 py-3">
-                          <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                            <button className="p-1.5 rounded-lg hover:bg-green-50 text-[#2ECC71] transition-colors" title="Download">
-                              <Download size={16} />
-                            </button>
-                            <button className="p-1.5 rounded-lg hover:bg-red-50 text-red-600 transition-colors" title="Delete">
-                              <Trash2 size={16} />
-                            </button>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })}
                   {filtered.length === 0 && (
                     <tr>
-                      <td colSpan={7} className="text-center py-10 text-gray-400">No documents found.</td>
+                      <td colSpan={7} className="text-center py-16 text-gray-400">
+                        <FileText size={40} className="mx-auto mb-3 text-gray-300" />
+                        <p className="text-base font-medium text-gray-500 mb-1">No documents yet</p>
+                        <p className="text-sm">Upload a document using the form above to get started.</p>
+                      </td>
                     </tr>
                   )}
                 </tbody>

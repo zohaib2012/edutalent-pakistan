@@ -9,17 +9,17 @@ const stats = [
 ];
 
 const phases = [
-  { title: 'Phase 1', sub: 'Primary Level', grades: 'Grades 1-5', awards: 'Laptops, Chromebooks, Shields, Certificates', color: 'from-blue-500 to-blue-600' },
-  { title: 'Phase 2', sub: 'Middle Level', grades: 'Grades 6-8', awards: 'Laptops, Chromebooks, Shields, Certificates', color: 'from-emerald-500 to-emerald-600' },
-  { title: 'Phase 3', sub: 'Matric Level', grades: 'Grades 9-10', awards: 'Laptops, Chromebooks, Shields, Certificates', color: 'from-purple-500 to-purple-600' },
-  { title: 'Phase 4', sub: 'Senior Level', grades: 'Grade 11-12 & Uni', awards: 'Laptops, Chromebooks, Shields, Certificates', color: 'from-gold to-yellow-600' },
+  { title: 'Phase 1', sub: 'Primary Level', grades: 'Grades 1-5', awards: 'Scholarship Awards, Laptops, Chromebooks, Shields, Certificates, Trophy', color: 'from-blue-500 to-blue-600' },
+  { title: 'Phase 2', sub: 'Middle Level', grades: 'Grades 6-8', awards: 'Scholarship Awards, Laptops, Chromebooks, Shields, Certificates, Trophy', color: 'from-emerald-500 to-emerald-600' },
+  { title: 'Phase 3', sub: 'Matric Level', grades: 'Grades 9-10', awards: 'Scholarship Awards, Laptops, Chromebooks, Shields, Certificates, Trophy', color: 'from-purple-500 to-purple-600' },
+  { title: 'Phase 4', sub: 'Senior Level', grades: 'Grade 11-12 & Uni', awards: 'Scholarship Awards, Laptops, Chromebooks, Shields, Certificates, Trophy', color: 'from-gold to-yellow-600' },
 ];
 
 const awards = [
-  { icon: Laptop, title: 'Laptops', count: '4 Winners', desc: 'Awarded to top performers in each phase', color: 'text-primary' },
-  { icon: Laptop, title: 'Chromebooks', count: '16 Winners', desc: 'Awarded to outstanding achievers across phases', color: 'text-success' },
-  { icon: Shield, title: 'Shields', count: '20 Winners', desc: 'Awarded to top contenders per phase', color: 'text-gold' },
-  { icon: Award, title: 'Certificates', count: 'Top 20 + All', desc: 'Appreciation + Participation with QR', color: 'text-primary' },
+  { icon: Laptop, title: 'Laptops', count: '', desc: 'Scholarship awards for top performers', color: 'text-primary' },
+  { icon: Laptop, title: 'Chromebooks', count: '', desc: 'Scholarship awards for outstanding achievers', color: 'text-success' },
+  { icon: Shield, title: 'Shields', count: '', desc: 'Scholarship awards for top contenders', color: 'text-gold' },
+  { icon: Award, title: 'Certificates & Trophies', count: '', desc: 'Appreciation + Participation with QR verification', color: 'text-primary' },
 ];
 
 const steps = [
@@ -56,7 +56,7 @@ const HomePage = () => {
                 <span className="text-gold">Rewarding Talent</span>
               </h1>
               <p className="text-lg md:text-xl text-white/80 mb-8 max-w-lg">
-                From Grade 1 to University — earn laptops, Chromebooks, shields, and certificates through Pakistan&apos;s most transparent online scholarship testing system.
+                From Grade 1 to University — earn scholarship awards, laptops, Chromebooks, shields, certificates, and trophies through Pakistan&apos;s most transparent online scholarship testing system.
               </p>
               <div className="flex flex-wrap gap-4">
                 <Link to="/apply" className="btn-gold text-base px-8 py-4">

@@ -19,7 +19,16 @@ const challanStorage = new CloudinaryStorage({
   },
 });
 
+const docStorage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: 'edutalent/documents',
+    allowed_formats: ['jpg', 'jpeg', 'png', 'pdf'],
+  },
+});
+
 const photoUpload = multer({ storage: photoStorage, limits: { fileSize: 2 * 1024 * 1024 } });
 const challanUpload = multer({ storage: challanStorage, limits: { fileSize: 5 * 1024 * 1024 } });
+const docUpload = multer({ storage: docStorage, limits: { fileSize: 2 * 1024 * 1024 } });
 
-module.exports = { photoUpload, challanUpload };
+module.exports = { photoUpload, challanUpload, docUpload };

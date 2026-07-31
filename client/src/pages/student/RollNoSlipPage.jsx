@@ -1,27 +1,40 @@
-import { useState } from 'react';
-import { Download, Copy, Check, FileText, User, Calendar, Clock, MapPin, Shield, Key, Eye, EyeOff } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { Download, Copy, Check, FileText, User, Calendar, Clock, MapPin, Shield, Key, Eye, EyeOff, Loader2, AlertCircle } from 'lucide-react';
+import { getMySlip, getStudentProfile } from '../../services/api';
 
 const RollNoSlipPage = () => {
+  const navigate = useNavigate();
+  const [slipData, setSlipData] = useState(null);
+  const [studentData, setStudentData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [copiedField, setCopiedField] = useState('');
   const [showPassword, setShowPassword] = useState(false);
 
-  const slipData = {
-    studentName: 'Muhammad Ahmed',
-    fatherName: 'Muhammad Ali',
-    rollNumber: 'ETP-2026-001234',
-    testDate: '20 July 2026',
-    testTime: '10:00 AM - 12:00 PM',
-    testCenter: 'EduTalent Test Center, Karachi',
-    phase: 'Secondary (Grade 9-10)',
-    portalUsername: 'ETP-2026-001234',
-    portalPassword: 'Ahmed@2026#Test',
-    testInstructions: [
-      'Arrive at least 30 minutes before the test time',
-      'Bring a printed copy of this slip',
-      'Bring original CNIC/B-Form for verification',
-      'Mobile phones and smartwatches are strictly prohibited',
-      'Use of unfair means will result in disqualification',
-    ],
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    try {
+      setLoading(true);
+      const [slipRes, profileRes] = await Promise.all([
+        getMySlip(),
+        getStudentProfile()
+      ]);
+      setSlipData(slipRes.data);
+      setStudentData(profileRes.data);
+    } catch (err) {
+      if (err.response?.status === 401) {
+        localStorage.removeItem('token');
+        navigate('/login');
+        return;
+      }
+      setError(err.response?.data?.message || 'Failed to load slip');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleCopy = (text, field) => {
@@ -29,6 +42,91 @@ const RollNoSlipPage = () => {
     setCopiedField(field);
     setTimeout(() => setCopiedField(''), 2000);
   };
+
+  const handleDownloadPDF = () => {
+    if (!slipData || !studentData) return;
+    const win = window.open('', '_blank');
+    if (!win) return;
+    const testDate = slipData.testDate ? new Date(slipData.testDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+    win.document.write(`
+      <html><head><title>Roll No Slip - ${studentData.registrationNumber || ''}</title>
+      <style>
+        @page { margin: 12mm; size: A4 portrait; }
+        body { font-family: 'Arial', sans-serif; padding: 30px; color: #222; }
+        .header { text-align: center; border-bottom: 3px solid #1A73E8; padding-bottom: 15px; margin-bottom: 20px; }
+        .header h1 { color: #1A73E8; font-size: 24px; margin: 0; letter-spacing: 1px; }
+        .header p { color: #666; font-size: 12px; margin: 3px 0 0; }
+        .badge { display: inline-block; border: 2px solid #1A73E8; padding: 8px 20px; font-size: 14px; font-weight: bold; color: #1A73E8; margin: 10px 0; border-radius: 4px; }
+        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
+        td, th { border: 1px solid #ccc; padding: 8px 12px; font-size: 13px; text-align: left; }
+        td.label { font-weight: bold; background: #f5f5f5; width: 30%; font-size: 12px; text-transform: uppercase; color: #555; }
+        .credentials { background: #f0f4ff; border: 2px solid #1A73E8; border-radius: 8px; padding: 15px; margin: 15px 0; }
+        .footer { margin-top: 25px; padding-top: 12px; border-top: 2px solid #ddd; text-align: center; font-size: 10px; color: #999; }
+        .instructions { margin: 15px 0; padding: 15px; background: #fffbea; border-left: 4px solid #f0ad4e; }
+        .photo-box { width: 100px; height: 100px; border: 2px solid #ccc; float: right; text-align: center; line-height: 100px; color: #999; font-size: 11px; }
+        .clearfix::after { content: ""; clear: both; display: table; }
+      </style></head><body>
+      <div class="header clearfix">
+        <div style="float:left;"><h1>EDUTALENT PAKISTAN</h1><p>Scholarship Testing Program - Roll No Slip</p></div>
+        <div class="photo-box">PHOTO</div>
+      </div>
+      <div style="text-align:center;"><span class="badge">ROLL NO: ${slipData.rollNumber || ''}</span></div>
+      <table>
+        <tr><td class="label">Student Name</td><td>${studentData.fullName || ''}</td></tr>
+        <tr><td class="label">Father's Name</td><td>${studentData.fatherName || ''}</td></tr>
+        <tr><td class="label">Registration No</td><td>${studentData.registrationNumber || ''}</td></tr>
+        <tr><td class="label">CNIC / B-Form</td><td>${studentData.cnicOrBform || ''}</td></tr>
+        <tr><td class="label">Phase</td><td>${studentData.phaseId?.name || studentData.phaseId || ''}</td></tr>
+        <tr><td class="label">Grade/Class</td><td>${studentData.grade || ''}</td></tr>
+        <tr><td class="label">Test Date</td><td><strong>${testDate}</strong></td></tr>
+        <tr><td class="label">Test Time</td><td><strong>${slipData.testTime || '10:00 AM - 12:00 PM'}</strong></td></tr>
+        <tr><td class="label">Test Center</td><td>${slipData.testCenter || 'Online / Designated Center'}</td></tr>
+      </table>
+      <div class="credentials">
+        <h3 style="margin:0 0 10px;color:#1A73E8;font-size:14px;">Test Portal Credentials</h3>
+        <table>
+          <tr><td class="label">Username</td><td><strong>${slipData.username || studentData.registrationNumber || ''}</strong></td></tr>
+          <tr><td class="label">Password</td><td><strong>${slipData.passwordGiven || ''}</strong></td></tr>
+        </table>
+      </div>
+      <div class="instructions">
+        <strong style="color:#8a6d3b;">Important Instructions:</strong>
+        <ul style="font-size:12px;margin:8px 0 0;padding-left:20px;color:#666;">
+          <li>Arrive at least 30 minutes before the test time</li>
+          <li>Bring a printed copy of this slip</li>
+          <li>Bring original CNIC/B-Form for verification</li>
+          <li>Mobile phones and smartwatches are strictly prohibited</li>
+          <li>Use of unfair means will result in disqualification</li>
+        </ul>
+      </div>
+      <div class="footer">EduTalent Pakistan | www.edutalentpakistan.com | This is a system-generated slip.</div>
+      </body></html>
+    `);
+    win.document.close();
+    win.focus();
+    win.print();
+  };
+
+  if (loading) return <div className="min-h-screen flex items-center justify-center"><Loader2 size={32} className="animate-spin text-primary" /></div>;
+
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <AlertCircle size={48} className="text-yellow-400 mx-auto mb-4" />
+          <p className="text-gray-600 text-lg mb-2">Slip Not Available</p>
+          <p className="text-gray-400 text-sm">{error}</p>
+          {error.includes('not found') && (
+            <p className="text-xs text-gray-400 mt-2">Your roll no slip will be issued after payment verification.</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (!slipData) return null;
+
+  const testDate = slipData.testDate ? new Date(slipData.testDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
 
   return (
     <div>
@@ -59,11 +157,11 @@ const RollNoSlipPage = () => {
                   <div className="flex-1 flex justify-between">
                     <div>
                       <p className="text-xs text-gray-500">Student Name</p>
-                      <p className="text-sm font-semibold text-gray-800">{slipData.studentName}</p>
+                      <p className="text-sm font-semibold text-gray-800">{studentData?.fullName}</p>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-gray-500">Father Name</p>
-                      <p className="text-sm font-semibold text-gray-800">{slipData.fatherName}</p>
+                      <p className="text-sm font-semibold text-gray-800">{studentData?.fatherName}</p>
                     </div>
                   </div>
                 </div>
@@ -75,7 +173,7 @@ const RollNoSlipPage = () => {
                   </div>
                   <div className="p-3 bg-primary-50 rounded-lg border border-primary-100">
                     <p className="text-xs text-gray-500">Phase</p>
-                    <p className="text-sm font-semibold text-gray-800">{slipData.phase}</p>
+                    <p className="text-sm font-semibold text-gray-800">{studentData?.phaseId?.name || ''}</p>
                   </div>
                 </div>
 
@@ -84,14 +182,14 @@ const RollNoSlipPage = () => {
                     <Calendar size={16} className="text-primary" />
                     <div>
                       <p className="text-xs text-gray-500">Test Date</p>
-                      <p className="text-sm font-semibold">{slipData.testDate}</p>
+                      <p className="text-sm font-semibold">{testDate}</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                     <Clock size={16} className="text-primary" />
                     <div>
                       <p className="text-xs text-gray-500">Test Time</p>
-                      <p className="text-sm font-semibold">{slipData.testTime}</p>
+                      <p className="text-sm font-semibold">{slipData.testTime || '10:00 AM - 12:00 PM'}</p>
                     </div>
                   </div>
                 </div>
@@ -100,7 +198,7 @@ const RollNoSlipPage = () => {
                   <MapPin size={16} className="text-primary" />
                   <div>
                     <p className="text-xs text-gray-500">Test Center</p>
-                    <p className="text-sm font-semibold">{slipData.testCenter}</p>
+                    <p className="text-sm font-semibold">{slipData.testCenter || 'Online / Designated Center'}</p>
                   </div>
                 </div>
               </div>
@@ -114,9 +212,9 @@ const RollNoSlipPage = () => {
                   <div className="flex items-center justify-between bg-gray-800 rounded-lg p-3">
                     <div>
                       <p className="text-xs text-gray-400">Username</p>
-                      <p className="text-sm font-mono font-bold text-white">{slipData.portalUsername}</p>
+                      <p className="text-sm font-mono font-bold text-white">{slipData.username || studentData?.registrationNumber}</p>
                     </div>
-                    <button onClick={() => handleCopy(slipData.portalUsername, 'username')}
+                    <button onClick={() => handleCopy(slipData.username || studentData?.registrationNumber, 'username')}
                       className="p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
                       {copiedField === 'username' ? <Check size={16} className="text-success" /> : <Copy size={16} className="text-gray-300" />}
                     </button>
@@ -124,14 +222,14 @@ const RollNoSlipPage = () => {
                   <div className="flex items-center justify-between bg-gray-800 rounded-lg p-3">
                     <div>
                       <p className="text-xs text-gray-400">Password</p>
-                      <p className="text-sm font-mono font-bold text-white">{showPassword ? slipData.portalPassword : '••••••••••••'}</p>
+                      <p className="text-sm font-mono font-bold text-white">{showPassword ? slipData.passwordGiven : '••••••••••••'}</p>
                     </div>
                     <div className="flex gap-2">
                       <button onClick={() => setShowPassword(p => !p)}
                         className="p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
                         {showPassword ? <EyeOff size={16} className="text-gray-300" /> : <Eye size={16} className="text-gray-300" />}
                       </button>
-                      <button onClick={() => handleCopy(slipData.portalPassword, 'password')}
+                      <button onClick={() => handleCopy(slipData.passwordGiven, 'password')}
                         className="p-2 bg-gray-700 rounded-lg hover:bg-gray-600 transition-colors">
                         {copiedField === 'password' ? <Check size={16} className="text-success" /> : <Copy size={16} className="text-gray-300" />}
                       </button>
@@ -146,7 +244,13 @@ const RollNoSlipPage = () => {
                   <p className="text-xs font-semibold text-gray-700 uppercase tracking-wider">Test Instructions</p>
                 </div>
                 <ul className="space-y-2">
-                  {slipData.testInstructions.map((inst, i) => (
+                  {[
+                    'Arrive at least 30 minutes before the test time',
+                    'Bring a printed copy of this slip',
+                    'Bring original CNIC/B-Form for verification',
+                    'Mobile phones and smartwatches are strictly prohibited',
+                    'Use of unfair means will result in disqualification',
+                  ].map((inst, i) => (
                     <li key={i} className="flex items-start gap-2 text-xs text-gray-600">
                       <span className="w-1.5 h-1.5 bg-primary rounded-full mt-1.5 flex-shrink-0" />
                       {inst}
@@ -156,7 +260,7 @@ const RollNoSlipPage = () => {
               </div>
             </div>
 
-            <button className="btn-primary w-full justify-center">
+            <button onClick={handleDownloadPDF} className="btn-primary w-full justify-center">
               <Download size={18} /> Download Slip PDF
             </button>
 

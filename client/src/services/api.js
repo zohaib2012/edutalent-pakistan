@@ -101,4 +101,9 @@ export const getRecentActivity = () => api.get('/admindashboard/recent-activity'
 export const getMyNotifications = () => api.get('/notifications/my-notifications');
 export const sendNotification = (data) => api.post('/notifications/send', data);
 
+// ---- SETTINGS ----
+export const getSettings = () => api.get('/settings');
+export const updateSettings = (category, settings) => api.put('/settings', { category, settings });
+export const updatePhaseFees = (phases) => api.put('/settings/phases', { phases });
+
 export default api;

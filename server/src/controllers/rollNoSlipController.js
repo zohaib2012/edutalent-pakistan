@@ -54,7 +54,11 @@ exports.getMySlip = async (req, res) => {
 };
 
 exports.download = async (req, res) => {
-  res.json({ message: 'PDF download' });
+  try {
+    const student = await Student.findById(req.studentId).populate('phaseId');
+    if (!student || !student.rollNoSlip.rollNumber) return res.status(404).json({ message: 'Slip not found' });
+    res.json({ student: student.toObject(), slip: student.rollNoSlip });
+  } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
 exports.getAll = async (req, res) => {

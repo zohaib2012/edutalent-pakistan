@@ -174,9 +174,11 @@ const RegisterPage = () => {
         email: createForm.email,
         password: createForm.password,
       });
+      const studentData = res.data.student || res.data;
       setAccountResult({
-        registrationNumber: res.data.registrationNumber,
-        message: res.data.message || 'Account Created Successfully!',
+        registrationNumber: studentData.registrationNumber || '',
+        password: studentData.tempPassword || '',
+        message: studentData.message || res.data.message || 'Account Created Successfully!',
       });
     } catch (err) {
       setErrors({ submit: err.response?.data?.message || 'Failed to create account. Please try again.' });
@@ -197,7 +199,6 @@ const RegisterPage = () => {
       if (!form.residentialAddress.trim()) errs.residentialAddress = 'Residential Address is required';
       if (!form.currentClass) errs.currentClass = 'Current Class is required';
     } else if (s === 1) {
-      if (!form.schoolName.trim()) errs.schoolName = 'School/College/University is required';
       if (!form.currentQualification.trim()) errs.currentQualification = 'Current Qualification is required';
       if (!form.totalMarks) errs.totalMarks = 'Total Marks is required';
       else if (isNaN(form.totalMarks) || Number(form.totalMarks) <= 0) errs.totalMarks = 'Enter a valid number';
@@ -288,9 +289,15 @@ const RegisterPage = () => {
       if (documents.certificate) fd.append('documents[certificate]', documents.certificate);
       if (documents.photo) fd.append('documents[photo]', documents.photo);
 
-      await submitApplication(fd);
+      const res = await submitApplication(fd);
       const sd = JSON.parse(localStorage.getItem('student') || '{}');
-      navigate('/registration-success', { state: { registrationNumber: form.cnicOrBform || sd.cnicOrBform || '' } });
+      navigate('/registration-success', {
+        state: {
+          registrationNumber: res.data?.registrationNumber || sd.registrationNumber || form.cnicOrBform || '',
+          password: sd.password || '',
+          formData: { ...form }
+        }
+      });
     } catch (err) {
       setErrors({ submit: err.response?.data?.message || 'Failed to submit application. Please try again.' });
     } finally {
@@ -360,12 +367,23 @@ const RegisterPage = () => {
           </div>
           <h2 className="text-2xl font-heading font-bold text-gray-800 mb-3">Account Created!</h2>
           <p className="text-gray-600 mb-4">{accountResult.message}</p>
-          <div className="bg-primary-50 rounded-xl p-5 mb-6 border border-primary-100">
+          <div className="bg-primary-50 rounded-xl p-5 mb-4 border border-primary-100">
             <p className="text-sm text-gray-500 mb-1">Your Registration ID</p>
             <p className="text-2xl font-heading font-bold text-primary tracking-wider">
               {accountResult.registrationNumber}
             </p>
           </div>
+          {accountResult.password && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+              <p className="text-sm font-semibold text-green-700 mb-1">Your Password</p>
+              <p className="text-lg font-bold text-green-800 tracking-wider font-mono">
+                {accountResult.password}
+              </p>
+              <p className="text-xs text-green-600 mt-1">
+                Save this password. You will need it to login.
+              </p>
+            </div>
+          )}
           <p className="text-sm text-gray-500 mb-6">
             Please login to complete your application.
           </p>
@@ -584,6 +602,13 @@ const RegisterPage = () => {
             <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
             <input type="email" value={form.email} readOnly
               className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 outline-none" />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Educational Institution <span className="text-red-500">*</span></label>
+            <input type="text" value={form.schoolName} onChange={e => updateForm('schoolName', e.target.value)}
+              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.schoolName ? 'border-red-400' : 'border-gray-200'}`}
+              placeholder="Enter school/college/university name" />
+            {errors.schoolName && <p className="text-red-500 text-xs mt-1">{errors.schoolName}</p>}
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Current Class/Grade/Semester <span className="text-red-500">*</span></label>

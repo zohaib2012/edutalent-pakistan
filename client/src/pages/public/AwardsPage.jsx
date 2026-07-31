@@ -2,10 +2,10 @@ import { Laptop, Shield, Award, Star, Trophy, Quote } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const awardTypes = [
-  { icon: Laptop, title: 'Laptops', count: '4 Winners', desc: 'Scholarship Awards — Top Performers', color: 'text-primary', bg: 'bg-primary-50' },
-  { icon: Laptop, title: 'Chromebooks', count: '16 Winners', desc: 'Scholarship Awards — Outstanding Achievers', color: 'text-success', bg: 'bg-green-50' },
-  { icon: Shield, title: 'Shields', count: '20 Winners', desc: 'Scholarship Awards — Top Contenders', color: 'text-gold', bg: 'bg-gold/10' },
-  { icon: Award, title: 'Certificates', count: 'Top 20 + All', desc: 'Appreciation + Participation with QR', color: 'text-primary', bg: 'bg-primary-50' },
+  { icon: Laptop, title: 'Laptops', count: '', desc: 'Scholarship Awards', color: 'text-primary', bg: 'bg-primary-50' },
+  { icon: Laptop, title: 'Chromebooks', count: '', desc: 'Scholarship Awards', color: 'text-success', bg: 'bg-green-50' },
+  { icon: Shield, title: 'Shields', count: '', desc: 'Scholarship Awards', color: 'text-gold', bg: 'bg-gold/10' },
+  { icon: Award, title: 'Certificates & Trophies', count: '', desc: 'Appreciation + Participation with QR verification', color: 'text-primary', bg: 'bg-primary-50' },
 ];
 
 const phases = [
@@ -37,15 +37,15 @@ const AwardsPage = () => {
             <Trophy size={36} className="text-gold" />
           </div>
           <h1 className="text-4xl md:text-5xl font-heading font-bold mb-4">Awards</h1>
-          <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto">
-            Outstanding prizes for outstanding students across all 4 phases.
+              <p className="text-lg md:text-xl text-white/80 max-w-3xl mx-auto">
+            Scholarship awards, laptops, Chromebooks, shields, certificates, and trophies for outstanding students across all 4 phases.
           </p>
         </div>
       </section>
 
       <section className="py-16 md:py-24 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <h2 className="text-2xl font-heading font-bold text-center mb-10">Scholarship Awards</h2>
+          <h2 className="text-2xl font-heading font-bold text-center mb-10">Scholarship Awards 🏆</h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
             {awardTypes.map((a, i) => (
               <div key={i} className="text-center p-6 rounded-xl border-2 border-gray-100 hover:border-gold/30 transition-all hover:shadow-lg">
@@ -53,7 +53,6 @@ const AwardsPage = () => {
                   <a.icon size={32} className={a.color} />
                 </div>
                 <h3 className="font-heading font-bold text-lg mb-1">{a.title}</h3>
-                <p className="text-gold font-heading font-bold text-xl mb-2">{a.count}</p>
                 <p className="text-gray-500 text-sm">{a.desc}</p>
               </div>
             ))}

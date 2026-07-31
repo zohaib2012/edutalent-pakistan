@@ -89,14 +89,16 @@ const SyllabusPage = () => {
           <meta charset="utf-8">
           <title>EduTalent Pakistan - ${phase.name} Syllabus</title>
           <style>
+            @page { margin: 20mm; }
             body { font-family: 'Segoe UI', Arial, sans-serif; margin: 40px; color: #333; }
-            .header { text-align: center; margin-bottom: 30px; }
-            .header h1 { color: #1e3a5f; font-size: 24px; margin-bottom: 4px; }
-            .header h2 { color: #1e40af; font-size: 18px; margin-bottom: 4px; }
+            .header { text-align: center; margin-bottom: 30px; border-bottom: 3px solid #1A73E8; padding-bottom: 15px; }
+            .header h1 { color: #1A73E8; font-size: 24px; margin-bottom: 4px; }
+            .header h2 { color: #333; font-size: 18px; margin-bottom: 4px; }
             .header p { color: #666; font-size: 14px; }
             table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-            th { background: #1e3a5f; color: white; padding: 10px 8px; text-align: left; font-size: 12px; text-transform: uppercase; }
+            th { background: #1A73E8; color: white; padding: 10px 8px; text-align: left; font-size: 12px; text-transform: uppercase; }
             .footer { text-align: center; margin-top: 30px; font-size: 12px; color: #999; border-top: 1px solid #eee; padding-top: 15px; }
+            @media print { body { margin: 0; padding: 20px; } }
           </style>
         </head>
         <body>
@@ -121,22 +123,20 @@ const SyllabusPage = () => {
             </tbody>
           </table>
           <div class="footer">
-            <p>EduTalent Pakistan | National Digital Scholarship Platform | www.edutalent.pk</p>
+            <p>EduTalent Pakistan | National Digital Scholarship Platform | www.edutalentpakistan.com</p>
             <p>Generated on ${new Date().toLocaleDateString()}</p>
           </div>
         </body>
       </html>
     `;
 
-    const blob = new Blob([html], { type: 'text/html' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `EduTalent_${phase.name.replace(' ', '_')}_Syllabus.html`;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
+    const win = window.open('', '_blank');
+    if (win) {
+      win.document.write(html);
+      win.document.close();
+      win.focus();
+      win.print();
+    }
   };
 
   return (

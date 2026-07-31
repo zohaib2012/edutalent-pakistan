@@ -12,12 +12,12 @@ const studentSchema = new mongoose.Schema({
   institutionName: { type: String },
   province: { type: String, required: true, enum: ['Sindh', 'Punjab', 'KPK', 'Balochistan', 'AJK', 'GB', 'Islamabad'] },
   district: String,
-  city: { type: String, required: true },
+  city: { type: String },
   mobileNumber: { type: String, required: true },
   whatsappNumber: String,
   fatherMobile: String,
   email: { type: String, required: true, lowercase: true },
-  address: { type: String, required: true },
+  address: { type: String },
   facebook: String,
   instagram: String,
   tiktok: String,
@@ -30,14 +30,7 @@ const studentSchema = new mongoose.Schema({
   registrationNumber: { type: String, unique: true },
   password: { type: String },
   registrationDate: { type: Date, default: Date.now },
-  documents: {
-    cnicFront: { url: String, publicId: String },
-    cnicBack: { url: String, publicId: String },
-    bform: { url: String, publicId: String },
-    markSheet: { url: String, publicId: String },
-    certificate: { url: String, publicId: String },
-    photo: { url: String, publicId: String }
-  },
+  documents: { type: mongoose.Schema.Types.Mixed, default: {} },
   challan: {
     challanNumber: { type: String },
     generatedAt: { type: Date },
@@ -92,9 +85,6 @@ const studentSchema = new mongoose.Schema({
   isActive: { type: Boolean, default: true },
 }, { timestamps: true });
 
-studentSchema.index({ cnicOrBform: 1 });
-studentSchema.index({ registrationNumber: 1 });
-studentSchema.index({ email: 1 });
 studentSchema.index({ status: 1 });
 studentSchema.index({ phaseId: 1 });
 

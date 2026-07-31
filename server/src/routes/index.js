@@ -19,5 +19,6 @@ router.use('/syllabus', require('./syllabusRoutes'));
 router.use('/faqs', require('./faqRoutes'));
 router.use('/contact', require('./contactRoutes'));
 router.use('/notifications', require('./notificationRoutes'));
+router.use('/settings', require('./settingRoutes'));
 
 module.exports = router;
