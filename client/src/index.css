@@ -9,18 +9,21 @@
     scroll-behavior: smooth;
   }
   body {
-    @apply font-body text-gray-800 bg-white m-0;
+    @apply font-body text-gray-700 bg-white m-0 leading-relaxed text-[15px];
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
   h1, h2, h3, h4, h5, h6 {
-    @apply font-heading;
+    @apply font-heading text-gray-900 tracking-tight;
+  }
+  p {
+    @apply leading-relaxed;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 inline-flex items-center gap-2;
+    @apply bg-primary hover:bg-primary-600 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 inline-flex items-center gap-2 shadow-sm hover:shadow-md;
   }
   .btn-gold {
     @apply bg-gold hover:bg-yellow-500 text-gray-900 font-semibold py-3 px-6 rounded-lg transition-all duration-300 inline-flex items-center gap-2;
@@ -32,7 +35,7 @@
     @apply text-3xl md:text-4xl font-heading font-bold text-gray-900 mb-4;
   }
   .section-subtitle {
-    @apply text-lg text-gray-600 max-w-2xl mx-auto;
+    @apply text-lg text-gray-600 max-w-2xl mx-auto leading-relaxed;
   }
   .container-custom {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;

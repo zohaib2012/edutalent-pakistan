@@ -6,6 +6,9 @@ import {
 } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 import { getDashboardStats, getRecentActivity } from '../../services/api';
+import BarChart from '../../components/charts/BarChart';
+import DonutChart from '../../components/charts/DonutChart';
+import TrendChart from '../../components/charts/TrendChart';
 
 export default function AdminDashboardPage() {
   const [stats, setStats] = useState(null);
@@ -124,14 +127,26 @@ export default function AdminDashboardPage() {
           <div className="mb-8">
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Charts & Analytics</h2>
             <div className="grid grid-cols-2 gap-6">
-              {['Registration by Province', 'Registration by Phase', 'Daily Trend', 'Payment Status'].map((label, i) => (
-                <div key={i} className="bg-white rounded-xl border border-gray-200 p-6">
-                  <p className="text-sm font-medium text-gray-700 mb-4">{label}</p>
-                  <div className="h-48 bg-gray-100 rounded-lg flex items-center justify-center">
-                    <span className="text-gray-400 text-sm">Chart Placeholder</span>
-                  </div>
-                </div>
-              ))}
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <p className="text-sm font-medium text-gray-700 mb-4">Registration by Province</p>
+                <BarChart data={(stats?.registrationByProvince || []).map((p) => ({ label: p._id || 'Unknown', value: p.count }))} />
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <p className="text-sm font-medium text-gray-700 mb-4">Registration by Phase</p>
+                <BarChart data={(stats?.registrationByPhase || []).map((p) => ({ label: p.name || 'Unknown', value: p.count }))} />
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <p className="text-sm font-medium text-gray-700 mb-4">Daily Registrations (Last 14 Days)</p>
+                <TrendChart data={(stats?.dailyTrend || []).map((d) => ({ date: d._id, value: d.count }))} />
+              </div>
+              <div className="bg-white rounded-xl border border-gray-200 p-6">
+                <p className="text-sm font-medium text-gray-700 mb-4">Payment Status</p>
+                <DonutChart data={[
+                  { label: 'Verified', value: stats?.paymentStatus?.verified || 0, color: '#2ECC71' },
+                  { label: 'Pending', value: stats?.paymentStatus?.pending || 0, color: '#F1C40F' },
+                  { label: 'Rejected', value: stats?.paymentStatus?.rejected || 0, color: '#E74C3C' },
+                ]} />
+              </div>
             </div>
           </div>
 

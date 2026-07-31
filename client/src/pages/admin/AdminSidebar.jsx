@@ -2,7 +2,7 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Banknote, Ticket, ClipboardList,
   BarChart3, Trophy, Bell, FileText, ChevronLeft, ChevronRight,
-  Settings, FileCheck, FileUp, Megaphone, ScrollText, LogOut
+  Settings, FileCheck, FileUp, Megaphone, ScrollText, LogOut, Layers
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -13,6 +13,7 @@ const navItems = [
   { icon: Banknote, label: 'Fee Verification', path: '/admin/fee-verification' },
   { icon: Ticket, label: 'Slips', path: '/admin/slips' },
   { icon: ClipboardList, label: 'Tests', path: '/admin/tests' },
+  { icon: Layers, label: 'Phases', path: '/admin/phases' },
   { icon: BarChart3, label: 'Results', path: '/admin/results' },
   { icon: ScrollText, label: 'Certificates', path: '/admin/certificate-mgmt' },
   { icon: Trophy, label: 'Awards', path: '/admin/awards' },

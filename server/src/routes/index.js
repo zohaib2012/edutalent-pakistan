@@ -20,5 +20,6 @@ router.use('/faqs', require('./faqRoutes'));
 router.use('/contact', require('./contactRoutes'));
 router.use('/notifications', require('./notificationRoutes'));
 router.use('/settings', require('./settingRoutes'));
+router.use('/phases', require('./phaseRoutes'));
 
 module.exports = router;

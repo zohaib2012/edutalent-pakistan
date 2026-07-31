@@ -34,6 +34,7 @@ api.interceptors.request.use((config) => {
     url.includes('/notifications/send') ||
     url.includes('/notifications/broadcast') ||
     url.includes('/settings') ||
+    url.includes('/phases') ||
     url.includes('/students') ||
     (url.includes('/announcements') && method !== 'get')
   );
@@ -131,5 +132,13 @@ export const sendNotification = (data) => api.post('/notifications/send', data);
 export const getSettings = () => api.get('/settings');
 export const updateSettings = (category, settings) => api.put('/settings', { category, settings });
 export const updatePhaseFees = (phases) => api.put('/settings/phases', { phases });
+
+// ---- PHASES ----
+export const getPhases = () => api.get('/phases');
+export const getPhase = (id) => api.get(`/phases/${id}`);
+export const createPhase = (data) => api.post('/phases', data);
+export const updatePhase = (id, data) => api.put(`/phases/${id}`, data);
+export const deletePhase = (id) => api.delete(`/phases/${id}`);
+export const getPhaseSubjects = (phaseId) => api.get(`/phases/${phaseId}/subjects`);
 
 export default api;

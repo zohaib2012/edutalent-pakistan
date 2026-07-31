@@ -55,6 +55,7 @@ import AdminCertificatesPage from './pages/admin/AdminCertificatesPage';
 import AdminDocumentsPage from './pages/admin/AdminDocumentsPage';
 import AdminAnnouncementsPage from './pages/admin/AdminAnnouncementsPage';
 import AdminApplicationsPage from './pages/admin/AdminApplicationsPage';
+import AdminPhasesPage from './pages/admin/AdminPhasesPage';
 
 function App() {
   return (
@@ -105,6 +106,7 @@ function App() {
         <Route path="/admin/fee-verification" element={<FeeVerificationPage />} />
         <Route path="/admin/slips" element={<SlipManagementPage />} />
         <Route path="/admin/tests" element={<TestManagementPage />} />
+        <Route path="/admin/phases" element={<AdminPhasesPage />} />
         <Route path="/admin/results" element={<AdminResultsPage />} />
         <Route path="/admin/awards" element={<AwardAssignmentPage />} />
         <Route path="/admin/notifications" element={<NotificationsPage />} />
