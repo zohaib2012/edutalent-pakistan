@@ -18,7 +18,7 @@ const faqs = [
   { q: 'Can I change my phase after registration?', a: 'No, phase changes are not allowed after registration. Please select the correct phase based on your current academic level.', category: 'Registration' },
   { q: 'What payment methods are accepted?', a: 'Fee payment is made through bank challan. You can download the challan from your account and pay at any branch of the designated bank.', category: 'Payment' },
   { q: 'Is there any age limit?', a: 'There is no specific age limit. Students are categorized by their current academic grade level.', category: 'General' },
-  { q: 'How can I contact support?', a: 'You can reach us via email at info@edutalentpakistan.com or through our WhatsApp number. Visit the Contact page for details.', category: 'General' },
+  { q: 'How can I contact support?', a: 'You can reach us via email at edutalentpakistan@gmail.com, on WhatsApp at +92 346 8275954, or call our support line at 0320 2603464. Visit the Contact page for details.', category: 'General' },
 ];
 
 const FAQsPage = () => {

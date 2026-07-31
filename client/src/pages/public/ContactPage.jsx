@@ -1,5 +1,17 @@
 import { useState } from 'react';
-import { Mail, Phone, MapPin, MessageSquare, Send, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MapPin, MessageSquare, Send } from 'lucide-react';
+import { FacebookIcon, InstagramIcon, TikTokIcon, WhatsAppIcon } from '../../components/icons/SocialIcons';
+
+const SOCIAL_LINKS = [
+  { label: 'Facebook', url: 'https://www.facebook.com/share/1JY7SmAuEC/', Icon: FacebookIcon },
+  { label: 'Instagram', url: 'https://www.instagram.com/edutalentpakistan', Icon: InstagramIcon },
+  { label: 'TikTok', url: 'https://www.tiktok.com/@edutalent4', Icon: TikTokIcon },
+  { label: 'WhatsApp Channel', url: 'https://whatsapp.com/channel/0029VbD831dCsU9PMWH2yD40', Icon: WhatsAppIcon },
+];
+
+const OFFICIAL_EMAIL = 'edutalentpakistan@gmail.com';
+const WHATSAPP_NUMBER = '923468275954';
+const SUPPORT_NUMBER = '+923202603464';
 
 const ContactPage = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
@@ -102,31 +114,31 @@ const ContactPage = () => {
             <div>
               <h2 className="text-2xl font-heading font-bold mb-6">Contact Information</h2>
               <div className="space-y-4 mb-8">
-                <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                <a href={`mailto:${OFFICIAL_EMAIL}`} className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary/40 transition-colors">
                   <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Mail size={22} className="text-primary" />
                   </div>
                   <div>
                     <h4 className="font-heading font-bold text-sm">Official Email</h4>
-                    <p className="text-gray-600 text-sm">info@edutalentpakistan.com</p>
+                    <p className="text-gray-600 text-sm break-all">{OFFICIAL_EMAIL}</p>
                   </div>
-                </div>
-                <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
+                </a>
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100 hover:border-primary/40 transition-colors">
                   <div className="w-12 h-12 bg-green-50 rounded-xl flex items-center justify-center flex-shrink-0">
-                    <MessageSquare size={22} className="text-success" />
+                    <WhatsAppIcon size={22} className="text-success" />
                   </div>
                   <div>
                     <h4 className="font-heading font-bold text-sm">WhatsApp Number</h4>
-                    <p className="text-gray-600 text-sm">+92-XXX-XXXXXXX</p>
+                    <p className="text-gray-600 text-sm">+92 346 8275954</p>
                   </div>
-                </div>
+                </a>
                 <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
                   <div className="w-12 h-12 bg-primary-50 rounded-xl flex items-center justify-center flex-shrink-0">
                     <Phone size={22} className="text-primary" />
                   </div>
                   <div>
-                    <h4 className="font-heading font-bold text-sm">Phone Number</h4>
-                    <p className="text-gray-600 text-sm">+92-XXX-XXXXXXX</p>
+                    <h4 className="font-heading font-bold text-sm">Support Number</h4>
+                    <p className="text-gray-600 text-sm">{SUPPORT_NUMBER}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 p-4 bg-gray-50 rounded-xl border border-gray-100">
@@ -141,10 +153,13 @@ const ContactPage = () => {
               </div>
 
               <h3 className="font-heading font-bold text-base mb-3">Follow Us</h3>
-              <div className="flex gap-3 mb-8">
-                <a href="#" className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors"><ExternalLink size={18} /></a>
-                <a href="#" className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors"><ExternalLink size={18} /></a>
-                <a href="#" className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors"><ExternalLink size={18} /></a>
+              <div className="flex flex-wrap gap-3 mb-8">
+                {SOCIAL_LINKS.map(({ label, url, Icon }) => (
+                  <a key={label} href={url} target="_blank" rel="noopener noreferrer" title={label}
+                    className="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center hover:bg-primary-600 transition-colors">
+                    <Icon size={18} />
+                  </a>
+                ))}
               </div>
 
               <h3 className="font-heading font-bold text-base mb-3">Our Location</h3>

@@ -1,6 +1,18 @@
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MapPin, ExternalLink } from 'lucide-react';
+import { Mail, Phone, MessageCircle } from 'lucide-react';
+import { FacebookIcon, InstagramIcon, TikTokIcon, WhatsAppIcon } from '../icons/SocialIcons';
 import logo from '../../assets/images/logo.jpeg';
+
+const SOCIAL_LINKS = [
+  { label: 'Facebook', url: 'https://www.facebook.com/share/1JY7SmAuEC/', Icon: FacebookIcon },
+  { label: 'Instagram', url: 'https://www.instagram.com/edutalentpakistan', Icon: InstagramIcon },
+  { label: 'TikTok', url: 'https://www.tiktok.com/@edutalent4', Icon: TikTokIcon },
+  { label: 'WhatsApp Channel', url: 'https://whatsapp.com/channel/0029VbD831dCsU9PMWH2yD40', Icon: WhatsAppIcon },
+];
+
+const WHATSAPP_NUMBER = '923468275954';
+const SUPPORT_NUMBER = '+923202603464';
+const OFFICIAL_EMAIL = 'edutalentpakistan@gmail.com';
 
 const Footer = () => {
   return (
@@ -20,9 +32,12 @@ const Footer = () => {
               Rewarding Talent for students from Grade 1 to University.
             </p>
             <div className="flex gap-3">
-              <a href="#" className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors"><ExternalLink size={16} /></a>
-              <a href="#" className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors"><ExternalLink size={16} /></a>
-              <a href="#" className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors"><ExternalLink size={16} /></a>
+              {SOCIAL_LINKS.map(({ label, url, Icon }) => (
+                <a key={label} href={url} target="_blank" rel="noopener noreferrer" title={label}
+                  className="w-9 h-9 bg-gray-800 rounded-full flex items-center justify-center hover:bg-primary transition-colors">
+                  <Icon size={16} />
+                </a>
+              ))}
             </div>
           </div>
 
@@ -72,15 +87,15 @@ const Footer = () => {
             <ul className="space-y-3">
               <li className="flex items-start gap-2 text-gray-400 text-sm">
                 <Mail size={16} className="mt-0.5 text-primary" />
-                info@edutalentpakistan.com
+                <a href={`mailto:${OFFICIAL_EMAIL}`} className="hover:text-white transition-colors">{OFFICIAL_EMAIL}</a>
+              </li>
+              <li className="flex items-start gap-2 text-gray-400 text-sm">
+                <MessageCircle size={16} className="mt-0.5 text-primary" />
+                <a href={`https://wa.me/${WHATSAPP_NUMBER}`} target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors">+92 346 8275954</a>
               </li>
               <li className="flex items-start gap-2 text-gray-400 text-sm">
                 <Phone size={16} className="mt-0.5 text-primary" />
-                +92-XXX-XXXXXXX
-              </li>
-              <li className="flex items-start gap-2 text-gray-400 text-sm">
-                <MapPin size={16} className="mt-0.5 text-primary" />
-                Head Office, Pakistan
+                <a href={`tel:${SUPPORT_NUMBER}`} className="hover:text-white transition-colors">0320 2603464</a>
               </li>
             </ul>
           </div>
