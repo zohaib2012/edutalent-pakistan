@@ -91,7 +91,8 @@ exports.submitTest = async (req, res) => {
     const TestResult = require('../models/TestResult');
     await TestResult.create({
       studentId: req.studentId, sessionId: session._id, phaseId: session.phaseId, rollNumber: session.rollNumber,
-      totalMarks: session.totalQuestions, obtainedMarks: session.score, percentage: session.percentage
+      totalMarks: session.totalQuestions, obtainedMarks: session.score, percentage: session.percentage,
+      totalTimeTaken: session.totalTimeTaken
     });
 
     res.json({ message: 'Test submitted', score: session.score, percentage: session.percentage, correct: session.correctAnswers, wrong: session.wrongAnswers, unattempted: session.totalQuestions - session.attemptedQuestions });

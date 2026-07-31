@@ -62,12 +62,8 @@ const MyResultsPage = () => {
 
   const obtained = result.obtainedMarks || 0;
   const total = result.totalMarks || 100;
-  const subjectBreakdown = result.subjectBreakdown || [
-    { subject: 'English', total: 25, correct: Math.round(obtained * 0.25), wrong: 0, unattempted: 0 },
-    { subject: 'Mathematics', total: 25, correct: Math.round(obtained * 0.25), wrong: 0, unattempted: 0 },
-    { subject: 'Science', total: 25, correct: Math.round(obtained * 0.25), wrong: 0, unattempted: 0 },
-    { subject: 'General Knowledge', total: 25, correct: Math.round(obtained * 0.25), wrong: 0, unattempted: 0 },
-  ];
+  const subjectBreakdown = result.subjectWiseBreakdown || [];
+  const phaseRank = result.phaseRank || result.rank;
 
   const gradeColor = percentage >= 80 ? 'text-success' : percentage >= 60 ? 'text-gold' : percentage >= 40 ? 'text-orange-500' : 'text-red-500';
   const gradeLabel = percentage >= 80 ? 'Excellent' : percentage >= 60 ? 'Good' : percentage >= 40 ? 'Average' : 'Needs Improvement';
@@ -120,44 +116,46 @@ const MyResultsPage = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-              <div className="bg-gradient-to-r from-primary-50 to-blue-50 px-6 md:px-8 py-4 border-b border-primary-100">
-                <div className="flex items-center gap-2">
-                  <TrendingUp size={18} className="text-primary" />
-                  <h2 className="text-lg font-heading font-bold text-gray-800">Subject-wise Breakdown</h2>
+            {subjectBreakdown.length > 0 && (
+              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-primary-50 to-blue-50 px-6 md:px-8 py-4 border-b border-primary-100">
+                  <div className="flex items-center gap-2">
+                    <TrendingUp size={18} className="text-primary" />
+                    <h2 className="text-lg font-heading font-bold text-gray-800">Subject-wise Breakdown</h2>
+                  </div>
+                </div>
+                <div className="p-6 md:p-8">
+                  <div className="space-y-4">
+                    {subjectBreakdown.map((subject, i) => (
+                      <div key={i}>
+                        <div className="flex justify-between items-center mb-1">
+                          <span className="text-sm font-semibold text-gray-700">{subject.subjectName || subject.subject}</span>
+                          <span className="text-xs text-gray-500">{subject.correct}/{subject.totalQuestions || subject.total}</span>
+                        </div>
+                        <div className="w-full bg-gray-100 rounded-full h-2.5">
+                          <div className="bg-primary h-2.5 rounded-full" style={{ width: `${((subject.correct / (subject.totalQuestions || subject.total)) || 0) * 100}%` }} />
+                        </div>
+                        <div className="flex gap-4 mt-1 text-xs text-gray-400">
+                          <span className="text-green-600">{subject.correct} correct</span>
+                          <span className="text-red-500">{subject.wrong || 0} wrong</span>
+                          <span className="text-gray-400">{subject.unattempted || 0} unattempted</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               </div>
-              <div className="p-6 md:p-8">
-                <div className="space-y-4">
-                  {subjectBreakdown.map((subject, i) => (
-                    <div key={i}>
-                      <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm font-semibold text-gray-700">{subject.subject}</span>
-                        <span className="text-xs text-gray-500">{subject.correct}/{subject.total}</span>
-                      </div>
-                      <div className="w-full bg-gray-100 rounded-full h-2.5">
-                        <div className="bg-primary h-2.5 rounded-full" style={{ width: `${(subject.correct / subject.total) * 100}%` }} />
-                      </div>
-                      <div className="flex gap-4 mt-1 text-xs text-gray-400">
-                        <span className="text-green-600">{subject.correct} correct</span>
-                        <span className="text-red-500">{subject.wrong} wrong</span>
-                        <span className="text-gray-400">{subject.unattempted} unattempted</span>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
+            )}
 
             <div className="grid md:grid-cols-2 gap-6">
-              {result.rank && (
+              {phaseRank && (
                 <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
                   <div className="w-12 h-12 bg-gold/20 rounded-xl flex items-center justify-center">
                     <Trophy size={24} className="text-gold" />
                   </div>
                   <div>
                     <p className="text-xs text-gray-400 uppercase tracking-wider">Phase Rank</p>
-                    <p className="text-xl font-heading font-bold text-gray-800">#{result.rank}</p>
+                    <p className="text-xl font-heading font-bold text-gray-800">#{phaseRank}</p>
                   </div>
                 </div>
               )}

@@ -29,6 +29,10 @@ const testResultSchema = new mongoose.Schema(
     percentage: {
       type: Number,
     },
+    totalTimeTaken: {
+      type: Number,
+      default: 0,
+    },
     subjectWiseBreakdown: [
       {
         subjectId: {
