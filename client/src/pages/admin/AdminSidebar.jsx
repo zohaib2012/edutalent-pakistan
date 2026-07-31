@@ -1,8 +1,8 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import {
   LayoutDashboard, Users, Banknote, Ticket, ClipboardList,
   BarChart3, Trophy, Bell, FileText, ChevronLeft, ChevronRight,
-  Settings, FileCheck, FileUp, Megaphone, ScrollText
+  Settings, FileCheck, FileUp, Megaphone, ScrollText, LogOut
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -25,7 +25,14 @@ const navItems = [
 
 export default function AdminSidebar() {
   const location = useLocation();
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
+
+  const handleLogout = () => {
+    localStorage.removeItem('adminToken');
+    localStorage.removeItem('adminUser');
+    navigate('/admin/login');
+  };
 
   return (
     <div className={`${collapsed ? 'w-20' : 'w-64'} bg-gray-900 text-white flex flex-col transition-all duration-300 min-h-screen`}>
@@ -67,8 +74,28 @@ export default function AdminSidebar() {
           );
         })}
       </nav>
-      <div className="p-4 border-t border-gray-700 text-xs text-gray-500">
-        {!collapsed && <span>v1.0.0</span>}
+      <div className="p-4 border-t border-gray-700">
+        {!collapsed && (
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+          >
+            <LogOut size={20} />
+            <span>Logout</span>
+          </button>
+        )}
+        {collapsed && (
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center p-2 rounded-lg text-red-400 hover:bg-red-500/10 hover:text-red-300 transition-colors"
+            title="Logout"
+          >
+            <LogOut size={20} />
+          </button>
+        )}
+        <div className="mt-3 text-xs text-gray-500 text-center">
+          {!collapsed && <span>v1.0.0</span>}
+        </div>
       </div>
     </div>
   );

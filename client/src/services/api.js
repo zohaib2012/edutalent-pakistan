@@ -11,11 +11,37 @@ const api = axios.create({
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
   const adminToken = localStorage.getItem('adminToken');
+  const url = config.url || '';
+  const method = (config.method || 'get').toLowerCase();
 
-  if (config.url?.includes('/admin') || config.url?.includes('/admindashboard')) {
-    if (adminToken) config.headers.Authorization = `Bearer ${adminToken}`;
-  } else {
-    if (token) config.headers.Authorization = `Bearer ${token}`;
+  const isStudentProfile = url.includes('/students/profile');
+  const isAdminPath = !isStudentProfile && (
+    url.includes('/admin') ||
+    url.includes('/admindashboard') ||
+    url.includes('/slips/generate') ||
+    url.includes('/slips/all') ||
+    url.includes('/payments/verify') ||
+    url.includes('/payments/reject') ||
+    url.includes('/payments/pending') ||
+    url.includes('/payments/all') ||
+    url.includes('/payments/stats') ||
+    url.includes('/questions') ||
+    url.includes('/results/generate') ||
+    (url.includes('/results') && !url.includes('/my-result') && !url.includes('/merit-list') && !url.includes('/overall-merit')) ||
+    (url.includes('/awards') && !url.includes('/winners') && !url.includes('/my-award')) ||
+    url.includes('/certificates/generate') ||
+    url.includes('/certificates/types') ||
+    url.includes('/notifications/send') ||
+    url.includes('/notifications/broadcast') ||
+    url.includes('/settings') ||
+    url.includes('/students') ||
+    (url.includes('/announcements') && method !== 'get')
+  );
+
+  if (isAdminPath && adminToken) {
+    config.headers.Authorization = `Bearer ${adminToken}`;
+  } else if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });

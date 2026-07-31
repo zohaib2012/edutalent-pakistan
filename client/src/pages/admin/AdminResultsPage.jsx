@@ -1,14 +1,29 @@
 import { useState, useEffect } from 'react';
-import { BarChart3, Download, FileText, TrendingUp, Award, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { BarChart3, Download, TrendingUp, Award, Loader2 } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
-import api from '../../services/api';
+import api, { getSettings } from '../../services/api';
 
 export default function AdminResultsPage() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [phases, setPhases] = useState([]);
   const [phase, setPhase] = useState('');
 
-  useEffect(() => { fetchResults(); }, []);
+  useEffect(() => {
+    fetchResults();
+    loadPhases();
+  }, []);
+
+  const loadPhases = async () => {
+    try {
+      const { data } = await getSettings();
+      if (data.success) {
+        setPhases(data.data.phases.filter((p) => p.isActive));
+      }
+    } catch {
+      setPhases([]);
+    }
+  };
 
   const fetchResults = async () => {
     setLoading(true);
@@ -59,6 +74,9 @@ export default function AdminResultsPage() {
               <select value={phase} onChange={(e) => setPhase(e.target.value)}
                 className="border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8]">
                 <option value="">Select Phase</option>
+                {phases.map((p) => (
+                  <option key={p._id} value={p._id}>{p.name}</option>
+                ))}
               </select>
             </div>
             <button onClick={generateResults} className="mt-5 bg-[#1A73E8] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#1557B0] flex items-center gap-2">

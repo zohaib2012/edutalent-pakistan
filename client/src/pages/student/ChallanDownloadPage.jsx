@@ -48,48 +48,115 @@ const ChallanDownloadPage = () => {
 
   const handleDownloadChallanPDF = () => {
     if (!studentData) return;
+    const bank = challan.bankDetails || {};
+    const amount = challan.amount || 1200;
+    const dueDate = challan.dueDate ? new Date(challan.dueDate).toLocaleDateString() : 'N/A';
+    const phase = studentData.phase || 'N/A';
+
+    const copies = [
+      { key: 'bank', label: 'BANK COPY', cls: 'label-bank' },
+      { key: 'candidate', label: 'CANDIDATE COPY', cls: 'label-candidate' },
+      { key: 'office', label: 'OFFICE COPY', cls: 'label-office' },
+    ];
+
+    const copyHTML = copies.map((c) => `
+      <td class="copy-cell">
+        <div class="logo-row">
+          <div class="org-name">EDUTALENT PAKISTAN</div>
+          <div class="org-tagline">Unlocking Brilliance, Rewarding Talent</div>
+        </div>
+        <div class="title-bar">Scholarship Application Fee Challan</div>
+        <div class="accent-line"></div>
+        <div class="challan-no">${challan.challanNumber || 'N/A'}</div>
+        <div style="clear:both;">
+          <div class="info-row"><div class="info-label">Reg No:</div><div class="info-value">${studentData.registrationNumber || 'N/A'}</div></div>
+          <div class="info-row"><div class="info-label">Program:</div><div class="info-value">Scholarship Testing Program 2026</div></div>
+          <div class="info-row"><div class="info-label">Phase:</div><div class="info-value">${phase}${studentData.grade ? ' - Grade ' + studentData.grade : ''}</div></div>
+          <div class="info-row"><div class="info-label">Due Date:</div><div class="info-value" style="color:#dc2626;">${dueDate}</div></div>
+        </div>
+        <div class="section-header"><span class="bullet">•</span> Candidate Information</div>
+        <div class="info-row"><div class="info-label">Name:</div><div class="info-value">${studentData.fullName || ''}</div></div>
+        <div class="info-row"><div class="info-label">Father's Name:</div><div class="info-value">${studentData.fatherName || ''}</div></div>
+        <div class="info-row"><div class="info-label">CNIC / B-Form:</div><div class="info-value">${studentData.cnicOrBform || 'N/A'}</div></div>
+        <div class="info-row"><div class="info-label">Mobile:</div><div class="info-value">${studentData.mobileNumber || 'N/A'}</div></div>
+        <div class="info-row"><div class="info-label">Email:</div><div class="info-value">${studentData.email || 'N/A'}</div></div>
+        <div class="section-header"><span class="bullet">•</span> Fee Details</div>
+        <div class="fee-table">
+          <div class="fee-row"><div class="fee-label">Application Fee</div><div class="fee-value">Rs. ${amount}/-</div></div>
+          <div class="fee-row"><div class="fee-label">Bank Charges</div><div class="fee-value">Rs. 0/-</div></div>
+          <div class="fee-row fee-total"><div class="fee-label">Total Amount</div><div class="fee-value">Rs. ${amount}/-</div></div>
+        </div>
+        <div class="section-header"><span class="bullet">•</span> Bank Details</div>
+        <div class="info-row"><div class="info-label">Bank:</div><div class="info-value">${bank.bankName || 'HBL (Habib Bank Limited)'}</div></div>
+        <div class="info-row"><div class="info-label">Account Title:</div><div class="info-value">${bank.accountTitle || 'EduTalent Pakistan'}</div></div>
+        <div class="info-row"><div class="info-label">Account No:</div><div class="info-value">${bank.accountNumber || 'N/A'}</div></div>
+        <div class="info-row"><div class="info-label">Branch:</div><div class="info-value">${bank.branchCode || 'N/A'}</div></div>
+        <div class="section-header"><span class="bullet">•</span> Payment Details</div>
+        <div class="field-label">Deposit Date:</div>
+        <div class="field-line"></div>
+        <div class="field-label">Transaction ID / Slip No:</div>
+        <div class="field-line"></div>
+        <div class="field-label">Bank Stamp & Signature:</div>
+        <div class="field-line"></div>
+        <div class="section-header"><span class="bullet">•</span> Instructions</div>
+        <ol class="instruction-list">
+          <li>Bring original receipt at test center.</li>
+          <li>Incomplete applications will not be accepted.</li>
+          <li>After fee submission, upload paid challan online.</li>
+          <li>Fee is non-refundable.</li>
+        </ol>
+        <div class="section-header"><span class="bullet">•</span> Terms &amp; Conditions</div>
+        <ol class="instruction-list">
+          <li>This challan is valid for 15 days from the date of issue.</li>
+          <li>Challan is non-transferable and non-refundable.</li>
+          <li>Candidates must bring original challan receipt on test day.</li>
+          <li>Duplicate challans are not issued.</li>
+        </ol>
+        <div class="copy-label ${c.cls}">${c.label}</div>
+      </td>
+    `).join('');
+
     const win = window.open('', '_blank');
     if (!win) return;
     win.document.write(`
       <html><head><title>Fee Challan - ${challan.challanNumber || ''}</title>
       <style>
-        @page { margin: 15mm; size: A4 portrait; }
-        body { font-family: 'Arial', sans-serif; padding: 30px; color: #222; }
-        .header { text-align: center; border-bottom: 3px solid #1A73E8; padding-bottom: 15px; margin-bottom: 20px; }
-        .header h1 { color: #1A73E8; font-size: 22px; margin: 0; letter-spacing: 1px; }
-        .header p { color: #666; font-size: 11px; margin: 3px 0 0; }
-        .challan-title { text-align: center; font-size: 15px; font-weight: bold; color: #1A73E8; margin: 15px 0; display: inline-block; padding: 5px 25px; border: 1px solid #1A73E8; background: #f0f6ff; }
-        table { width: 100%; border-collapse: collapse; margin: 12px 0; }
-        td, th { border: 1px solid #ccc; padding: 7px 10px; font-size: 12px; text-align: left; }
-        td.label { font-weight: bold; background: #f5f5f5; width: 35%; font-size: 11px; text-transform: uppercase; color: #555; }
-        td.value { font-weight: 600; }
-        .amount-box { text-align: center; border: 2px solid #1A73E8; border-radius: 8px; padding: 15px; margin: 15px 0; background: #f8fbff; }
-        .amount-box .amount { font-size: 32px; font-weight: bold; color: #1A73E8; }
-        .footer { margin-top: 25px; padding-top: 12px; border-top: 2px solid #ddd; text-align: center; font-size: 10px; color: #999; }
-        .payment-methods { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-        .payment-method { border: 1px solid #ddd; padding: 6px 12px; font-size: 11px; border-radius: 4px; background: #f9f9f9; }
-        .tear-line { border-top: 2px dashed #ccc; margin: 20px 0; position: relative; text-align: center; }
-        .tear-line span { background: #fff; padding: 0 10px; position: relative; top: -9px; font-size: 11px; color: #999; }
-        .bank-copy { border: 2px dashed #1A73E8; padding: 15px; margin-top: 20px; background: #fafcff; }
+        @page { size: A4 landscape; margin: 6mm; }
+        * { margin: 0; padding: 0; }
+        body { font-family: Arial, sans-serif; font-size: 7.5pt; background: #fff; }
+        .main-table { width: 100%; border-collapse: collapse; }
+        .copy-cell { width: 33.33%; vertical-align: top; border: 1.5pt solid #1a2d4a; padding: 5pt; }
+        .copy-cell + .copy-cell { border-left: 1pt dashed #94a3b8; }
+        .logo-row { text-align: center; border-bottom: 2pt solid #1a2d4a; padding-bottom: 5pt; margin-bottom: 5pt; }
+        .org-name { font-size: 10pt; font-weight: bold; color: #1a2d4a; letter-spacing: .3pt; }
+        .org-tagline { font-size: 6.5pt; color: #64748b; letter-spacing: .5pt; margin-top: 1pt; }
+        .title-bar { background-color: #1a2d4a; color: #fff; text-align: center; font-weight: bold; font-size: 8pt; padding: 3.5pt; margin-bottom: 5pt; letter-spacing: .3pt; }
+        .accent-line { height: 1.5pt; background-color: #f6b13a; margin: 0 35% 4pt; }
+        .challan-no { text-align: right; font-size: 7pt; font-weight: bold; margin-bottom: 4pt; color: #1a2d4a; }
+        .info-row { display: table; width: 100%; border-bottom: .5pt solid #e2e8f0; margin-bottom: 1pt; }
+        .info-label { display: table-cell; width: 38%; font-size: 7pt; color: #64748b; padding: 2pt 0; font-weight: 500; }
+        .info-value { display: table-cell; font-size: 7pt; font-weight: bold; padding: 2pt 0; color: #1e293b; }
+        .section-header { background-color: #1a2d4a; color: #fff; font-weight: bold; font-size: 7pt; padding: 2.5pt 5pt; margin: 5pt 0 3pt; letter-spacing: .3pt; }
+        .bullet { color: #f6b13a; font-size: 7pt; margin-right: 3pt; }
+        .fee-table { width: 100%; }
+        .fee-row { display: table; width: 100%; border-bottom: .5pt solid #e2e8f0; padding: 2pt 0; }
+        .fee-label { display: table-cell; font-size: 7pt; color: #475569; }
+        .fee-value { display: table-cell; font-size: 7pt; font-weight: bold; text-align: right; color: #1e293b; }
+        .fee-total { background-color: rgba(26,45,74,.06); }
+        .fee-total .fee-label,
+        .fee-total .fee-value { font-size: 8pt; font-weight: bold; color: #1a2d4a; }
+        .field-line { border-bottom: .5pt solid #94a3b8; height: 11pt; margin-bottom: 2pt; }
+        .field-label { font-size: 6.5pt; color: #64748b; }
+        .instruction-list { padding-left: 10pt; margin-top: 1pt; }
+        .instruction-list li { font-size: 6.5pt; color: #475569; margin-bottom: 1.2pt; }
+        .copy-label { text-align: center; font-size: 7pt; font-weight: bold; letter-spacing: 1pt; padding: 2.5pt; margin-top: 4pt; }
+        .label-bank { background-color: #1a2d4a; color: #fff; }
+        .label-candidate { background-color: #16a34a; color: #fff; }
+        .label-office { background-color: #f59e0b; color: #1a2d4a; }
       </style></head><body>
-      <div class="header"><h1>EDUTALENT PAKISTAN</h1><p>Scholarship Testing Program - Fee Challan</p></div>
-      <div style="text-align:center;"><span class="challan-title">CHALLAN ${challan.challanNumber || ''}</span></div>
-      <table><tr><td class="label">Student Name</td><td class="value">${studentData.fullName || ''}</td></tr>
-      <tr><td class="label">Father's Name</td><td class="value">${studentData.fatherName || ''}</td></tr>
-      <tr><td class="label">Registration No</td><td class="value">${studentData.registrationNumber || ''}</td></tr>
-      <tr><td class="label">CNIC / B-Form</td><td class="value">${studentData.cnicOrBform || ''}</td></tr>
-      <tr><td class="label">Challan No</td><td class="value">${challan.challanNumber || ''}</td></tr>
-      <tr><td class="label">Due Date</td><td class="value" style="color:#d32f2f;">${challan.dueDate ? new Date(challan.dueDate).toLocaleDateString() : ''}</td></tr></table>
-      <div class="amount-box"><div style="font-size:11px;color:#666;margin-bottom:5px;">TOTAL FEE</div><div class="amount">PKR ${challan.amount || 1200}/-</div></div>
-      <table><tr><td class="label">Bank</td><td class="value">${challan.bankDetails?.bankName || 'HBL (Habib Bank Limited)'}</td></tr>
-      <tr><td class="label">Account Title</td><td class="value">${challan.bankDetails?.accountTitle || 'EduTalent Pakistan'}</td></tr>
-      <tr><td class="label">Account Number</td><td class="value">${challan.bankDetails?.accountNumber || '1234-5678-9012-3456'}</td></tr></table>
-      <div class="tear-line"><span>TEAR HERE - BANK COPY</span></div>
-      <div class="bank-copy"><h3 style="margin:0 0 10px;font-size:13px;color:#1A73E8;">BANK USE ONLY</h3>
-      <table><tr><td class="label">Challan No</td><td class="value">${challan.challanNumber || ''}</td></tr>
-      <tr><td class="label">Amount</td><td class="value">PKR ${challan.amount || 1200}/-</td></tr></table>
-      <div style="margin-top:10px;font-size:11px;color:#888;"><div>Deposit Date: _______________</div><div>Bank Officer Sign: _______________</div><div>Bank Stamp: _______________</div></div></div>
-      <div class="footer">EduTalent Pakistan | www.edutalentpakistan.com | This is a system-generated challan.</div>
+      <table class="main-table"><tr>
+      ${copyHTML}
+      </tr></table>
       </body></html>
     `);
     win.document.close();

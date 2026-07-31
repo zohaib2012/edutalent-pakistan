@@ -282,9 +282,9 @@ const ProfilePage = () => {
                       <div className="space-y-0">
                         {timelineSteps.map((step, i) => {
                           const StepIcon = step.icon;
-                          const isCompleted = i < timelineProgress;
-                          const isCurrent = i === timelineProgress;
-                          const isPending = i > timelineProgress;
+                          const isCompleted = i <= timelineProgress;
+                          const isCurrent = i === timelineProgress + 1;
+                          const isPending = i > timelineProgress + 1;
 
                           return (
                             <div key={step.key} className="relative flex items-start gap-4 pb-8 last:pb-0">
@@ -337,16 +337,16 @@ const ProfilePage = () => {
                       <div className="space-y-3">
                         <div className="flex items-center justify-between text-sm">
                           <span className="text-gray-500">Overall Progress</span>
-                          <span className="font-bold text-primary">{Math.round((timelineProgress / (timelineSteps.length - 1)) * 100)}%</span>
+                          <span className="font-bold text-primary">{Math.round(((timelineProgress + 1) / timelineSteps.length) * 100)}%</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                           <div className="bg-gradient-to-r from-primary to-success h-2 rounded-full transition-all duration-1000"
-                            style={{ width: `${(timelineProgress / (timelineSteps.length - 1)) * 100}%` }} />
+                            style={{ width: `${((timelineProgress + 1) / timelineSteps.length) * 100}%` }} />
                         </div>
                         <div className="pt-2 space-y-2">
                           <div className="flex items-center gap-2 text-xs text-gray-500">
                             <div className="w-3 h-3 rounded-full bg-success flex-shrink-0" />
-                            <span>{timelineProgress} of {timelineSteps.length - 1} steps completed</span>
+                            <span>{timelineProgress + 1} of {timelineSteps.length} steps completed</span>
                           </div>
                           {timelineProgress < timelineSteps.length - 1 && (
                             <div className="flex items-center gap-2 text-xs text-primary">

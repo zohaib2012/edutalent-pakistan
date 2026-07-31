@@ -1,34 +1,23 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import {
   Camera, Mic, Maximize2, CheckCircle, XCircle, AlertTriangle,
   SkipForward, Flag, Timer, Shield, Smartphone, Monitor,
-  ChevronRight, LogOut
+  ChevronRight, LogOut, Loader2
 } from 'lucide-react';
+import { startTest, getQuestion, submitAnswer, submitTest, flagCheat } from '../../services/api';
 
 const TOTAL_QUESTIONS = 100;
 const PER_QUESTION_TIME = 25;
 const MAX_VIOLATIONS = 3;
 
-const sampleQuestions = [
-  { id: 1, text: 'What is the capital of Pakistan?', options: ['Lahore', 'Karachi', 'Islamabad', 'Peshawar'], correct: 2 },
-  { id: 2, text: 'Which planet is known as the Red Planet?', options: ['Venus', 'Mars', 'Jupiter', 'Saturn'], correct: 1 },
-  { id: 3, text: 'What is the chemical symbol for water?', options: ['H2O', 'CO2', 'NaCl', 'O2'], correct: 0 },
-  { id: 4, text: 'Who wrote the national anthem of Pakistan?', options: ['Allama Iqbal', 'Hafeez Jalandhari', 'Faiz Ahmed Faiz', 'Ahmed Faraz'], correct: 1 },
-];
-
 const TestPortalPage = () => {
+  const navigate = useNavigate();
   const [phase, setPhase] = useState('pre-test');
   const [checks, setChecks] = useState({ camera: 'pending', mic: 'pending', fullscreen: 'pending' });
   const [agreed, setAgreed] = useState(false);
-  const [questions] = useState(() => {
-    const qs = [];
-    for (let i = 0; i < TOTAL_QUESTIONS; i++) {
-      const base = sampleQuestions[i % sampleQuestions.length];
-      qs.push({ ...base, id: i + 1, text: base.text + (i >= sampleQuestions.length ? ` (Set ${Math.floor(i / sampleQuestions.length) + 1})` : '') });
-    }
-    return qs;
-  });
+  const [questions, setQuestions] = useState([]);
+  const [loadingQuestion, setLoadingQuestion] = useState(false);
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(PER_QUESTION_TIME);
@@ -39,6 +28,7 @@ const TestPortalPage = () => {
   const [submitting, setSubmitting] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [flashing, setFlashing] = useState(false);
+  const [result, setResult] = useState(null);
 
   const videoRef = useRef(null);
   const audioRef = useRef(null);
@@ -48,8 +38,8 @@ const TestPortalPage = () => {
 
   const answeredCount = Object.keys(answers).length;
   const skippedCount = currentQ + 1 - answeredCount;
-  const remainingCount = TOTAL_QUESTIONS - currentQ - 1;
-  const progressPercent = ((currentQ + 1) / TOTAL_QUESTIONS) * 100;
+  const remainingCount = (questions.length || TOTAL_QUESTIONS) - currentQ - 1;
+  const progressPercent = ((currentQ + 1) / (questions.length || TOTAL_QUESTIONS)) * 100;
 
   const checkCamera = async () => {
     try {
@@ -85,6 +75,7 @@ const TestPortalPage = () => {
   const handleViolation = useCallback(() => {
     setViolations(prev => {
       const v = prev + 1;
+      flagCheat({ type: 'violation', details: 'Tab switch or screen leave detected' }).catch(() => {});
       if (v >= MAX_VIOLATIONS) {
         setTestTerminated(true);
         setPhase('terminated');
@@ -131,7 +122,7 @@ const TestPortalPage = () => {
   }, [phase, handleViolation]);
 
   useEffect(() => {
-    if (phase !== 'test' || testTerminated) return;
+    if (phase !== 'test' || testTerminated || loadingQuestion) return;
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
         if (prev <= 1) {
@@ -144,10 +135,47 @@ const TestPortalPage = () => {
       });
     }, 1000);
     return () => clearInterval(timerRef.current);
-  }, [phase, currentQ, testTerminated]);
+  }, [phase, currentQ, testTerminated, loadingQuestion]);
+
+  const startTestSession = async () => {
+    try {
+      setLoadingQuestion(true);
+      const res = await startTest();
+      const total = res.data?.totalQuestions || 0;
+      await loadQuestion(0, total);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to start test');
+      navigate('/profile');
+    } finally {
+      setLoadingQuestion(false);
+    }
+  };
+
+  const loadQuestion = async (index, total) => {
+    try {
+      const res = await getQuestion(index);
+      setQuestions(prev => {
+        const arr = [...prev];
+        arr[index] = {
+          id: res.data.question.id,
+          text: res.data.question.text,
+          options: res.data.question.options.map(o => o.text),
+          total: res.data.totalQuestions || total,
+        };
+        return arr;
+      });
+    } catch (err) {
+      if (err.response?.status === 404) {
+        finishTest();
+      } else {
+        alert(err.response?.data?.message || 'Failed to load question');
+      }
+    }
+  };
 
   const handleAutoAdvance = () => {
-    if (currentQ < TOTAL_QUESTIONS - 1) {
+    const total = questions.length || TOTAL_QUESTIONS;
+    if (currentQ < total - 1) {
       setCurrentQ(prev => prev + 1);
       setSelectedAnswer(null);
       setTimeLeft(PER_QUESTION_TIME);
@@ -160,8 +188,14 @@ const TestPortalPage = () => {
     if (selectedAnswer !== null) return;
     setSelectedAnswer(optIdx);
     setAnswers(prev => ({ ...prev, [currentQ]: optIdx }));
+    const q = questions[currentQ];
+    if (q?.id) {
+      const optionLabel = ['A', 'B', 'C', 'D'][optIdx];
+      submitAnswer({ questionId: q.id, selectedOption: optionLabel, timeTaken: PER_QUESTION_TIME - timeLeft }).catch(() => {});
+    }
     setTimeout(() => {
-      if (currentQ < TOTAL_QUESTIONS - 1) {
+      const total = questions.length || TOTAL_QUESTIONS;
+      if (currentQ < total - 1) {
         setCurrentQ(prev => prev + 1);
         setSelectedAnswer(null);
         setTimeLeft(PER_QUESTION_TIME);
@@ -176,7 +210,7 @@ const TestPortalPage = () => {
     handleAutoAdvance();
   };
 
-  const finishTest = () => {
+  const finishTest = async () => {
     clearInterval(timerRef.current);
     setSubmitted(true);
     setPhase('post-test');
@@ -185,6 +219,12 @@ const TestPortalPage = () => {
     }
     if (document.fullscreenElement) {
       document.exitFullscreen();
+    }
+    try {
+      const res = await submitTest();
+      setResult(res.data || {});
+    } catch {
+      setResult(null);
     }
   };
 
@@ -200,9 +240,10 @@ const TestPortalPage = () => {
   };
 
   const q = questions[currentQ];
-  const correctCount = Object.entries(answers).filter(([idx, ans]) => questions[Number(idx)].correct === ans).length;
-  const wrongCount = answeredCount - correctCount;
-  const unattemptedCount = TOTAL_QUESTIONS - answeredCount;
+  const correctCount = result?.correct ?? 0;
+  const wrongCount = result?.wrong ?? 0;
+  const unattemptedCount = result?.unattempted ?? 0;
+  const totalQuestions = questions.length || TOTAL_QUESTIONS;
 
   if (testTerminated) {
     return (
@@ -309,10 +350,10 @@ const TestPortalPage = () => {
               <span className="text-sm text-gray-700">I agree to Test Rules and Anti-Cheating Policy</span>
             </label>
 
-            <button disabled={!allPassed || !agreed}
-              onClick={() => { setPhase('test'); setTimeLeft(PER_QUESTION_TIME); }}
+            <button disabled={!allPassed || !agreed || loadingQuestion}
+              onClick={async () => { setPhase('test'); setTimeLeft(PER_QUESTION_TIME); await startTestSession(); }}
               className="btn-primary w-full justify-center disabled:opacity-40 disabled:cursor-not-allowed">
-              Start Test <ChevronRight size={18} />
+              {loadingQuestion ? <><Loader2 size={18} className="animate-spin" /> Starting...</> : <>Start Test <ChevronRight size={18} /></>}
             </button>
           </div>
         </div>
@@ -330,32 +371,47 @@ const TestPortalPage = () => {
           <h2 className="section-title text-center">Test Submitted Successfully</h2>
           <p className="section-subtitle mb-8">Thank you for completing the test.</p>
 
-          <div className="grid grid-cols-3 gap-4 mb-8">
-            <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-              <p className="text-2xl font-heading font-bold text-success">{correctCount}</p>
-              <p className="text-xs text-gray-500">Correct</p>
-            </div>
-            <div className="bg-red-50 rounded-xl p-4 border border-red-200">
-              <p className="text-2xl font-heading font-bold text-red-500">{wrongCount}</p>
-              <p className="text-xs text-gray-500">Wrong</p>
-            </div>
-            <div className="bg-gray-100 rounded-xl p-4 border border-gray-200">
-              <p className="text-2xl font-heading font-bold text-gray-500">{unattemptedCount}</p>
-              <p className="text-xs text-gray-500">Unattempted</p>
-            </div>
-          </div>
+          {result ? (
+            <>
+              <div className="grid grid-cols-3 gap-4 mb-8">
+                <div className="bg-green-50 rounded-xl p-4 border border-green-200">
+                  <p className="text-2xl font-heading font-bold text-success">{result.correct ?? 0}</p>
+                  <p className="text-xs text-gray-500">Correct</p>
+                </div>
+                <div className="bg-red-50 rounded-xl p-4 border border-red-200">
+                  <p className="text-2xl font-heading font-bold text-red-500">{result.wrong ?? 0}</p>
+                  <p className="text-xs text-gray-500">Wrong</p>
+                </div>
+                <div className="bg-gray-100 rounded-xl p-4 border border-gray-200">
+                  <p className="text-2xl font-heading font-bold text-gray-500">{result.unattempted ?? 0}</p>
+                  <p className="text-xs text-gray-500">Unattempted</p>
+                </div>
+              </div>
 
-          <div className="bg-primary-50 rounded-xl p-4 mb-8 border border-primary-100">
-            <p className="text-sm text-gray-500">Score Preview</p>
-            <p className="text-2xl font-heading font-bold text-primary">{correctCount} / {TOTAL_QUESTIONS}</p>
-          </div>
+              <div className="bg-primary-50 rounded-xl p-4 mb-8 border border-primary-100">
+                <p className="text-sm text-gray-500">Your Score</p>
+                <p className="text-2xl font-heading font-bold text-primary">{result.score ?? 0} / {result.percentage !== undefined ? (result.percentage / 100 * (questions.length || 100)).toFixed(0) : (questions.length || 100)}</p>
+                <p className="text-xs text-gray-500 mt-1">Percentage: {result.percentage ?? 0}%</p>
+              </div>
 
-          <p className="text-sm text-gray-500 mb-6">Your full result will be published soon</p>
+              <p className="text-sm text-gray-500 mb-6">Your full result will be published soon</p>
+            </>
+          ) : (
+            <p className="text-sm text-gray-500 mb-6">Your test has been submitted. Results will be published soon.</p>
+          )}
 
           <Link to="/my-results" className="btn-primary w-full justify-center">
             Go to Dashboard
           </Link>
         </div>
+      </div>
+    );
+  }
+
+  if (!q) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <Loader2 size={32} className="animate-spin text-primary" />
       </div>
     );
   }
@@ -370,7 +426,7 @@ const TestPortalPage = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-gray-700">Question {currentQ + 1} of {TOTAL_QUESTIONS}</span>
+            <span className="text-sm font-medium text-gray-700">Question {currentQ + 1} of {totalQuestions}</span>
 
             <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold ${
               timeLeft <= 5 ? 'bg-red-100 text-red-600' : 'bg-primary-50 text-primary'
@@ -391,7 +447,7 @@ const TestPortalPage = () => {
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
           <div className="flex items-center justify-between mb-6">
             <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-3 py-1 rounded-full">
-              Question #{q.id}
+              Question #{currentQ + 1}
             </span>
             <button onClick={handleSkip} className="text-sm text-gray-500 hover:text-primary flex items-center gap-1">
               <SkipForward size={16} /> Skip

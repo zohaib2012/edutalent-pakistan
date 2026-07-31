@@ -35,6 +35,10 @@ const Footer = () => {
                 ['Scholarships', '/scholarships'],
                 ['Apply Now', '/apply'],
                 ['Results', '/results'],
+                ['Terms & Conditions', '/terms'],
+                ['Privacy Policy', '/privacy'],
+                ['Refund Policy', '/refund'],
+                ['Anti-Cheating Policy', '/anti-cheating'],
               ].map(([name, path]) => (
                 <li key={path}>
                   <Link to={path} className="text-gray-400 hover:text-white text-sm transition-colors">{name}</Link>
@@ -87,9 +91,9 @@ const Footer = () => {
             <p className="text-gray-500 text-xs">
               &copy; {new Date().getFullYear()} EduTalent Pakistan. All rights reserved.
             </p>
-            <div className="flex gap-4 text-xs text-gray-500">
+            <div className="flex gap-4 text-xs text-gray-400">
               <Link to="/privacy" className="hover:text-white transition-colors">Privacy</Link>
-              <Link to="/terms" className="hover:text-white transition-colors">Terms</Link>
+              <Link to="/terms" className="hover:text-white transition-colors">Terms & Conditions</Link>
               <Link to="/refund" className="hover:text-white transition-colors">Refund</Link>
               <Link to="/anti-cheating" className="hover:text-white transition-colors">Anti-Cheating</Link>
             </div>
