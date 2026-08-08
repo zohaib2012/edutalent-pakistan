@@ -122,6 +122,12 @@ const TestPortalPage = () => {
   }, [phase, handleViolation]);
 
   useEffect(() => {
+    if (streamRef.current && videoRef.current) {
+      videoRef.current.srcObject = streamRef.current;
+    }
+  }, [phase]);
+
+  useEffect(() => {
     if (phase !== 'test' || testTerminated || loadingQuestion) return;
     timerRef.current = setInterval(() => {
       setTimeLeft(prev => {
@@ -519,6 +525,19 @@ const TestPortalPage = () => {
           </div>
         </div>
       </div>
+
+      {checks.camera === 'success' && (
+        <div className="fixed bottom-4 right-4 z-40 w-40 md:w-52 rounded-xl overflow-hidden shadow-2xl border-2 border-green-400 bg-black group">
+          <div className="absolute top-2 left-2 z-10 flex items-center gap-1.5 bg-black/60 rounded-full px-2 py-0.5">
+            <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
+            <span className="text-white text-[10px] font-bold tracking-wider">REC</span>
+          </div>
+          <video ref={videoRef} autoPlay muted playsInline className="w-full h-28 object-cover" />
+          <div className="absolute bottom-0 left-0 right-0 bg-black/40 px-2 py-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <p className="text-white text-[10px] text-center">Camera is ON for proctoring</p>
+          </div>
+        </div>
+      )}
 
       {showViolationModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">

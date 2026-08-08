@@ -59,7 +59,7 @@ export default function AdminLoginPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="admin@edutalent.edu.pk"
+                  placeholder="Enter your admin email"
                   className="w-full pl-10 pr-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#1A73E8] focus:border-[#1A73E8] outline-none text-sm"
                 />
               </div>
@@ -106,11 +106,6 @@ export default function AdminLoginPage() {
             </button>
           </form>
 
-          <div className="mt-6 p-3 bg-gray-50 rounded-lg border border-gray-200">
-            <p className="text-xs text-gray-500 font-medium mb-1">Demo Credentials:</p>
-            <p className="text-xs text-gray-400">Email: admin@edutalent.edu.pk</p>
-            <p className="text-xs text-gray-400">Password: admin123</p>
-          </div>
           <p className="text-center text-xs text-gray-400 mt-4">
             &copy; {new Date().getFullYear()} EduTalent Pakistan. All rights reserved.
           </p>

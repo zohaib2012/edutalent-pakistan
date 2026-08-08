@@ -3,9 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import {
   Check, ChevronRight, ChevronLeft, Upload, User, BookOpen,
   Phone, FileText, ClipboardList, CheckCircle, AlertCircle,
-  X, Loader2, LogIn
+  X, Loader2
 } from 'lucide-react';
-import { createAccount, submitApplication, getApplicationForm } from '../../services/api';
+import { createAccount, submitApplication, getApplicationForm, studentLogin } from '../../services/api';
 
 const provinces = ['Sindh','Punjab','KPK','Balochistan','AJK','GB','Islamabad'];
 
@@ -38,23 +38,17 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const token = localStorage.getItem('token');
 
-  const [phase] = useState(token ? 'application' : 'create');
   const [step, setStep] = useState(0);
   const [errors, setErrors] = useState({});
   const [loading, setLoading] = useState(false);
   const [fetchLoading, setFetchLoading] = useState(false);
-  const [accountResult, setAccountResult] = useState(null);
   const [documentType, setDocumentType] = useState('cnic');
-
-  const [createForm, setCreateForm] = useState({
-    fullName: '', fatherName: '', cnicOrBform: '', dateOfBirth: '',
-    mobileNumber: '', email: '', password: '', confirmPassword: '',
-  });
 
   const [form, setForm] = useState({
     fullName: '', fatherName: '', cnicOrBform: '', dateOfBirth: '',
     gender: '', province: '', district: '', city: '',
     residentialAddress: '', mobileNumber: '', email: '',
+    password: '', confirmPassword: '',
     currentClass: '',
     schoolName: '', currentQualification: '', totalMarks: '',
     obtainedMarks: '', lastQualification: '',
@@ -70,7 +64,7 @@ const RegisterPage = () => {
   const fileInputRefs = useRef({});
 
   useEffect(() => {
-    if (!token || phase !== 'application') return;
+    if (!token) return;
     const fetchExistingData = async () => {
       setFetchLoading(true);
       try {
@@ -126,12 +120,7 @@ const RegisterPage = () => {
       }
     };
     fetchExistingData();
-  }, [token, phase]);
-
-  const updateCreateForm = (field, value) => {
-    setCreateForm(prev => ({ ...prev, [field]: value }));
-    setErrors(prev => ({ ...prev, [field]: '' }));
-  };
+  }, [token]);
 
   const updateForm = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -142,62 +131,29 @@ const RegisterPage = () => {
   const validateCNIC = (cnic) => /^\d{5}-\d{7}-\d{1}$/.test(cnic);
   const validateMobile = (mobile) => /^03\d{2}-\d{7}$/.test(mobile) || /^\+92\d{10}$/.test(mobile) || /^\d{11}$/.test(mobile);
 
-  const validateCreateForm = () => {
-    const errs = {};
-    if (!createForm.fullName.trim()) errs.fullName = 'Full Name is required';
-    if (!createForm.fatherName.trim()) errs.fatherName = "Father's Name is required";
-    if (!createForm.cnicOrBform.trim()) errs.cnicOrBform = 'CNIC/B-Form is required';
-    else if (!validateCNIC(createForm.cnicOrBform)) errs.cnicOrBform = 'Invalid CNIC format (XXXXX-XXXXXXX-X)';
-    if (!createForm.dateOfBirth) errs.dateOfBirth = 'Date of Birth is required';
-    if (!createForm.mobileNumber.trim()) errs.mobileNumber = 'Mobile Number is required';
-    else if (!validateMobile(createForm.mobileNumber)) errs.mobileNumber = 'Invalid mobile number';
-    if (!createForm.email.trim()) errs.email = 'Email is required';
-    else if (!validateEmail(createForm.email)) errs.email = 'Invalid email address';
-    if (!createForm.password) errs.password = 'Password is required';
-    else if (createForm.password.length < 6) errs.password = 'Password must be at least 6 characters';
-    if (createForm.password !== createForm.confirmPassword) errs.confirmPassword = 'Passwords do not match';
-    setErrors(errs);
-    return Object.keys(errs).length === 0;
-  };
-
-  const handleCreateAccount = async (e) => {
-    e.preventDefault();
-    if (!validateCreateForm()) return;
-    setLoading(true);
-    try {
-      const res = await createAccount({
-        fullName: createForm.fullName,
-        fatherName: createForm.fatherName,
-        cnicOrBform: createForm.cnicOrBform,
-        dateOfBirth: createForm.dateOfBirth,
-        mobileNumber: createForm.mobileNumber,
-        email: createForm.email,
-        password: createForm.password,
-      });
-      const studentData = res.data.student || res.data;
-      setAccountResult({
-        registrationNumber: studentData.registrationNumber || '',
-        password: studentData.tempPassword || '',
-        message: studentData.message || res.data.message || 'Account Created Successfully!',
-      });
-    } catch (err) {
-      setErrors({ submit: err.response?.data?.message || 'Failed to create account. Please try again.' });
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const validateStep = (s) => {
     const errs = {};
     if (s === 0) {
       if (!form.fullName.trim()) errs.fullName = 'Full Name is required';
       if (!form.fatherName.trim()) errs.fatherName = "Father's Name is required";
+      if (!form.cnicOrBform.trim()) errs.cnicOrBform = 'CNIC/B-Form is required';
+      else if (!validateCNIC(form.cnicOrBform)) errs.cnicOrBform = 'Invalid CNIC format (XXXXX-XXXXXXX-X)';
+      if (!form.dateOfBirth) errs.dateOfBirth = 'Date of Birth is required';
       if (!form.gender) errs.gender = 'Gender is required';
       if (!form.province) errs.province = 'Province is required';
       if (!form.district.trim()) errs.district = 'District is required';
       if (!form.city.trim()) errs.city = 'City is required';
       if (!form.residentialAddress.trim()) errs.residentialAddress = 'Residential Address is required';
       if (!form.currentClass) errs.currentClass = 'Current Class is required';
+      if (!form.mobileNumber.trim()) errs.mobileNumber = 'Mobile Number is required';
+      else if (!validateMobile(form.mobileNumber)) errs.mobileNumber = 'Invalid mobile number';
+      if (!form.email.trim()) errs.email = 'Email is required';
+      else if (!validateEmail(form.email)) errs.email = 'Invalid email address';
+      if (!token) {
+        if (!form.password) errs.password = 'Password is required';
+        else if (form.password.length < 6) errs.password = 'Password must be at least 6 characters';
+        if (form.password !== form.confirmPassword) errs.confirmPassword = 'Passwords do not match';
+      }
     } else if (s === 1) {
       if (!form.currentQualification.trim()) errs.currentQualification = 'Current Qualification is required';
       if (!form.totalMarks) errs.totalMarks = 'Total Marks is required';
@@ -276,10 +232,36 @@ const RegisterPage = () => {
 
   const handleSubmitApplication = async () => {
     setLoading(true);
+    setErrors(prev => ({ ...prev, submit: '' }));
+    let registrationNumber = '';
+    let password = '';
     try {
+      if (!token) {
+        const accountRes = await createAccount({
+          fullName: form.fullName,
+          fatherName: form.fatherName,
+          cnicOrBform: form.cnicOrBform,
+          dateOfBirth: form.dateOfBirth,
+          mobileNumber: form.mobileNumber,
+          email: form.email,
+          password: form.password,
+        });
+        const accountData = accountRes.data.student || accountRes.data;
+        registrationNumber = accountData.registrationNumber || '';
+        password = accountData.tempPassword || form.password || '';
+
+        const loginRes = await studentLogin({ registrationNumber, password });
+        localStorage.setItem('token', loginRes.data.token);
+        localStorage.setItem('student', JSON.stringify(loginRes.data.student || {}));
+      } else {
+        const sd = JSON.parse(localStorage.getItem('student') || '{}');
+        registrationNumber = sd.registrationNumber || '';
+        password = sd.password || '';
+      }
+
       const fd = new FormData();
       Object.entries(form).forEach(([key, value]) => {
-        if (value) fd.append(key, value);
+        if (value && key !== 'password' && key !== 'confirmPassword') fd.append(key, value);
       });
       fd.append('documentType', documentType);
       if (documents.cnicFront) fd.append('documents[cnicFront]', documents.cnicFront);
@@ -290,16 +272,20 @@ const RegisterPage = () => {
       if (documents.photo) fd.append('documents[photo]', documents.photo);
 
       const res = await submitApplication(fd);
-      const sd = JSON.parse(localStorage.getItem('student') || '{}');
       navigate('/registration-success', {
         state: {
-          registrationNumber: res.data?.registrationNumber || sd.registrationNumber || form.cnicOrBform || '',
-          password: sd.password || '',
+          registrationNumber: res.data?.registrationNumber || registrationNumber || form.cnicOrBform || '',
+          password,
           formData: { ...form }
         }
       });
     } catch (err) {
-      setErrors({ submit: err.response?.data?.message || 'Failed to submit application. Please try again.' });
+      const message = err.response?.data?.message || 'Failed to submit application. Please try again.';
+      if (/already|registered/i.test(message)) {
+        setErrors({ submit: `${message}. Please login with your existing account to continue.` });
+      } else {
+        setErrors({ submit: message });
+      }
     } finally {
       setLoading(false);
     }
@@ -355,115 +341,6 @@ const RegisterPage = () => {
         </div>
         {error && <p className="text-red-500 text-xs mt-1 flex items-center gap-1"><AlertCircle size={12} />{error}</p>}
       </div>
-    );
-  };
-
-  const renderAccountCreation = () => {
-    if (accountResult) {
-      return (
-        <div className="text-center max-w-lg mx-auto py-8">
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-            <CheckCircle size={44} className="text-success" />
-          </div>
-          <h2 className="text-2xl font-heading font-bold text-gray-800 mb-3">Account Created!</h2>
-          <p className="text-gray-600 mb-4">{accountResult.message}</p>
-          <div className="bg-primary-50 rounded-xl p-5 mb-4 border border-primary-100">
-            <p className="text-sm text-gray-500 mb-1">Your Registration ID</p>
-            <p className="text-2xl font-heading font-bold text-primary tracking-wider">
-              {accountResult.registrationNumber}
-            </p>
-          </div>
-          {accountResult.password && (
-            <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
-              <p className="text-sm font-semibold text-green-700 mb-1">Your Password</p>
-              <p className="text-lg font-bold text-green-800 tracking-wider font-mono">
-                {accountResult.password}
-              </p>
-              <p className="text-xs text-green-600 mt-1">
-                Save this password. You will need it to login.
-              </p>
-            </div>
-          )}
-          <p className="text-sm text-gray-500 mb-6">
-            Please login to complete your application.
-          </p>
-          <button onClick={() => navigate('/login')} className="btn-primary w-full justify-center py-3">
-            <LogIn size={18} /> Login to Continue
-          </button>
-        </div>
-      );
-    }
-
-    return (
-      <form onSubmit={handleCreateAccount} className="space-y-6">
-        {errors.submit && (
-          <div className="flex items-center gap-2 bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm">
-            <AlertCircle size={16} />
-            <span>{errors.submit}</span>
-          </div>
-        )}
-        <div className="grid md:grid-cols-2 gap-5">
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
-            <input type="text" value={createForm.fullName} onChange={e => updateCreateForm('fullName', e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.fullName ? 'border-red-400' : 'border-gray-200'}`}
-              placeholder="Enter full name" />
-            {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Father's Name</label>
-            <input type="text" value={createForm.fatherName} onChange={e => updateCreateForm('fatherName', e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.fatherName ? 'border-red-400' : 'border-gray-200'}`}
-              placeholder="Enter father's name" />
-            {errors.fatherName && <p className="text-red-500 text-xs mt-1">{errors.fatherName}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">CNIC / B-Form</label>
-            <input type="text" value={createForm.cnicOrBform} onChange={e => updateCreateForm('cnicOrBform', e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.cnicOrBform ? 'border-red-400' : 'border-gray-200'}`}
-              placeholder="XXXXX-XXXXXXX-X" />
-            {errors.cnicOrBform && <p className="text-red-500 text-xs mt-1">{errors.cnicOrBform}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
-            <input type="date" value={createForm.dateOfBirth} onChange={e => updateCreateForm('dateOfBirth', e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.dateOfBirth ? 'border-red-400' : 'border-gray-200'}`} />
-            {errors.dateOfBirth && <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Mobile Number</label>
-            <input type="text" value={createForm.mobileNumber} onChange={e => updateCreateForm('mobileNumber', e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.mobileNumber ? 'border-red-400' : 'border-gray-200'}`}
-              placeholder="03XX-XXXXXXX" />
-            {errors.mobileNumber && <p className="text-red-500 text-xs mt-1">{errors.mobileNumber}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-            <input type="email" value={createForm.email} onChange={e => updateCreateForm('email', e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.email ? 'border-red-400' : 'border-gray-200'}`}
-              placeholder="your@email.com" />
-            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Password</label>
-            <input type="password" value={createForm.password} onChange={e => updateCreateForm('password', e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.password ? 'border-red-400' : 'border-gray-200'}`}
-              placeholder="Min 6 characters" />
-            {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Confirm Password</label>
-            <input type="password" value={createForm.confirmPassword} onChange={e => updateCreateForm('confirmPassword', e.target.value)}
-              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.confirmPassword ? 'border-red-400' : 'border-gray-200'}`}
-              placeholder="Re-enter password" />
-            {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
-          </div>
-        </div>
-        <button type="submit" disabled={loading} className="btn-primary w-full justify-center py-3 text-base">
-          {loading ? <Loader2 size={18} className="animate-spin" /> : <User size={18} />}
-          {loading ? 'Creating Account...' : 'Create Account'}
-        </button>
-      </form>
     );
   };
 
@@ -533,24 +410,31 @@ const RegisterPage = () => {
       case 0: return (
         <div className="grid md:grid-cols-2 gap-5">
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name <span className="text-red-500">*</span></label>
             <input type="text" value={form.fullName} onChange={e => updateForm('fullName', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50 outline-none" readOnly />
+              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.fullName ? 'border-red-400' : 'border-gray-200'}`}
+              placeholder="Enter full name" />
+            {errors.fullName && <p className="text-red-500 text-xs mt-1">{errors.fullName}</p>}
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Father's/Guardian's Name</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Father's/Guardian's Name <span className="text-red-500">*</span></label>
             <input type="text" value={form.fatherName} onChange={e => updateForm('fatherName', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50 outline-none" readOnly />
+              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.fatherName ? 'border-red-400' : 'border-gray-200'}`}
+              placeholder="Enter father's name" />
+            {errors.fatherName && <p className="text-red-500 text-xs mt-1">{errors.fatherName}</p>}
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">CNIC/B-Form Number</label>
-            <input type="text" value={form.cnicOrBform} readOnly
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 outline-none" />
+            <label className="block text-sm font-semibold text-gray-700 mb-1">CNIC/B-Form Number <span className="text-red-500">*</span></label>
+            <input type="text" value={form.cnicOrBform} onChange={e => updateForm('cnicOrBform', e.target.value)}
+              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.cnicOrBform ? 'border-red-400' : 'border-gray-200'}`}
+              placeholder="XXXXX-XXXXXXX-X" />
+            {errors.cnicOrBform && <p className="text-red-500 text-xs mt-1">{errors.cnicOrBform}</p>}
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Date of Birth <span className="text-red-500">*</span></label>
             <input type="date" value={form.dateOfBirth} onChange={e => updateForm('dateOfBirth', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50 outline-none" readOnly />
+              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.dateOfBirth ? 'border-red-400' : 'border-gray-200'}`} />
+            {errors.dateOfBirth && <p className="text-red-500 text-xs mt-1">{errors.dateOfBirth}</p>}
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Gender <span className="text-red-500">*</span></label>
@@ -594,15 +478,37 @@ const RegisterPage = () => {
             {errors.residentialAddress && <p className="text-red-500 text-xs mt-1">{errors.residentialAddress}</p>}
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Mobile Number</label>
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Mobile Number <span className="text-red-500">*</span></label>
             <input type="text" value={form.mobileNumber} onChange={e => updateForm('mobileNumber', e.target.value)}
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50 outline-none" readOnly />
+              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.mobileNumber ? 'border-red-400' : 'border-gray-200'}`}
+              placeholder="03XX-XXXXXXX" />
+            {errors.mobileNumber && <p className="text-red-500 text-xs mt-1">{errors.mobileNumber}</p>}
           </div>
           <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-            <input type="email" value={form.email} readOnly
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 outline-none" />
+            <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address <span className="text-red-500">*</span></label>
+            <input type="email" value={form.email} onChange={e => updateForm('email', e.target.value)}
+              className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.email ? 'border-red-400' : 'border-gray-200'}`}
+              placeholder="your@email.com" />
+            {errors.email && <p className="text-red-500 text-xs mt-1">{errors.email}</p>}
           </div>
+          {!token && (
+            <>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Password <span className="text-red-500">*</span></label>
+                <input type="password" value={form.password} onChange={e => updateForm('password', e.target.value)}
+                  className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.password ? 'border-red-400' : 'border-gray-200'}`}
+                  placeholder="Min 6 characters" />
+                {errors.password && <p className="text-red-500 text-xs mt-1">{errors.password}</p>}
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">Confirm Password <span className="text-red-500">*</span></label>
+                <input type="password" value={form.confirmPassword} onChange={e => updateForm('confirmPassword', e.target.value)}
+                  className={`w-full px-4 py-3 border rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary ${errors.confirmPassword ? 'border-red-400' : 'border-gray-200'}`}
+                  placeholder="Re-enter password" />
+                {errors.confirmPassword && <p className="text-red-500 text-xs mt-1">{errors.confirmPassword}</p>}
+              </div>
+            </>
+          )}
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Educational Institution <span className="text-red-500">*</span></label>
             <input type="text" value={form.schoolName} onChange={e => updateForm('schoolName', e.target.value)}
@@ -666,8 +572,9 @@ const RegisterPage = () => {
         <div className="grid md:grid-cols-2 gap-5">
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Student Mobile Number</label>
-            <input type="text" value={form.studentMobile} readOnly
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 outline-none" />
+            <input type="text" value={form.studentMobile} onChange={e => updateForm('studentMobile', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+              placeholder="03XX-XXXXXXX" />
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Father's/Guardian's Mobile Number <span className="text-red-500">*</span></label>
@@ -685,8 +592,9 @@ const RegisterPage = () => {
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Email Address</label>
-            <input type="email" value={form.studentEmail} readOnly
-              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm bg-gray-50 text-gray-500 outline-none" />
+            <input type="email" value={form.studentEmail} onChange={e => updateForm('studentEmail', e.target.value)}
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm outline-none focus:ring-2 focus:ring-primary"
+              placeholder="your@email.com" />
           </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Facebook Profile URL <span className="text-gray-400 font-normal">(optional)</span></label>
@@ -875,31 +783,11 @@ const RegisterPage = () => {
     }
   };
 
-  if (phase === 'create') {
-    return (
-      <div>
-        <section className="bg-gradient-to-br from-primary via-primary-700 to-primary-900 text-white py-14 md:py-20">
-          <div className="container-custom text-center">
-            <h1 className="text-3xl md:text-4xl font-heading font-bold mb-2">Create Account</h1>
-            <p className="text-white/80">Register for EduTalent Pakistan Scholarship</p>
-          </div>
-        </section>
-        <section className="py-12 md:py-16 bg-gray-50 min-h-[60vh]">
-          <div className="container-custom">
-            <div className="max-w-2xl mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-10">
-              {renderAccountCreation()}
-            </div>
-          </div>
-        </section>
-      </div>
-    );
-  }
-
   return (
     <div>
       <section className="bg-gradient-to-br from-primary via-primary-700 to-primary-900 text-white py-14 md:py-20">
         <div className="container-custom text-center">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold mb-2">Complete Application</h1>
+          <h1 className="text-3xl md:text-4xl font-heading font-bold mb-2">Student Registration</h1>
           <p className="text-white/80">Fill in your details to apply for the scholarship</p>
         </div>
       </section>

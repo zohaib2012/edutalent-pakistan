@@ -25,10 +25,6 @@ const StudentLoginPage = () => {
       localStorage.setItem('student', JSON.stringify(res.data.student));
       navigate('/challan');
     } catch (err) {
-      if (regNumber === 'ETP-2025-P1-0001' && password === 'student123') {
-        navigate('/challan');
-        return;
-      }
       setError(err.response?.data?.message || 'Invalid credentials');
     } finally {
       setLoading(false);
@@ -59,7 +55,7 @@ const StudentLoginPage = () => {
                 type="text"
                 value={regNumber}
                 onChange={(e) => setRegNumber(e.target.value)}
-                placeholder="e.g. ETP-2025-P1-0001"
+                placeholder="Enter your registration number"
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all text-sm"
               />
             </div>
@@ -81,12 +77,6 @@ const StudentLoginPage = () => {
               Login
             </button>
           </form>
-
-          <div className="mt-4 p-3 bg-gray-50 rounded-lg border border-gray-200">
-            <p className="text-xs text-gray-500 font-medium mb-1">Demo Credentials:</p>
-            <p className="text-xs text-gray-400">Reg #: ETP-2025-P1-0001</p>
-            <p className="text-xs text-gray-400">Password: student123</p>
-          </div>
 
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-500">

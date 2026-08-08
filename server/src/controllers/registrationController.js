@@ -142,6 +142,12 @@ exports.submitApplication = async (req, res) => {
 
     student.grade = String(gradeNum);
     student.phaseId = phase._id;
+    if (fullName) student.fullName = fullName;
+    if (fatherName) student.fatherName = fatherName;
+    if (cnicOrBform) student.cnicOrBform = cnicOrBform;
+    if (dateOfBirth) student.dateOfBirth = dateOfBirth;
+    if (mobileNumber) student.mobileNumber = mobileNumber;
+    if (email) student.email = email;
     student.gender = gender || student.gender;
     student.district = district || student.district;
     student.schoolOrCollege = schoolName || student.schoolOrCollege;
