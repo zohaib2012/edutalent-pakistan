@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, FileText, Download, User, Hash, Calendar, DollarSign, CheckCircle, Clock, AlertCircle } from 'lucide-react';
+import { Search, FileText, Download, User, Hash, Calendar, CheckCircle, Clock, AlertCircle, Landmark, Banknote } from 'lucide-react';
+import logo from '../../assets/images/logo.jpeg';
 
 const FindChallanPage = () => {
   const [regNumber, setRegNumber] = useState('');
@@ -78,40 +79,42 @@ const FindChallanPage = () => {
             )}
 
             {challanData && (
-              <div className="mt-8 bg-gray-50 rounded-xl border border-gray-200 p-6">
-                <h3 className="font-heading font-bold text-lg text-gray-900 mb-4 flex items-center gap-2">
-                  <FileText size={20} className="text-primary" /> Challan Details
-                </h3>
-                <div className="space-y-3">
+              <div className="mt-8 bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="bg-gradient-to-r from-primary via-primary-600 to-primary-700 px-6 py-5 flex items-center justify-between">
                   <div className="flex items-center gap-3">
-                    <User size={16} className="text-gray-400 shrink-0" />
+                    <div className="w-11 h-11 bg-white/15 rounded-xl flex items-center justify-center">
+                      <Landmark size={22} className="text-white" />
+                    </div>
+                    <div>
+                      <h3 className="font-heading font-bold text-lg text-white">Challan Details</h3>
+                      <p className="text-xs text-white/70">Scholarship Application Fee</p>
+                    </div>
+                  </div>
+                  <img src={logo} alt="EduTalent" className="h-10 w-10 rounded-lg object-cover bg-white p-0.5" />
+                </div>
+                <div className="p-6 space-y-3">
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <User size={16} className="text-primary shrink-0" />
                     <div>
                       <div className="text-xs text-gray-500">Student Name</div>
                       <div className="text-sm font-semibold text-gray-900">{challanData.studentName}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <Hash size={16} className="text-gray-400 shrink-0" />
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Hash size={16} className="text-primary shrink-0" />
                     <div>
                       <div className="text-xs text-gray-500">Challan #</div>
                       <div className="text-sm font-semibold text-gray-900">{challanData.challanNumber}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <DollarSign size={16} className="text-gray-400 shrink-0" />
-                    <div>
-                      <div className="text-xs text-gray-500">Amount</div>
-                      <div className="text-sm font-semibold text-gray-900">{challanData.amount}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
-                    <Calendar size={16} className="text-gray-400 shrink-0" />
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <Calendar size={16} className="text-primary shrink-0" />
                     <div>
                       <div className="text-xs text-gray-500">Due Date</div>
                       <div className="text-sm font-semibold text-gray-900">{challanData.dueDate}</div>
                     </div>
                   </div>
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
                     {challanData.status === 'Paid' ? (
                       <CheckCircle size={16} className="text-success shrink-0" />
                     ) : (
@@ -126,10 +129,17 @@ const FindChallanPage = () => {
                       </span>
                     </div>
                   </div>
+                  <div className="bg-gradient-to-r from-primary-50 to-gold-50 rounded-xl p-5 text-center border border-primary-100 relative overflow-hidden">
+                    <div className="absolute -right-4 -top-4 text-primary/10"><Banknote size={80} /></div>
+                    <p className="text-xs text-gray-500 uppercase tracking-wider mb-1">Total Amount</p>
+                    <p className="text-2xl font-heading font-bold text-primary">{challanData.amount}</p>
+                  </div>
                 </div>
-                <button className="btn-primary w-full justify-center mt-5 text-sm py-3">
-                  <Download size={16} /> Download Challan PDF
-                </button>
+                <div className="px-6 pb-6">
+                  <button className="btn-primary w-full justify-center text-sm py-3 shadow-lg shadow-primary/20">
+                    <Download size={16} /> Download Challan PDF
+                  </button>
+                </div>
               </div>
             )}
 

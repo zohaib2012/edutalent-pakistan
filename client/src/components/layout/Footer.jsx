@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
 import { Mail, Phone, MessageCircle, MapPin } from 'lucide-react';
 import { FacebookIcon, InstagramIcon, TikTokIcon, WhatsAppIcon } from '../icons/SocialIcons';
+import DownloadAppButton from '../DownloadAppButton';
 import logo from '../../assets/images/logo.jpeg';
 
 const SOCIAL_LINKS = [
@@ -39,6 +40,9 @@ const Footer = () => {
                   <Icon size={16} />
                 </a>
               ))}
+            </div>
+            <div className="mt-5">
+              <DownloadAppButton variant="footer" />
             </div>
           </div>
 

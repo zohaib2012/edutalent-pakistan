@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X, ChevronDown, Mail, Phone } from 'lucide-react';
 import { FacebookIcon, InstagramIcon, TikTokIcon, WhatsAppIcon } from '../icons/SocialIcons';
+import DownloadAppButton from '../DownloadAppButton';
 import logo from '../../assets/images/logo.jpeg';
 
 const navLinks = [
@@ -136,6 +137,7 @@ const Navbar = () => {
             </div>
 
             <div className="flex items-center gap-2">
+              <DownloadAppButton />
               {isLoggedIn ? (
                 <Link to="/profile" className="hidden sm:inline-flex btn-primary text-sm py-2.5 px-5">
                   Dashboard
@@ -187,6 +189,9 @@ const Navbar = () => {
                 <Link to="/login" className="block btn-primary text-center text-sm">Student Login</Link>
               </div>
             )}
+            <div className="mt-3">
+              <DownloadAppButton variant="footer" className="w-full" />
+            </div>
           </div>
         </div>
       )}

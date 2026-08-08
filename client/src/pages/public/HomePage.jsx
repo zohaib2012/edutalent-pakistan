@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Users, Award, FileCheck, Globe, BookOpen, Laptop, Shield, ChevronRight, Clock, CheckCircle, Megaphone, Loader2 } from 'lucide-react';
 import { getAnnouncements } from '../../services/api';
+import logo from '../../assets/images/logo.jpeg';
 
 const stats = [
   { icon: Users, value: '10,000+', label: 'Students Registered' },
@@ -85,8 +86,8 @@ const HomePage = () => {
               <div className="relative">
                 <div className="w-80 h-80 bg-white/5 rounded-full border border-white/10 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="w-24 h-24 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-2xl">
-                      <span className="text-white font-heading font-bold text-3xl">ETP</span>
+                    <div className="w-28 h-28 bg-white rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-2xl overflow-hidden border-4 border-white/10">
+                      <img src={logo} alt="EduTalent Pakistan" className="w-full h-full object-contain" />
                     </div>
                     <p className="text-gold font-heading font-bold text-lg">EduTalent Pakistan</p>
                     <p className="text-white/60 text-sm">Est. 2025</p>

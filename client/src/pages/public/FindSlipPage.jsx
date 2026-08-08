@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, FileText, Download, User, Hash, Calendar, Clock, Shield, AlertTriangle, MapPin, Monitor, Eye, Mic } from 'lucide-react';
+import { Search, FileText, Download, User, Hash, Calendar, Clock, Shield, AlertTriangle, MapPin, Monitor, Eye, Mic, BadgeCheck } from 'lucide-react';
+import logo from '../../assets/images/logo.jpeg';
 
 const FindSlipPage = () => {
   const [regNumber, setRegNumber] = useState('');
@@ -82,70 +83,81 @@ const FindSlipPage = () => {
 
             {slipData && (
               <div className="mt-8">
-                <div className="bg-gray-50 rounded-xl border border-gray-200 p-6 space-y-4">
-                  <h3 className="font-heading font-bold text-lg text-gray-900 flex items-center gap-2">
-                    <FileText size={20} className="text-primary" /> Roll Number Slip
-                  </h3>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2">
-                      <User size={15} className="text-gray-400 shrink-0" />
+                <div className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden">
+                  <div className="bg-gradient-to-r from-primary via-primary-600 to-primary-700 px-6 py-5 flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 bg-white/15 rounded-xl flex items-center justify-center">
+                        <BadgeCheck size={22} className="text-white" />
+                      </div>
                       <div>
-                        <div className="text-[10px] text-gray-500 uppercase">Student Name</div>
-                        <div className="text-sm font-semibold text-gray-900">{slipData.studentName}</div>
+                        <h3 className="font-heading font-bold text-lg text-white flex items-center gap-2">Roll Number Slip</h3>
+                        <p className="text-xs text-white/70">Verified &amp; System Generated</p>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <User size={15} className="text-gray-400 shrink-0" />
-                      <div>
-                        <div className="text-[10px] text-gray-500 uppercase">Father Name</div>
-                        <div className="text-sm font-semibold text-gray-900">{slipData.fatherName}</div>
-                      </div>
-                    </div>
+                    <img src={logo} alt="EduTalent" className="h-10 w-10 rounded-lg object-cover bg-white p-0.5" />
                   </div>
-
-                  <div className="bg-primary text-white rounded-xl p-4 text-center">
-                    <div className="text-xs text-white/70 mb-1 uppercase">Roll Number</div>
-                    <div className="text-2xl md:text-3xl font-heading font-bold tracking-wider">{slipData.rollNumber}</div>
-                  </div>
-
-                  <div className="grid grid-cols-2 gap-4">
-                    <div className="flex items-center gap-2">
-                      <Calendar size={15} className="text-gray-400 shrink-0" />
-                      <div>
-                        <div className="text-[10px] text-gray-500 uppercase">Test Date</div>
-                        <div className="text-sm font-semibold text-gray-900">{slipData.testDate}</div>
+                  <div className="p-6">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-2">
+                        <User size={15} className="text-gray-400 shrink-0" />
+                        <div>
+                          <div className="text-[10px] text-gray-500 uppercase">Student Name</div>
+                          <div className="text-sm font-semibold text-gray-900">{slipData.studentName}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <User size={15} className="text-gray-400 shrink-0" />
+                        <div>
+                          <div className="text-[10px] text-gray-500 uppercase">Father Name</div>
+                          <div className="text-sm font-semibold text-gray-900">{slipData.fatherName}</div>
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Clock size={15} className="text-gray-400 shrink-0" />
-                      <div>
-                        <div className="text-[10px] text-gray-500 uppercase">Test Time</div>
-                        <div className="text-sm font-semibold text-gray-900">{slipData.testTime}</div>
+
+                    <div className="bg-gradient-to-br from-primary to-primary-700 text-white rounded-xl p-5 text-center my-4 relative overflow-hidden">
+                      <div className="absolute -right-4 -top-4 text-white/10"><BadgeCheck size={72} /></div>
+                      <div className="text-xs text-white/70 mb-1 uppercase tracking-widest">Roll Number</div>
+                      <div className="text-2xl md:text-3xl font-heading font-bold tracking-wider">{slipData.rollNumber}</div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                        <Calendar size={15} className="text-primary shrink-0" />
+                        <div>
+                          <div className="text-[10px] text-gray-500 uppercase">Test Date</div>
+                          <div className="text-sm font-semibold text-gray-900">{slipData.testDate}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
+                        <Clock size={15} className="text-primary shrink-0" />
+                        <div>
+                          <div className="text-[10px] text-gray-500 uppercase">Test Time</div>
+                          <div className="text-sm font-semibold text-gray-900">{slipData.testTime}</div>
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <div className="flex items-center gap-2">
-                    <Shield size={15} className="text-gray-400 shrink-0" />
-                    <div>
-                      <div className="text-[10px] text-gray-500 uppercase">Phase</div>
-                      <div className="text-sm font-semibold text-gray-900">{slipData.phase}</div>
+                    <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg mt-3">
+                      <Shield size={15} className="text-primary shrink-0" />
+                      <div>
+                        <div className="text-[10px] text-gray-500 uppercase">Phase</div>
+                        <div className="text-sm font-semibold text-gray-900">{slipData.phase}</div>
+                      </div>
                     </div>
                   </div>
                 </div>
 
-                <div className="mt-4 bg-gray-900 rounded-xl p-5 border border-gray-700">
+                <div className="mt-4 bg-gradient-to-br from-gray-900 via-primary-900 to-primary-800 rounded-xl p-5 border border-primary-700">
                   <div className="flex items-center gap-2 mb-3">
                     <Monitor size={16} className="text-gold" />
-                    <span className="text-xs text-gray-400 uppercase font-semibold">Test Portal Credentials</span>
+                    <span className="text-xs text-gold uppercase font-semibold tracking-wider">Test Portal Credentials</span>
                   </div>
                   <div className="space-y-2">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-400">Username</span>
                       <span className="text-white font-mono font-semibold">{slipData.username}</span>
                     </div>
-                    <div className="h-px bg-gray-700" />
+                    <div className="h-px bg-white/10" />
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-gray-400">Password</span>
                       <span className="text-white font-mono font-semibold">{slipData.password}</span>
@@ -153,7 +165,7 @@ const FindSlipPage = () => {
                   </div>
                 </div>
 
-                <button className="btn-primary w-full justify-center mt-5 text-sm py-3">
+                <button className="btn-primary w-full justify-center mt-5 text-sm py-3 shadow-lg shadow-primary/20">
                   <Download size={16} /> Download Slip PDF
                 </button>
 
