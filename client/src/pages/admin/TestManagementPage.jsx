@@ -1,13 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Search, X, Loader2 } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
-import api, { getPhases, getPhaseSubjects } from '../../services/api';
+import api, { getPhases } from '../../services/api';
 
 export default function TestManagementPage() {
   const [activeTab, setActiveTab] = useState('Questions');
   const [questions, setQuestions] = useState([]);
   const [phases, setPhases] = useState([]);
-  const [subjects, setSubjects] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -43,18 +42,6 @@ export default function TestManagementPage() {
     }
   };
 
-  const handlePhaseChange = async (phaseId) => {
-    setForm((prev) => ({ ...prev, phase: phaseId, subject: '' }));
-    setSubjects([]);
-    if (!phaseId) return;
-    try {
-      const res = await getPhaseSubjects(phaseId);
-      setSubjects(res.data?.data || []);
-    } catch {
-      setSubjects([]);
-    }
-  };
-
   const handleSaveQ = async () => {
     if (!form.question.trim() || !form.correctAnswer) {
       alert('Please fill the question and select the correct answer');
@@ -70,7 +57,7 @@ export default function TestManagementPage() {
     try {
       await api.post('/questions', {
         phaseId: form.phase,
-        subjectId: form.subject,
+        subject: form.subject,
         questionText: form.question,
         options: optionLabels.map((label) => ({
           label, text: form[`option${label}`], isCorrect: form.correctAnswer === label,
@@ -204,7 +191,7 @@ export default function TestManagementPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Phase <span className="text-red-500">*</span></label>
-                      <select value={form.phase} onChange={(e) => handlePhaseChange(e.target.value)}
+                      <select value={form.phase} onChange={(e) => setForm({ ...form, phase: e.target.value })}
                         className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8] bg-white">
                         <option value="">Select Phase</option>
                         {phases.map((p) => (
@@ -214,14 +201,9 @@ export default function TestManagementPage() {
                     </div>
                     <div>
                       <label className="block text-sm font-medium text-gray-700 mb-1">Subject <span className="text-red-500">*</span></label>
-                      <select value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })}
-                        disabled={!form.phase}
-                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8] bg-white disabled:bg-gray-100 disabled:text-gray-400">
-                        <option value="">{form.phase ? 'Select Subject' : 'Select Phase first'}</option>
-                        {subjects.map((s) => (
-                          <option key={s._id} value={s._id}>{s.name}</option>
-                        ))}
-                      </select>
+                      <input type="text" value={form.subject} onChange={(e) => setForm({ ...form, subject: e.target.value })}
+                        placeholder="e.g. Mathematics, English, Physics..."
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8] bg-white" />
                     </div>
                   </div>
                   <div>

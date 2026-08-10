@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import {
   CheckCircle, Download, ShieldCheck,
-  Banknote, LayoutDashboard, Loader2, KeyRound, User
+  Banknote, LayoutDashboard, Loader2, KeyRound
 } from 'lucide-react';
 
 const RegistrationSuccessPage = () => {
@@ -12,16 +12,6 @@ const RegistrationSuccessPage = () => {
   const formData = location.state?.formData || {};
   const [downloadingApp, setDownloadingApp] = useState(false);
   const [downloadingChallan, setDownloadingChallan] = useState(false);
-  const autoTriggered = useRef(false);
-
-  useEffect(() => {
-    if (autoTriggered.current || !registrationNumber || registrationNumber === 'N/A') return;
-    autoTriggered.current = true;
-    const timer = setTimeout(() => {
-      handleDownloadApplication();
-    }, 1000);
-    return () => clearTimeout(timer);
-  }, [registrationNumber]);
 
   const handleDownloadApplication = () => {
     setDownloadingApp(true);
@@ -36,9 +26,6 @@ const RegistrationSuccessPage = () => {
       // fallback
     } finally {
       setDownloadingApp(false);
-      setTimeout(() => {
-        handleDownloadChallan();
-      }, 500);
     }
   };
 

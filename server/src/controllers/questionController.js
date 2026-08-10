@@ -1,4 +1,6 @@
 const Question = require('../models/Question');
+const Subject = require('../models/Subject');
+const mongoose = require('mongoose');
 
 exports.getAll = async (req, res) => {
   try {
@@ -14,7 +16,29 @@ exports.getAll = async (req, res) => {
 };
 
 exports.create = async (req, res) => {
-  try { const question = await Question.create(req.body); res.status(201).json(question); } catch (error) { res.status(500).json({ message: error.message }); }
+  try {
+    const { subject, phaseId } = req.body;
+
+    if (!req.body.subjectId && subject && typeof subject === 'string' && subject.trim()) {
+      const name = subject.trim();
+      let sub = await Subject.findOne({ name: { $regex: new RegExp(`^${name}$`, 'i') } });
+      if (!sub) {
+        sub = await Subject.create({
+          name,
+          slug: name.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, ''),
+          phases: phaseId ? [phaseId] : [],
+          isActive: true,
+        });
+      } else if (phaseId && !sub.phases.some(p => p.toString() === phaseId.toString())) {
+        sub.phases.push(phaseId);
+        await sub.save();
+      }
+      req.body.subjectId = sub._id;
+    }
+
+    const question = await Question.create(req.body);
+    res.status(201).json(question);
+  } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
 exports.getById = async (req, res) => {
