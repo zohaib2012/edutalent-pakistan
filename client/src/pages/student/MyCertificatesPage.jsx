@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { Download, Award, Medal, Shield, Star, Trophy, Clock, QrCode, Search, FileCheck, Plus, Loader, CheckCircle, XCircle } from 'lucide-react';
-import { getMyCertificates, generateCertificate, verifyCertificate } from '../../services/api';
+import { Download, Award, Medal, Shield, Star, Trophy, Clock, Search, FileCheck, Plus, Loader, CheckCircle } from 'lucide-react';
+import { getMyCertificates, generateCertificate } from '../../services/api';
 
 const certificateMeta = {
   '1st Position': { icon: Trophy, color: 'text-gold', bg: 'bg-gold/10 text-gold border-gold/20' },
@@ -9,6 +9,11 @@ const certificateMeta = {
   'Top 20': { icon: Star, color: 'text-primary', bg: 'bg-primary-50 text-primary border-primary-200' },
   'Appreciation': { icon: Award, color: 'text-success', bg: 'bg-green-50 text-success border-green-200' },
   'Participation': { icon: Clock, color: 'text-gray-500', bg: 'bg-gray-100 text-gray-600 border-gray-200' },
+};
+
+const typeLabelMap = {
+  '1st_position': '1st Position', top5: 'Top 5', shield: 'Shield', top20: 'Top 20',
+  appreciation: 'Appreciation', participation: 'Participation',
 };
 
 const downloadCertificatePDF = (cert) => {
@@ -236,9 +241,6 @@ const MyCertificatesPage = () => {
   const [certificates, setCertificates] = useState([]);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
-  const [verifyNumber, setVerifyNumber] = useState('');
-  const [verifying, setVerifying] = useState(false);
-  const [verifyResult, setVerifyResult] = useState(null);
   const [generatedSerial, setGeneratedSerial] = useState(null);
 
   useEffect(() => {
@@ -276,21 +278,6 @@ const MyCertificatesPage = () => {
       setGeneratedSerial(fallback.serialNumber);
     } finally {
       setGenerating(false);
-    }
-  };
-
-  const handleVerify = async (e) => {
-    e.preventDefault();
-    if (!verifyNumber.trim()) return;
-    setVerifying(true);
-    setVerifyResult(null);
-    try {
-      const res = await verifyCertificate(verifyNumber.trim());
-      setVerifyResult({ valid: true, data: res.data });
-    } catch {
-      setVerifyResult({ valid: false, message: 'Certificate not found or invalid.' });
-    } finally {
-      setVerifying(false);
     }
   };
 
@@ -341,19 +328,18 @@ const MyCertificatesPage = () => {
             ) : (
               <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {certificates.map((cert) => {
-                  const meta = certificateMeta[cert.type] || certificateMeta['Participation'];
+                  const label = typeLabelMap[cert.type] || cert.type || 'Participation';
+                  const meta = certificateMeta[label] || certificateMeta['Participation'];
                   const Icon = meta.icon;
-                  const serialNumber = cert.serialNumber || cert.serial || `ETP-CERT-${new Date().getFullYear()}-XXXX`;
-                  const issueDate = cert.issueDate ? new Date(cert.issueDate).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
-                  const verifyUrl = `https://edutalent-pakistan.vercel.app/certificates/verify/${serialNumber}`;
-                  const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(verifyUrl)}`;
+                  const serialNumber = cert.serialNumber || cert.certificateNumber || cert.serial || `ETP-CERT-${new Date().getFullYear()}-XXXX`;
+                  const issueDate = cert.issuedAt ? new Date(cert.issuedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' }) : 'N/A';
 
                   return (
                     <div key={cert._id || cert.id} className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow">
                       <div className="p-6">
                         <div className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${meta.bg}`}>
                           <Icon size={14} />
-                          {cert.type}
+                          {label}
                         </div>
 
                         <div className="mt-4 space-y-2">
@@ -372,23 +358,18 @@ const MyCertificatesPage = () => {
                             <p className="text-sm font-medium text-gray-600">{issueDate}</p>
                           </div>
                         </div>
-
-                        <div className="mt-4 flex justify-center">
-                          <img
-                            src={qrUrl}
-                            alt="QR Code"
-                            className="w-24 h-24"
-                            onError={(e) => {
-                              e.target.style.display = 'none';
-                            }}
-                          />
-                        </div>
                       </div>
 
                       <div className="px-6 pb-6">
-                        <button onClick={() => downloadCertificatePDF(cert)} className="btn-primary w-full justify-center text-sm">
-                          <Download size={16} /> Download Certificate
-                        </button>
+                        {cert.fileUrl ? (
+                          <a href={cert.fileUrl} target="_blank" rel="noopener noreferrer" className="btn-primary w-full justify-center text-sm">
+                            <Download size={16} /> Download Certificate
+                          </a>
+                        ) : (
+                          <button onClick={() => downloadCertificatePDF(cert)} className="btn-primary w-full justify-center text-sm">
+                            <Download size={16} /> Download Certificate
+                          </button>
+                        )}
                       </div>
                     </div>
                   );
@@ -396,59 +377,16 @@ const MyCertificatesPage = () => {
               </div>
             )}
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8" id="verify">
-              <div className="flex items-center gap-3 mb-5">
+            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6" id="verify-note">
+              <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-primary-50 rounded-xl flex items-center justify-center">
                   <Search size={20} className="text-primary" />
                 </div>
                 <div>
-                  <h2 className="text-lg font-heading font-bold text-gray-800">Verify Certificate</h2>
-                  <p className="text-xs text-gray-500">Enter the certificate serial number to verify its authenticity</p>
+                  <h2 className="text-lg font-heading font-bold text-gray-800">Certificate Issuance</h2>
+                  <p className="text-xs text-gray-500">Certificates are issued by the EduTalent administration after results are published.</p>
                 </div>
               </div>
-
-              <form onSubmit={handleVerify} className="max-w-md">
-                <div className="flex gap-3">
-                  <input
-                    type="text"
-                    value={verifyNumber}
-                    onChange={(e) => setVerifyNumber(e.target.value)}
-                    placeholder="Enter certificate number..."
-                    className="flex-1 px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none"
-                  />
-                  <button type="submit" disabled={verifying} className="btn-primary text-sm">
-                    {verifying ? <Loader size={16} className="animate-spin" /> : <Search size={16} />}
-                    Verify
-                  </button>
-                </div>
-              </form>
-
-              {verifyResult && (
-                <div className={`mt-4 p-4 rounded-lg border ${verifyResult.valid ? 'bg-green-50 border-green-200' : 'bg-red-50 border-red-200'}`}>
-                  <div className="flex items-start gap-2">
-                    {verifyResult.valid ? (
-                      <CheckCircle size={18} className="text-success mt-0.5 flex-shrink-0" />
-                    ) : (
-                      <XCircle size={18} className="text-red-500 mt-0.5 flex-shrink-0" />
-                    )}
-                    <div>
-                      <p className={`text-sm font-semibold ${verifyResult.valid ? 'text-success' : 'text-red-600'}`}>
-                        {verifyResult.valid ? 'Certificate Verified Successfully!' : 'Verification Failed'}
-                      </p>
-                      {verifyResult.valid ? (
-                        <div className="mt-1 text-xs text-gray-600 space-y-1">
-                          <p>Certificate #{verifyNumber} is valid and issued by EduTalent Pakistan.</p>
-                          {verifyResult.data?.type && <p>Type: <span className="font-semibold">{verifyResult.data.type}</span></p>}
-                          {verifyResult.data?.studentName && <p>Issued to: <span className="font-semibold">{verifyResult.data.studentName}</span></p>}
-                          {verifyResult.data?.issueDate && <p>Issue Date: <span className="font-semibold">{new Date(verifyResult.data.issueDate).toLocaleDateString()}</span></p>}
-                        </div>
-                      ) : (
-                        <p className="text-xs text-red-500 mt-1">{verifyResult.message}</p>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              )}
             </div>
           </div>
         </div>

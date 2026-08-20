@@ -4,7 +4,7 @@ import {
   ChevronLeft, ChevronRight, Image, ExternalLink, Loader2
 } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
-import { verifyPayment, rejectPayment } from '../../services/api';
+import { verifyPayment, rejectPayment, getPhases } from '../../services/api';
 import api from '../../services/api';
 
 const tabs = ['Pending', 'Verified', 'Rejected'];
@@ -19,12 +19,19 @@ export default function FeeVerificationPage() {
   const [showImageModal, setShowImageModal] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [data, setData] = useState([]);
+  const [phases, setPhases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [actionLoading, setActionLoading] = useState(null);
 
   useEffect(() => {
     fetchData();
   }, [activeTab]);
+
+  useEffect(() => {
+    getPhases()
+      .then((res) => setPhases(res.data?.data || []))
+      .catch(() => setPhases([]));
+  }, []);
 
   const fetchData = async () => {
     setLoading(true);
@@ -41,7 +48,8 @@ export default function FeeVerificationPage() {
 
   const filtered = data.filter(
     (f) =>
-      f.fullName?.toLowerCase().includes(search.toLowerCase())
+      f.fullName?.toLowerCase().includes(search.toLowerCase()) &&
+      (!phaseFilter || (f.phaseId?._id || f.phaseId) === phaseFilter)
   );
 
   const itemsPerPage = 5;
@@ -128,12 +136,11 @@ export default function FeeVerificationPage() {
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-gray-900">Fee Verification</h1>
             <div className="flex items-center gap-3">
-              <select value={phaseFilter} onChange={(e) => setPhaseFilter(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8]">
+              <select value={phaseFilter} onChange={(e) => { setPhaseFilter(e.target.value); setCurrentPage(1); }} className="border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8]">
                 <option value="">All Phases</option>
-                <option>Phase 1</option>
-                <option>Phase 2</option>
-                <option>Phase 3</option>
-                <option>Phase 4</option>
+                {phases.map((p) => (
+                  <option key={p._id} value={p._id}>{p.name}</option>
+                ))}
               </select>
               {selectedRows.length > 0 && (
                 <button

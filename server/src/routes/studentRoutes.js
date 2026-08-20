@@ -7,6 +7,7 @@ const studentController = require('../controllers/studentController');
 router.get('/', adminAuth, studentController.getAll);
 router.get('/profile', auth, studentController.getProfile);
 router.put('/profile', auth, studentController.updateProfile);
+router.get('/track', studentController.track);
 router.get('/search', adminAuth, studentController.search);
 router.get('/phase/:phaseId', adminAuth, studentController.getByPhase);
 router.get('/status/:status', adminAuth, studentController.getByStatus);

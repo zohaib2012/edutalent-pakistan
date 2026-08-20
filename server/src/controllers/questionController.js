@@ -36,6 +36,17 @@ exports.create = async (req, res) => {
       req.body.subjectId = sub._id;
     }
 
+    if (req.file) {
+      req.body.questionImageUrl = req.file.path;
+    }
+    if (typeof req.body.options === 'string') {
+      try {
+        req.body.options = JSON.parse(req.body.options);
+      } catch {
+        return res.status(400).json({ message: 'Invalid options format' });
+      }
+    }
+
     const question = await Question.create(req.body);
     res.status(201).json(question);
   } catch (error) { res.status(500).json({ message: error.message }); }
@@ -46,7 +57,13 @@ exports.getById = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  try { const question = await Question.findByIdAndUpdate(req.params.id, req.body, { new: true }); res.json(question); } catch (error) { res.status(500).json({ message: error.message }); }
+  try {
+    if (req.file) {
+      req.body.questionImageUrl = req.file.path;
+    }
+    const question = await Question.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(question);
+  } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
 exports.delete = async (req, res) => {

@@ -58,3 +58,16 @@
     background: rgba(255, 255, 255, 0.3);
   }
 }
+
+@media (max-width: 768px) {
+  .admin-sidebar {
+    width: 4rem !important;
+    min-width: 4rem !important;
+  }
+  .admin-sidebar .nav-label,
+  .admin-sidebar .section-label,
+  .admin-sidebar .brand-text,
+  .admin-sidebar .admin-sidebar-footer-text {
+    display: none !important;
+  }
+}

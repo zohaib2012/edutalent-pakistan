@@ -3,6 +3,7 @@ import Layout from './components/layout/Layout';
 
 import HomePage from './pages/public/HomePage';
 import AboutPage from './pages/public/AboutPage';
+import TeamPage from './pages/public/TeamPage';
 import MissionPage from './pages/public/MissionPage';
 import VisionPage from './pages/public/VisionPage';
 import ValuesPage from './pages/public/ValuesPage';
@@ -12,7 +13,6 @@ import ApplyNowPage from './pages/public/ApplyNowPage';
 import StudentLoginPage from './pages/public/StudentLoginPage';
 import SyllabusPage from './pages/public/SyllabusPage';
 import TestRulesPage from './pages/public/TestRulesPage';
-import DemoTestPage from './pages/public/DemoTestPage';
 import DateSheetPage from './pages/public/DateSheetPage';
 import ResultsPage from './pages/public/ResultsPage';
 import MeritListPage from './pages/public/MeritListPage';
@@ -56,6 +56,9 @@ import AdminDocumentsPage from './pages/admin/AdminDocumentsPage';
 import AdminAnnouncementsPage from './pages/admin/AdminAnnouncementsPage';
 import AdminApplicationsPage from './pages/admin/AdminApplicationsPage';
 import AdminPhasesPage from './pages/admin/AdminPhasesPage';
+import AdminSyllabusPage from './pages/admin/AdminSyllabusPage';
+import AdminMeritListPage from './pages/admin/AdminMeritListPage';
+import AdminContactQueriesPage from './pages/admin/AdminContactQueriesPage';
 
 function App() {
   return (
@@ -63,6 +66,7 @@ function App() {
       <Routes>
         <Route path="/" element={<Layout><HomePage /></Layout>} />
         <Route path="/about" element={<Layout><AboutPage /></Layout>} />
+        <Route path="/team" element={<Layout><TeamPage /></Layout>} />
         <Route path="/mission" element={<Layout><MissionPage /></Layout>} />
         <Route path="/vision" element={<Layout><VisionPage /></Layout>} />
         <Route path="/values" element={<Layout><ValuesPage /></Layout>} />
@@ -73,7 +77,6 @@ function App() {
         <Route path="/login" element={<Layout><StudentLoginPage /></Layout>} />
         <Route path="/syllabus" element={<Layout><SyllabusPage /></Layout>} />
         <Route path="/test-rules" element={<Layout><TestRulesPage /></Layout>} />
-        <Route path="/demo-test" element={<Layout><DemoTestPage /></Layout>} />
         <Route path="/datesheet" element={<Layout><DateSheetPage /></Layout>} />
         <Route path="/results" element={<Layout><ResultsPage /></Layout>} />
         <Route path="/merit-list" element={<Layout><MeritListPage /></Layout>} />
@@ -107,9 +110,12 @@ function App() {
         <Route path="/admin/slips" element={<SlipManagementPage />} />
         <Route path="/admin/tests" element={<TestManagementPage />} />
         <Route path="/admin/phases" element={<AdminPhasesPage />} />
+        <Route path="/admin/syllabus" element={<AdminSyllabusPage />} />
         <Route path="/admin/results" element={<AdminResultsPage />} />
+        <Route path="/admin/merit-list" element={<AdminMeritListPage />} />
         <Route path="/admin/awards" element={<AwardAssignmentPage />} />
         <Route path="/admin/notifications" element={<NotificationsPage />} />
+        <Route path="/admin/contact-queries" element={<AdminContactQueriesPage />} />
         <Route path="/admin/logs" element={<LogsReportsPage />} />
         <Route path="/admin/settings" element={<AdminSettingsPage />} />
         <Route path="/admin/certificate-mgmt" element={<AdminCertificatesPage />} />

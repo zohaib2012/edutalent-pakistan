@@ -6,6 +6,7 @@ const rollNoSlipController = require('../controllers/rollNoSlipController');
 
 router.get('/my-slip', auth, rollNoSlipController.getMySlip);
 router.get('/download', auth, rollNoSlipController.download);
+router.get('/search', rollNoSlipController.search);
 router.post('/generate/:studentId', adminAuth, rollNoSlipController.generate);
 router.post('/generate-bulk', adminAuth, rollNoSlipController.generateBulk);
 router.get('/all', adminAuth, rollNoSlipController.getAll);

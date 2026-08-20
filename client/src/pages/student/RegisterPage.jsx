@@ -72,6 +72,10 @@ const RegisterPage = () => {
         const res = await getApplicationForm();
         const data = res.data;
         if (data) {
+          if (data.status && data.status !== 'registered') {
+            navigate('/profile');
+            return;
+          }
           setForm(prev => ({
             ...prev,
             fullName: data.fullName || sd.fullName || '',
@@ -276,6 +280,7 @@ const RegisterPage = () => {
         state: {
           registrationNumber: res.data?.registrationNumber || registrationNumber || form.cnicOrBform || '',
           password,
+          challan: res.data?.challan || null,
           formData: { ...form }
         }
       });

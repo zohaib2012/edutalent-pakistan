@@ -63,6 +63,41 @@ exports.generate = async (req, res) => {
   }
 };
 
+exports.search = async (req, res) => {
+  try {
+    const { registrationNumber, cnic } = req.query;
+    if (!registrationNumber && !cnic) {
+      return res.status(400).json({ message: 'Provide registration number or CNIC/B-Form' });
+    }
+    const filter = {};
+    if (registrationNumber) filter.registrationNumber = registrationNumber.trim();
+    if (cnic) filter.cnicOrBform = cnic.trim();
+    const student = await Student.findOne(filter).populate('phaseId');
+    if (!student || !student.challan?.challanNumber) {
+      return res.status(404).json({ message: 'No challan found for the provided details. Please check your information and try again.' });
+    }
+    res.json({
+      challan: {
+        challanNumber: student.challan.challanNumber,
+        amount: student.challan.amount || 1200,
+        dueDate: student.challan.dueDate,
+        isPaid: student.challan.isPaid,
+        paymentVerified: student.challan.paymentVerified,
+      },
+      student: {
+        fullName: student.fullName,
+        fatherName: student.fatherName,
+        registrationNumber: student.registrationNumber,
+        cnicOrBform: student.cnicOrBform,
+        mobileNumber: student.mobileNumber,
+        email: student.email,
+        grade: student.grade,
+        phase: student.phaseId ? student.phaseId.name : null,
+      }
+    });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
 exports.getByNumber = async (req, res) => {
   try {
     const { challanNumber } = req.params;

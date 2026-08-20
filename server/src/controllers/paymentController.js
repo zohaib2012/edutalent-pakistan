@@ -1,4 +1,5 @@
 const Student = require('../models/Student');
+const Notification = require('../models/Notification');
 
 exports.upload = async (req, res) => {
   try {
@@ -9,6 +10,18 @@ exports.upload = async (req, res) => {
     student.challan.paidChallanImageUrl = req.file.path;
     student.status = 'payment_pending';
     await student.save();
+
+    try {
+      await Notification.create({
+        recipientType: 'admin',
+        title: 'Challan Uploaded',
+        message: `${student.fullName} (${student.registrationNumber}) uploaded their paid challan and is awaiting verification.`,
+        type: 'challan',
+      });
+    } catch (nErr) {
+      console.error('Notification creation failed:', nErr.message);
+    }
+
     res.json({ message: 'Challan uploaded successfully', status: student.status });
   } catch (error) { res.status(500).json({ message: error.message }); }
 };

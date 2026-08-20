@@ -3,7 +3,7 @@ import {
   LayoutDashboard, Users, Banknote, Ticket, ClipboardList,
   BarChart3, Trophy, Bell, FileText, ChevronLeft, ChevronRight,
   Settings, FileCheck, FileUp, Megaphone, ScrollText, LogOut,
-  Layers, GraduationCap, ShieldCheck
+  Layers, GraduationCap, ShieldCheck, BookOpen, Medal, MessageSquare
 } from 'lucide-react';
 import { useState } from 'react';
 
@@ -28,7 +28,9 @@ const navSections = [
     items: [
       { icon: ClipboardList, label: 'Tests', path: '/admin/tests' },
       { icon: Layers, label: 'Phases', path: '/admin/phases' },
+      { icon: BookOpen, label: 'Syllabus', path: '/admin/syllabus' },
       { icon: BarChart3, label: 'Results', path: '/admin/results' },
+      { icon: Medal, label: 'Merit List', path: '/admin/merit-list' },
       { icon: ScrollText, label: 'Certificates', path: '/admin/certificate-mgmt' },
       { icon: Trophy, label: 'Awards', path: '/admin/awards' },
     ],
@@ -38,6 +40,7 @@ const navSections = [
     items: [
       { icon: Megaphone, label: 'Announcements', path: '/admin/announcements-mgmt' },
       { icon: Bell, label: 'Notifications', path: '/admin/notifications' },
+      { icon: MessageSquare, label: 'Contact Queries', path: '/admin/contact-queries' },
     ],
   },
   {
@@ -69,7 +72,7 @@ export default function AdminSidebar() {
 
   return (
     <div
-      className={`${collapsed ? 'w-20' : 'w-64'} bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 text-white flex flex-col transition-all duration-300 min-h-screen border-r border-gray-800`}
+      className={`admin-sidebar ${collapsed ? 'w-20' : 'w-64'} bg-gradient-to-b from-gray-900 via-gray-900 to-gray-950 text-white flex flex-col transition-all duration-300 min-h-screen border-r border-gray-800`}
     >
       {/* Brand header */}
       <div className="flex items-center justify-between px-4 py-5 border-b border-gray-800">
@@ -78,7 +81,7 @@ export default function AdminSidebar() {
             <GraduationCap size={20} className="text-white" />
           </div>
           {!collapsed && (
-            <div className="min-w-0">
+            <div className="brand-text min-w-0">
               <p className="font-heading font-bold text-base leading-tight truncate">EduTalent</p>
               <p className="text-[11px] font-medium text-primary-300 uppercase tracking-wider">Admin Panel</p>
             </div>
@@ -98,7 +101,7 @@ export default function AdminSidebar() {
         {navSections.map((section) => (
           <div key={section.label}>
             {!collapsed && (
-              <p className="px-3 mb-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">{section.label}</p>
+              <p className="section-label px-3 mb-2 text-[11px] font-semibold text-gray-500 uppercase tracking-wider">{section.label}</p>
             )}
             <div className="space-y-1">
               {section.items.map((item) => {
@@ -123,7 +126,7 @@ export default function AdminSidebar() {
                       size={20}
                       className={isActive ? '' : 'transition-colors group-hover:text-primary-300'}
                     />
-                    {!collapsed && <span>{item.label}</span>}
+                    {!collapsed && <span className="nav-label">{item.label}</span>}
                   </Link>
                 );
               })}
@@ -135,7 +138,7 @@ export default function AdminSidebar() {
       {/* Footer */}
       <div className="p-3 border-t border-gray-800">
         {!collapsed && adminUser && (
-          <div className="flex items-center gap-3 px-2 py-2.5 rounded-lg bg-white/5 mb-2">
+          <div className="admin-sidebar-footer-text flex items-center gap-3 px-2 py-2.5 rounded-lg bg-white/5 mb-2">
             <div className="w-9 h-9 rounded-full bg-gradient-to-br from-gold to-gold-600 flex items-center justify-center text-gray-900 font-heading font-bold text-sm shrink-0">
               {((adminUser.fullName || adminUser.name || 'A')[0] || 'A').toUpperCase()}
             </div>
@@ -153,10 +156,10 @@ export default function AdminSidebar() {
           title="Logout"
         >
           <LogOut size={20} />
-          {!collapsed && <span>Logout</span>}
+          {!collapsed && <span className="admin-sidebar-footer-text">Logout</span>}
         </button>
         {!collapsed && (
-          <p className="mt-2 text-[11px] text-gray-600 text-center">EduTalent Admin Panel v1.0.0</p>
+          <p className="admin-sidebar-footer-text mt-2 text-[11px] text-gray-600 text-center">EduTalent Admin Panel v1.0.0</p>
         )}
       </div>
     </div>

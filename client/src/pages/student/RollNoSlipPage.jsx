@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Copy, Check, FileText, User, Calendar, Clock, MapPin, Shield, Key, Eye, EyeOff, Loader2, AlertCircle, BadgeCheck } from 'lucide-react';
+import { Download, Copy, Check, FileText, User, Calendar, MapPin, Shield, Key, Eye, EyeOff, Loader2, AlertCircle, BadgeCheck, Phone } from 'lucide-react';
 import { getMySlip, getStudentProfile } from '../../services/api';
 import logo from '../../assets/images/logo.jpeg';
 
@@ -48,7 +48,6 @@ const RollNoSlipPage = () => {
     if (!slipData || !studentData) return;
     const win = window.open('', '_blank');
     if (!win) return;
-    const testDate = slipData.testDate ? new Date(slipData.testDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
     win.document.write(`
       <html><head><title>Roll No Slip - ${studentData.registrationNumber || ''}</title>
       <style>
@@ -89,10 +88,15 @@ const RollNoSlipPage = () => {
         <tr><td class="label">CNIC / B-Form</td><td>${studentData.cnicOrBform || ''}</td></tr>
         <tr><td class="label">Phase</td><td>${studentData.phaseId?.name || studentData.phaseId || ''}</td></tr>
         <tr><td class="label">Grade/Class</td><td>${studentData.grade || ''}</td></tr>
-        <tr><td class="label">Test Date</td><td><strong>${testDate}</strong></td></tr>
-        <tr><td class="label">Test Time</td><td><strong>${slipData.testTime || '10:00 AM - 12:00 PM'}</strong></td></tr>
         <tr><td class="label">Test Center</td><td>${slipData.testCenter || 'Online / Designated Center'}</td></tr>
       </table>
+      <div class="instructions">
+        <strong>Test Date &amp; Timing:</strong>
+        <p style="font-size:12px;margin:6px 0 0;color:#666;">
+          Test date and timing will be shared via SMS/WhatsApp. Contact or message
+          <strong style="color:#92400e;"> 03468275954</strong> to confirm your test date and time.
+        </p>
+      </div>
       <div class="credentials">
         <h3>🔐 Test Portal Credentials</h3>
         <table>
@@ -136,8 +140,6 @@ const RollNoSlipPage = () => {
   }
 
   if (!slipData) return null;
-
-  const testDate = slipData.testDate ? new Date(slipData.testDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
 
   return (
     <div>
@@ -199,28 +201,22 @@ const RollNoSlipPage = () => {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                        <Calendar size={16} className="text-primary" />
-                        <div>
-                          <p className="text-xs text-gray-500">Test Date</p>
-                          <p className="text-sm font-semibold">{testDate}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                        <Clock size={16} className="text-primary" />
-                        <div>
-                          <p className="text-xs text-gray-500">Test Time</p>
-                          <p className="text-sm font-semibold">{slipData.testTime || '10:00 AM - 12:00 PM'}</p>
-                        </div>
-                      </div>
-                    </div>
-
                     <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
                       <MapPin size={16} className="text-primary" />
                       <div>
                         <p className="text-xs text-gray-500">Test Center</p>
                         <p className="text-sm font-semibold">{slipData.testCenter || 'Online / Designated Center'}</p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-start gap-2 p-4 bg-amber-50 border border-amber-200 rounded-lg">
+                      <Phone size={16} className="text-amber-700 mt-0.5" />
+                      <div>
+                        <p className="text-xs font-semibold text-amber-800">Test Date &amp; Timing</p>
+                        <p className="text-xs text-amber-700 mt-1">
+                          Test date and timing will be shared via SMS/WhatsApp. Contact or message
+                          <span className="font-bold"> 03468275954</span> to confirm your test date and time.
+                        </p>
                       </div>
                     </div>
                   </div>

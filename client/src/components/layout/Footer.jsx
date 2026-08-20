@@ -22,7 +22,7 @@ const Footer = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-10 mb-12">
           <div className="lg:col-span-2">
             <Link to="/" className="flex items-center gap-3 mb-4">
-              <img src={logo} alt="EduTalent Pakistan" className="h-12 w-auto rounded-md" />
+              <img src={logo} alt="EduTalent Pakistan" className="h-12 w-12 rounded-full object-cover ring-2 ring-white/10" />
               <div className="leading-tight">
                 <span className="block text-white font-heading font-bold text-xl">EduTalent</span>
                 <span className="block text-gray-400 font-heading text-base -mt-0.5">Pakistan</span>

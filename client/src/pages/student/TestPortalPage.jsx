@@ -2,8 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import {
   Camera, Mic, Maximize2, CheckCircle, XCircle, AlertTriangle,
-  SkipForward, Flag, Timer, Shield, Smartphone, Monitor,
-  ChevronRight, LogOut, Loader2
+  SkipForward, Timer, Smartphone, Monitor,
+  ChevronRight, Loader2
 } from 'lucide-react';
 import { startTest, getQuestion, submitAnswer, submitTest, flagCheat } from '../../services/api';
 
@@ -17,6 +17,7 @@ const TestPortalPage = () => {
   const [checks, setChecks] = useState({ camera: 'pending', mic: 'pending', fullscreen: 'pending' });
   const [agreed, setAgreed] = useState(false);
   const [questions, setQuestions] = useState([]);
+  const [totalQuestions, setTotalQuestions] = useState(0);
   const [loadingQuestion, setLoadingQuestion] = useState(false);
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState({});
@@ -24,22 +25,20 @@ const TestPortalPage = () => {
   const [violations, setViolations] = useState(0);
   const [showViolationModal, setShowViolationModal] = useState(false);
   const [testTerminated, setTestTerminated] = useState(false);
-  const [submitted, setSubmitted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [selectedAnswer, setSelectedAnswer] = useState(null);
   const [flashing, setFlashing] = useState(false);
-  const [result, setResult] = useState(null);
 
   const videoRef = useRef(null);
   const audioRef = useRef(null);
   const streamRef = useRef(null);
   const timerRef = useRef(null);
-  const fullscreenCheckRef = useRef(null);
 
   const answeredCount = Object.keys(answers).length;
-  const skippedCount = currentQ + 1 - answeredCount;
-  const remainingCount = (questions.length || TOTAL_QUESTIONS) - currentQ - 1;
-  const progressPercent = ((currentQ + 1) / (questions.length || TOTAL_QUESTIONS)) * 100;
+  const totalQ = totalQuestions || TOTAL_QUESTIONS;
+  const skippedCount = Math.max(0, currentQ + 1 - answeredCount);
+  const remainingCount = Math.max(0, totalQ - currentQ - 1);
+  const progressPercent = ((currentQ + 1) / totalQ) * 100;
 
   const checkCamera = async () => {
     try {
@@ -148,7 +147,11 @@ const TestPortalPage = () => {
       setLoadingQuestion(true);
       const res = await startTest();
       const total = res.data?.totalQuestions || 0;
-      await loadQuestion(0, total);
+      setTotalQuestions(total);
+      setCurrentQ(0);
+      setQuestions([]);
+      setAnswers({});
+      await loadQuestion(0);
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to start test');
       navigate('/profile');
@@ -157,17 +160,20 @@ const TestPortalPage = () => {
     }
   };
 
-  const loadQuestion = async (index, total) => {
+  const loadQuestion = async (index) => {
     try {
       const res = await getQuestion(index);
+      const q = {
+        id: res.data.question.id,
+        text: res.data.question.text,
+        questionImageUrl: res.data.question.questionImageUrl || null,
+        options: res.data.question.options.map(o => o.text),
+      };
+      const t = res.data.totalQuestions || totalQuestions;
+      setTotalQuestions(t);
       setQuestions(prev => {
         const arr = [...prev];
-        arr[index] = {
-          id: res.data.question.id,
-          text: res.data.question.text,
-          options: res.data.question.options.map(o => o.text),
-          total: res.data.totalQuestions || total,
-        };
+        arr[index] = q;
         return arr;
       });
     } catch (err) {
@@ -179,8 +185,16 @@ const TestPortalPage = () => {
     }
   };
 
+  useEffect(() => {
+    if (phase !== 'test' || testTerminated) return;
+    if (currentQ >= totalQuestions) return;
+    if (!questions[currentQ]) {
+      loadQuestion(currentQ);
+    }
+  }, [currentQ, phase, testTerminated, totalQuestions]);
+
   const handleAutoAdvance = () => {
-    const total = questions.length || TOTAL_QUESTIONS;
+    const total = totalQuestions || TOTAL_QUESTIONS;
     if (currentQ < total - 1) {
       setCurrentQ(prev => prev + 1);
       setSelectedAnswer(null);
@@ -200,7 +214,7 @@ const TestPortalPage = () => {
       submitAnswer({ questionId: q.id, selectedOption: optionLabel, timeTaken: PER_QUESTION_TIME - timeLeft }).catch(() => {});
     }
     setTimeout(() => {
-      const total = questions.length || TOTAL_QUESTIONS;
+      const total = totalQuestions || TOTAL_QUESTIONS;
       if (currentQ < total - 1) {
         setCurrentQ(prev => prev + 1);
         setSelectedAnswer(null);
@@ -218,7 +232,6 @@ const TestPortalPage = () => {
 
   const finishTest = async () => {
     clearInterval(timerRef.current);
-    setSubmitted(true);
     setPhase('post-test');
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(t => t.stop());
@@ -227,10 +240,9 @@ const TestPortalPage = () => {
       document.exitFullscreen();
     }
     try {
-      const res = await submitTest();
-      setResult(res.data || {});
+      await submitTest();
     } catch {
-      setResult(null);
+      // ignore
     }
   };
 
@@ -246,10 +258,7 @@ const TestPortalPage = () => {
   };
 
   const q = questions[currentQ];
-  const correctCount = result?.correct ?? 0;
-  const wrongCount = result?.wrong ?? 0;
-  const unattemptedCount = result?.unattempted ?? 0;
-  const totalQuestions = questions.length || TOTAL_QUESTIONS;
+  const totalQuestionsDisplay = totalQuestions || TOTAL_QUESTIONS;
 
   if (testTerminated) {
     return (
@@ -375,38 +384,18 @@ const TestPortalPage = () => {
             <CheckCircle size={40} className="text-success" />
           </div>
           <h2 className="section-title text-center">Test Submitted Successfully</h2>
-          <p className="section-subtitle mb-8">Thank you for completing the test.</p>
+          <p className="section-subtitle mb-6">Thank you for completing the test.</p>
 
-          {result ? (
-            <>
-              <div className="grid grid-cols-3 gap-4 mb-8">
-                <div className="bg-green-50 rounded-xl p-4 border border-green-200">
-                  <p className="text-2xl font-heading font-bold text-success">{result.correct ?? 0}</p>
-                  <p className="text-xs text-gray-500">Correct</p>
-                </div>
-                <div className="bg-red-50 rounded-xl p-4 border border-red-200">
-                  <p className="text-2xl font-heading font-bold text-red-500">{result.wrong ?? 0}</p>
-                  <p className="text-xs text-gray-500">Wrong</p>
-                </div>
-                <div className="bg-gray-100 rounded-xl p-4 border border-gray-200">
-                  <p className="text-2xl font-heading font-bold text-gray-500">{result.unattempted ?? 0}</p>
-                  <p className="text-xs text-gray-500">Unattempted</p>
-                </div>
-              </div>
+          <div className="bg-amber-50 rounded-xl p-4 mb-8 border border-amber-200">
+            <AlertTriangle size={20} className="text-amber-600 mx-auto mb-2" />
+            <p className="text-sm text-amber-800 font-medium">Result Pending</p>
+            <p className="text-xs text-amber-700 mt-1">
+              Your result will be displayed after it is officially published by the administration.
+              Please check back later.
+            </p>
+          </div>
 
-              <div className="bg-primary-50 rounded-xl p-4 mb-8 border border-primary-100">
-                <p className="text-sm text-gray-500">Your Score</p>
-                <p className="text-2xl font-heading font-bold text-primary">{result.score ?? 0} / {result.percentage !== undefined ? (result.percentage / 100 * (questions.length || 100)).toFixed(0) : (questions.length || 100)}</p>
-                <p className="text-xs text-gray-500 mt-1">Percentage: {result.percentage ?? 0}%</p>
-              </div>
-
-              <p className="text-sm text-gray-500 mb-6">Your full result will be published soon</p>
-            </>
-          ) : (
-            <p className="text-sm text-gray-500 mb-6">Your test has been submitted. Results will be published soon.</p>
-          )}
-
-          <Link to="/my-results" className="btn-primary w-full justify-center">
+          <Link to="/profile" className="btn-primary w-full justify-center">
             Go to Dashboard
           </Link>
         </div>
@@ -432,7 +421,7 @@ const TestPortalPage = () => {
           </div>
 
           <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-gray-700">Question {currentQ + 1} of {totalQuestions}</span>
+            <span className="text-sm font-medium text-gray-700">Question {currentQ + 1} of {totalQuestionsDisplay}</span>
 
             <div className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-bold ${
               timeLeft <= 5 ? 'bg-red-100 text-red-600' : 'bg-primary-50 text-primary'
@@ -460,7 +449,13 @@ const TestPortalPage = () => {
             </button>
           </div>
 
-          <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-8 leading-relaxed">{q.text}</h3>
+          <h3 className="text-xl md:text-2xl font-semibold text-gray-900 mb-6 leading-relaxed">{q.text}</h3>
+
+          {q.questionImageUrl && (
+            <div className="mb-6 flex justify-center">
+              <img src={q.questionImageUrl} alt="Question" className="max-h-64 rounded-xl border border-gray-200 shadow-sm" />
+            </div>
+          )}
 
           <div className="space-y-3">
             {q.options.map((opt, idx) => {

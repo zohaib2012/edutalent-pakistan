@@ -118,8 +118,12 @@ export default function AdminApplicationsPage() {
               <div className="bg-white rounded-xl w-full max-w-3xl max-h-[90vh] overflow-y-auto shadow-2xl">
                 <div className="flex items-center justify-between p-5 border-b border-gray-100 sticky top-0 bg-white z-10">
                   <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-[#1A73E8]/10 flex items-center justify-center">
-                      <User size={22} className="text-[#1A73E8]" />
+                    <div className="w-12 h-12 rounded-full bg-[#1A73E8]/10 flex items-center justify-center overflow-hidden">
+                      {viewApp.photoUrl ? (
+                        <img src={viewApp.photoUrl} alt={viewApp.fullName} className="w-full h-full object-cover" />
+                      ) : (
+                        <User size={22} className="text-[#1A73E8]" />
+                      )}
                     </div>
                     <div>
                       <h3 className="text-lg font-semibold text-gray-900">{viewApp.fullName}</h3>
@@ -139,9 +143,10 @@ export default function AdminApplicationsPage() {
                     <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gray-50 rounded-lg p-4">
                       <div><span className={detailLabelClass}>Full Name</span><p className={detailValueClass}>{viewApp.fullName}</p></div>
                       <div><span className={detailLabelClass}>Father's Name</span><p className={detailValueClass}>{viewApp.fatherName}</p></div>
-                      <div><span className={detailLabelClass}>CNIC</span><p className={detailValueClass + " font-mono"}>{viewApp.cnicOrBform}</p></div>
+                      <div><span className={detailLabelClass}>CNIC / B-Form</span><p className={detailValueClass + " font-mono"}>{viewApp.cnicOrBform}</p></div>
                       <div><span className={detailLabelClass}>DOB</span><p className={detailValueClass}>{viewApp.dateOfBirth ? new Date(viewApp.dateOfBirth).toLocaleDateString() : '-'}</p></div>
                       <div><span className={detailLabelClass}>Gender</span><p className={detailValueClass}>{viewApp.gender || '-'}</p></div>
+                      <div><span className={detailLabelClass}>Registration #</span><p className={detailValueClass + " font-mono"}>{viewApp.registrationNumber || '-'}</p></div>
                     </div>
                   </div>
 
@@ -149,35 +154,74 @@ export default function AdminApplicationsPage() {
                     <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
                       <School size={16} className="text-[#1A73E8]" /> Academic Information
                     </h4>
-                    <div className="grid grid-cols-2 gap-4 bg-gray-50 rounded-lg p-4">
-                      <div><span className={detailLabelClass}>Institution</span><p className={detailValueClass}>{viewApp.schoolOrCollege || '-'}</p></div>
-                      <div><span className={detailLabelClass}>Grade</span><p className={detailValueClass}>{viewApp.grade || '-'}</p></div>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gray-50 rounded-lg p-4">
+                      <div><span className={detailLabelClass}>Institution</span><p className={detailValueClass}>{viewApp.schoolOrCollege || viewApp.institutionName || '-'}</p></div>
+                      <div><span className={detailLabelClass}>Grade / Class</span><p className={detailValueClass}>{viewApp.grade || '-'}</p></div>
                       <div><span className={detailLabelClass}>Phase</span><p className={detailValueClass}>{viewApp.phaseId?.name || '-'}</p></div>
-                      <div><span className={detailLabelClass}>Province</span><p className={detailValueClass}>{viewApp.province || '-'}</p></div>
+                      <div><span className={detailLabelClass}>Current Qualification</span><p className={detailValueClass}>{viewApp.currentQualification || '-'}</p></div>
+                      <div><span className={detailLabelClass}>Last Qualification</span><p className={detailValueClass}>{viewApp.lastQualification || '-'}</p></div>
+                      <div><span className={detailLabelClass}>Marks</span><p className={detailValueClass}>{viewApp.obtainedMarks != null ? `${viewApp.obtainedMarks} / ${viewApp.totalMarks || '-'}` : '-'}</p></div>
                     </div>
                   </div>
 
                   <div>
                     <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <Mail size={16} className="text-[#1A73E8]" /> Contact
+                      <MapPin size={16} className="text-[#1A73E8]" /> Address & Location
+                    </h4>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4 bg-gray-50 rounded-lg p-4">
+                      <div><span className={detailLabelClass}>Province</span><p className={detailValueClass}>{viewApp.province || '-'}</p></div>
+                      <div><span className={detailLabelClass}>District</span><p className={detailValueClass}>{viewApp.district || '-'}</p></div>
+                      <div><span className={detailLabelClass}>City</span><p className={detailValueClass}>{viewApp.city || '-'}</p></div>
+                      <div className="md:col-span-3"><span className={detailLabelClass}>Address</span><p className={detailValueClass}>{viewApp.address || '-'}</p></div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <Mail size={16} className="text-[#1A73E8]" /> Contact Information
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 bg-gray-50 rounded-lg p-4">
                       <div className="flex items-center gap-2"><Phone size={14} className="text-gray-400" /><span className="text-sm">{viewApp.mobileNumber || '-'}</span></div>
                       <div className="flex items-center gap-2"><Mail size={14} className="text-gray-400" /><span className="text-sm">{viewApp.email || '-'}</span></div>
-                      <div className="md:col-span-2 flex items-start gap-2"><MapPin size={14} className="text-gray-400 mt-0.5" /><span className="text-sm">{viewApp.address || '-'}</span></div>
+                      <div className="flex items-center gap-2"><Phone size={14} className="text-gray-400" /><span className="text-sm">Father: {viewApp.fatherMobile || '-'}</span></div>
+                      <div className="flex items-center gap-2"><Phone size={14} className="text-gray-400" /><span className="text-sm">WhatsApp: {viewApp.whatsappNumber || '-'}</span></div>
                     </div>
                   </div>
 
                   <div>
                     <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
-                      <CreditCard size={16} className="text-[#F1C40F]" /> Challan
+                      <CreditCard size={16} className="text-[#F1C40F]" /> Challan / Fee
                     </h4>
-                    <div className="grid grid-cols-2 gap-4 bg-gray-50 rounded-lg p-4">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 bg-gray-50 rounded-lg p-4">
                       <div><span className={detailLabelClass}>Challan #</span><p className={detailValueClass + " font-mono"}>{viewApp.challan?.challanNumber || '-'}</p></div>
                       <div><span className={detailLabelClass}>Amount</span><p className={detailValueClass}>Rs. {viewApp.challan?.amount || '-'}</p></div>
                       <div><span className={detailLabelClass}>Paid</span><p className={detailValueClass}>{viewApp.challan?.paymentVerified ? 'Yes' : 'No'}</p></div>
                       <div><span className={detailLabelClass}>Status</span><p className={detailValueClass}>{statusLabels[viewApp.status] || viewApp.status}</p></div>
                     </div>
+                  </div>
+
+                  <div>
+                    <h4 className="text-sm font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                      <FileText size={16} className="text-[#1A73E8]" /> Uploaded Documents
+                    </h4>
+                    {viewApp.documents && Object.keys(viewApp.documents).length > 0 ? (
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                        {Object.entries(viewApp.documents).map(([key, doc]) => (
+                          <div key={key} className="bg-gray-50 rounded-lg p-3 border border-gray-100">
+                            <p className="text-xs text-gray-500 font-medium mb-2 capitalize">{key.replace(/([A-Z])/g, ' $1')}</p>
+                            {doc?.url ? (
+                              <a href={doc.url} target="_blank" rel="noopener noreferrer">
+                                <img src={doc.url} alt={key} className="w-full h-24 object-cover rounded-md border border-gray-200 hover:opacity-80" />
+                              </a>
+                            ) : (
+                              <p className="text-xs text-gray-400">Not uploaded</p>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <p className="text-sm text-gray-400 bg-gray-50 rounded-lg p-4">No documents uploaded.</p>
+                    )}
                   </div>
                 </div>
               </div>

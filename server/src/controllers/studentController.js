@@ -42,6 +42,23 @@ exports.search = async (req, res) => {
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
+exports.track = async (req, res) => {
+  try {
+    const { query } = req.query;
+    if (!query) return res.status(400).json({ message: 'Provide email or CNIC/B-Form' });
+    const student = await Student.findOne({
+      $or: [{ email: query }, { cnicOrBform: query }, { registrationNumber: query }]
+    }).populate('phaseId').select('fullName registrationNumber status phaseId');
+    if (!student) return res.status(404).json({ message: 'No application found for the provided details.' });
+    res.json({
+      fullName: student.fullName,
+      registrationNumber: student.registrationNumber,
+      status: student.status,
+      phase: student.phaseId ? student.phaseId.name : null,
+    });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
 exports.getByPhase = async (req, res) => {
   try {
     const students = await Student.find({ phaseId: req.params.phaseId }).populate('phaseId');

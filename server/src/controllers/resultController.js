@@ -6,13 +6,17 @@ exports.getMyResult = async (req, res) => {
   try {
     const result = await TestResult.findOne({ studentId: req.studentId }).populate('sessionId');
     if (!result) return res.status(404).json({ message: 'Result not found' });
+    if (!result.publishedAt) return res.status(404).json({ message: 'Result has not been published yet' });
     res.json(result);
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
 exports.getMeritList = async (req, res) => {
   try {
-    const results = await TestResult.find({ phaseId: req.params.phaseId }).sort({ obtainedMarks: -1, totalTimeTaken: 1 }).populate('studentId', 'fullName city province').limit(50);
+    const results = await TestResult.find({ phaseId: req.params.phaseId, publishedAt: { $ne: null } })
+      .sort({ obtainedMarks: -1, totalTimeTaken: 1 })
+      .populate('studentId', 'fullName city province')
+      .limit(50);
     const meritList = results.map((r, i) => ({ rank: i + 1, studentName: r.studentId?.fullName, rollNumber: r.rollNumber, score: r.obtainedMarks, percentage: r.percentage, awardCategory: r.awardCategory }));
     res.json(meritList);
   } catch (error) { res.status(500).json({ message: error.message }); }

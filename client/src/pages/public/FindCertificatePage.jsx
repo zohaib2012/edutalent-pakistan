@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Search, Award, Shield, FileCheck, Star, ThumbsUp, Users, CheckCircle, XCircle, QrCode } from 'lucide-react';
+import { Search, Award, Shield, FileCheck, Star, ThumbsUp, Users, CheckCircle, XCircle, Download, Loader2 } from 'lucide-react';
+import { searchCertificate } from '../../services/api';
 
 const certificateTypes = [
   { icon: Award, title: '1st Position', desc: 'Top performer in the phase — Gold-tier certificate with highest distinction.', color: 'from-gold to-yellow-500', bg: 'bg-gold/10', text: 'text-gold' },
@@ -10,20 +11,41 @@ const certificateTypes = [
   { icon: Users, title: 'Participation', desc: 'Issued to every test participant — Certificate of participation.', color: 'from-purple-500 to-purple-600', bg: 'bg-purple-50', text: 'text-purple-500' },
 ];
 
+const typeLabel = {
+  '1st_position': '1st Position', top5: 'Top 5', shield: 'Shield', top20: 'Top 20',
+  appreciation: 'Appreciation', participation: 'Participation',
+};
+
 const FindCertificatePage = () => {
-  const [certNumber, setCertNumber] = useState('');
+  const [regNumber, setRegNumber] = useState('');
+  const [cnic, setCnic] = useState('');
   const [certData, setCertData] = useState(null);
   const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleVerify = (e) => {
+  const handleVerify = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     setSearched(true);
-    setCertData({
-      studentName: 'Fatima Ali',
-      certificateType: 'Top 5',
-      issueDate: 'September 15, 2025',
-      valid: true,
-    });
+    setCertData(null);
+    try {
+      const params = {};
+      if (regNumber.trim()) params.registrationNumber = regNumber.trim();
+      if (cnic.trim()) params.cnic = cnic.trim();
+      const res = await searchCertificate(params);
+      setCertData(res.data);
+    } catch (err) {
+      setError(err.response?.data?.message || 'No matching certificate found in our records.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!certData?.fileUrl) return;
+    window.open(certData.fileUrl, '_blank');
   };
 
   return (
@@ -35,7 +57,7 @@ const FindCertificatePage = () => {
             <span>Verification Portal</span>
           </div>
           <h1 className="text-4xl md:text-5xl font-heading font-bold mb-4">Find & Verify Your Certificate</h1>
-          <p className="text-white/80 text-lg max-w-2xl mx-auto">Enter your certificate number to verify its authenticity and view details.</p>
+          <p className="text-white/80 text-lg max-w-2xl mx-auto">Enter your certificate number, registration number or CNIC to verify and download your certificate.</p>
         </div>
       </section>
 
@@ -43,29 +65,35 @@ const FindCertificatePage = () => {
         <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-8">
             <form onSubmit={handleVerify} className="space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1.5">Certificate Number</label>
-                <div className="relative">
-                  <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    value={certNumber}
-                    onChange={(e) => setCertNumber(e.target.value)}
-                    placeholder="e.g. CERT-2025-0001"
-                    required
-                    className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none transition-all"
-                  />
+              <div className="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">Registration Number</label>
+                  <div className="relative">
+                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input type="text" value={regNumber} onChange={(e) => setRegNumber(e.target.value)}
+                      placeholder="e.g. ETP-2026-P4-0007-JG6L"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1.5">CNIC / B-Form</label>
+                  <div className="relative">
+                    <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input type="text" value={cnic} onChange={(e) => setCnic(e.target.value)}
+                      placeholder="e.g. 12121-1212121-1"
+                      className="w-full pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none" />
+                  </div>
                 </div>
               </div>
-              <button type="submit" className="btn-primary w-full justify-center text-base py-3.5">
-                <Search size={18} /> Verify
+              <button type="submit" disabled={loading} className="btn-primary w-full justify-center text-base py-3.5 disabled:opacity-60 disabled:cursor-not-allowed">
+                {loading ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />} Find Certificate
               </button>
             </form>
 
-            {searched && !certData && (
+            {searched && error && (
               <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
                 <XCircle size={20} className="text-red-500" />
-                <p className="text-sm text-red-700">Invalid certificate number. No matching certificate found in our records.</p>
+                <p className="text-sm text-red-700">{error}</p>
               </div>
             )}
 
@@ -83,39 +111,41 @@ const FindCertificatePage = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    <Star size={16} className="text-gray-400 shrink-0" />
-                    <div>
-                      <div className="text-xs text-gray-500">Certificate Type</div>
-                      <div className="text-sm font-semibold text-gray-900">{certData.certificateType}</div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-3">
                     <FileCheck size={16} className="text-gray-400 shrink-0" />
                     <div>
-                      <div className="text-xs text-gray-500">Issue Date</div>
-                      <div className="text-sm font-semibold text-gray-900">{certData.issueDate}</div>
+                      <div className="text-xs text-gray-500">Certificate Type</div>
+                      <div className="text-sm font-semibold text-gray-900">{typeLabel[certData.certificateType] || certData.certificateType}</div>
                     </div>
                   </div>
                   <div className="flex items-center gap-3">
-                    {certData.valid ? (
-                      <CheckCircle size={16} className="text-success shrink-0" />
-                    ) : (
-                      <XCircle size={16} className="text-red-500 shrink-0" />
-                    )}
+                    <Star size={16} className="text-gray-400 shrink-0" />
+                    <div>
+                      <div className="text-xs text-gray-500">Certificate #</div>
+                      <div className="text-sm font-semibold text-gray-900 font-mono">{certData.certificateNumber}</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <Award size={16} className="text-gray-400 shrink-0" />
+                    <div>
+                      <div className="text-xs text-gray-500">Issue Date</div>
+                      <div className="text-sm font-semibold text-gray-900">
+                        {certData.issuedAt ? new Date(certData.issuedAt).toLocaleDateString() : '-'}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <CheckCircle size={16} className="text-success shrink-0" />
                     <div>
                       <div className="text-xs text-gray-500">Status</div>
-                      <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                        certData.valid ? 'bg-green-50 text-success' : 'bg-red-50 text-red-600'
-                      }`}>
-                        {certData.valid ? 'Valid' : 'Invalid'}
-                      </span>
+                      <span className="inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full bg-green-50 text-success">Valid</span>
                     </div>
                   </div>
                 </div>
-                <div className="mt-5 bg-white rounded-lg border border-gray-200 p-4 flex items-center justify-center gap-3">
-                  <QrCode size={20} className="text-gray-400" />
-                  <span className="text-xs text-gray-500">QR Code — Scan to verify authenticity</span>
-                </div>
+                {certData.fileUrl && (
+                  <button onClick={handleDownload} className="btn-primary w-full justify-center mt-5 text-sm">
+                    <Download size={16} /> Download Certificate
+                  </button>
+                )}
               </div>
             )}
           </div>

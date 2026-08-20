@@ -16,6 +16,8 @@ export default function TestManagementPage() {
     question: '', optionA: '', optionB: '', optionC: '', optionD: '',
     correctAnswer: '', subject: '', phase: '', difficulty: 'Medium', timeLimit: '25',
   });
+  const [questionImage, setQuestionImage] = useState(null);
+  const [questionImagePreview, setQuestionImagePreview] = useState('');
 
   const tabs = ['Questions', 'Settings'];
 
@@ -55,19 +57,24 @@ export default function TestManagementPage() {
       return;
     }
     try {
-      await api.post('/questions', {
+      const fd = new FormData();
+      Object.entries({
         phaseId: form.phase,
         subject: form.subject,
         questionText: form.question,
-        options: optionLabels.map((label) => ({
+        options: JSON.stringify(optionLabels.map((label) => ({
           label, text: form[`option${label}`], isCorrect: form.correctAnswer === label,
-        })),
+        }))),
         difficulty: form.difficulty.toLowerCase(),
         marks: 1,
         timeLimit: Number(form.timeLimit) || 25,
-      });
+      }).forEach(([k, v]) => fd.append(k, v));
+      if (questionImage) fd.append('questionImage', questionImage);
+      await api.post('/questions', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
       setShowAddModal(false);
       setForm({ question: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: '', subject: '', phase: '', difficulty: 'Medium', timeLimit: '25' });
+      setQuestionImage(null);
+      setQuestionImagePreview('');
       fetchQuestions();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to save question');
@@ -149,7 +156,14 @@ export default function TestManagementPage() {
                       ) : filteredQuestions.map((q, i) => (
                         <tr key={q._id} className="border-b border-gray-50 hover:bg-gray-50">
                           <td className="px-5 py-3 text-gray-500">{i + 1}</td>
-                          <td className="px-5 py-3 text-gray-900 max-w-md truncate">{q.questionText}</td>
+                          <td className="px-5 py-3 text-gray-900 max-w-md truncate">
+                            <div className="flex items-center gap-2">
+                              {q.questionImageUrl && (
+                                <img src={q.questionImageUrl} alt="Q" className="w-10 h-10 object-cover rounded-md border border-gray-200 shrink-0" />
+                              )}
+                              <span>{q.questionText}</span>
+                            </div>
+                          </td>
                           <td className="px-5 py-3">
                             <span className="px-2 py-1 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
                               {q.phaseId?.name || 'Unknown'}
@@ -210,6 +224,31 @@ export default function TestManagementPage() {
                     <label className="block text-sm font-medium text-gray-700 mb-1">Question <span className="text-red-500">*</span></label>
                     <textarea rows={3} value={form.question} onChange={(e) => setForm({ ...form, question: e.target.value })}
                       placeholder="Enter the question..." className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8] resize-none" />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Question Image <span className="text-gray-400 text-xs">(Optional)</span></label>
+                    <div className="flex items-center gap-4">
+                      <div className="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-[#1A73E8] hover:bg-blue-50/30 transition-colors flex-1"
+                        onClick={() => document.getElementById('question-image-input').click()}>
+                        {questionImagePreview ? (
+                          <img src={questionImagePreview} alt="Preview" className="h-24 w-40 object-contain mx-auto" />
+                        ) : (
+                          <p className="text-sm text-gray-500">Click to upload question image</p>
+                        )}
+                        <input id="question-image-input" type="file" accept="image/*" className="hidden"
+                          onChange={(e) => {
+                            const file = e.target.files[0];
+                            if (file) {
+                              setQuestionImage(file);
+                              setQuestionImagePreview(URL.createObjectURL(file));
+                            }
+                          }} />
+                      </div>
+                      {questionImagePreview && (
+                        <button onClick={() => { setQuestionImage(null); setQuestionImagePreview(''); }}
+                          className="p-2 rounded-lg hover:bg-red-50 text-red-600"><X size={16} /></button>
+                      )}
+                    </div>
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     {['A', 'B', 'C', 'D'].map((opt) => (

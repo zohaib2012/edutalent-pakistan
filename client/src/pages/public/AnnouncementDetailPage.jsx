@@ -73,6 +73,10 @@ const AnnouncementDetailPage = () => {
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-12">
+            {announcement.imageUrl && (
+              <img src={announcement.imageUrl} alt={announcement.title}
+                className="w-full max-h-96 object-cover rounded-xl border border-gray-200 mb-8" />
+            )}
             <div className="prose prose-gray max-w-none">
               {contentParagraphs.map((para, i) => (
                 <p key={i} className="text-gray-700 text-base leading-relaxed mb-4">{para}</p>

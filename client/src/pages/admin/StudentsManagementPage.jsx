@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Search, ChevronLeft, ChevronRight, UserPlus, Loader2, Trash2 } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Loader2, Trash2 } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
-import api from '../../services/api';
+import api, { getPhases } from '../../services/api';
 
 const statusColors = {
   registered: 'bg-gray-100 text-gray-700',
@@ -25,6 +25,7 @@ const statusLabels = {
 
 export default function StudentsManagementPage() {
   const [students, setStudents] = useState([]);
+  const [phases, setPhases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [phaseFilter, setPhaseFilter] = useState('');
@@ -36,7 +37,13 @@ export default function StudentsManagementPage() {
 
   useEffect(() => {
     fetchStudents();
-  }, [currentPage]);
+  }, [currentPage, search, phaseFilter, provinceFilter, statusFilter]);
+
+  useEffect(() => {
+    getPhases()
+      .then((res) => setPhases(res.data?.data || []))
+      .catch(() => setPhases([]));
+  }, []);
 
   const fetchStudents = async () => {
     setLoading(true);
@@ -44,6 +51,7 @@ export default function StudentsManagementPage() {
       const params = { page: currentPage, limit: itemsPerPage };
       if (search) params.search = search;
       if (phaseFilter) params.phase = phaseFilter;
+      if (provinceFilter) params.province = provinceFilter;
       if (statusFilter) params.status = statusFilter;
       const res = await api.get('/students', { params });
       setStudents(res.data.students || []);
@@ -57,7 +65,7 @@ export default function StudentsManagementPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, phaseFilter, statusFilter]);
+  }, [search, phaseFilter, provinceFilter, statusFilter]);
 
   const handleDelete = async (id) => {
     if (!confirm('Delete this student?')) return;
@@ -76,9 +84,6 @@ export default function StudentsManagementPage() {
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-gray-900">Student Management</h1>
-            <button className="flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1557B0] transition-colors">
-              <UserPlus size={18} /> Add Student
-            </button>
           </div>
 
           <div className="flex flex-wrap items-center gap-4 mb-6">
@@ -90,6 +95,9 @@ export default function StudentsManagementPage() {
             </div>
             <select value={phaseFilter} onChange={(e) => setPhaseFilter(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8]">
               <option value="">All Phases</option>
+              {phases.map((p) => (
+                <option key={p._id} value={p._id}>{p.name}</option>
+              ))}
             </select>
             <select value={provinceFilter} onChange={(e) => setProvinceFilter(e.target.value)} className="border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8]">
               <option value="">All Provinces</option>

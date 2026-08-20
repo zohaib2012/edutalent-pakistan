@@ -1,45 +1,70 @@
 import { useState, useEffect } from 'react';
-import { Bell, Send, Mail, CheckCircle, XCircle, Clock, Search, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { Send, Mail, CheckCircle, Clock, Search, ChevronLeft, ChevronRight, Loader2, Inbox, UserPlus } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
-import api from '../../services/api';
+import api, { getStudents } from '../../services/api';
 
 export default function NotificationsPage() {
   const [title, setTitle] = useState('');
   const [message, setMessage] = useState('');
   const [target, setTarget] = useState('all');
+  const [selectedStudent, setSelectedStudent] = useState('');
+  const [students, setStudents] = useState([]);
   const [search, setSearch] = useState('');
   const [sending, setSending] = useState(false);
-  const [history, setHistory] = useState([]);
+  const [tab, setTab] = useState('received');
+  const [received, setReceived] = useState([]);
+  const [sent, setSent] = useState([]);
   const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 4;
+  const itemsPerPage = 6;
 
-  useEffect(() => { fetchHistory(); }, []);
+  useEffect(() => { fetchAll(); }, []);
 
-  const fetchHistory = async () => {
+  const fetchAll = async () => {
     setLoading(true);
     try {
-      const res = await api.get('/notifications/my-notifications');
-      setHistory(Array.isArray(res.data) ? res.data : []);
+      const [recRes, sentRes] = await Promise.all([
+        api.get('/notifications/admin'),
+        api.get('/notifications/admin/sent'),
+      ]);
+      setReceived(Array.isArray(recRes.data) ? recRes.data : []);
+      setSent(Array.isArray(sentRes.data) ? sentRes.data : []);
     } catch {
-      setHistory([]);
+      setReceived([]);
+      setSent([]);
     } finally {
       setLoading(false);
     }
   };
 
+  const loadStudents = async (q) => {
+    try {
+      const res = await getStudents({ search: q, limit: 30 });
+      setStudents(res.data?.students || []);
+    } catch {
+      setStudents([]);
+    }
+  };
+
+  const handleTargetChange = (val) => {
+    setTarget(val);
+    if (val === 'student') loadStudents('');
+  };
+
   const handleSend = async () => {
     if (!title.trim() || !message.trim()) return;
+    if (target === 'student' && !selectedStudent) { alert('Please select a student'); return; }
     setSending(true);
     try {
       if (target === 'all') {
         await api.post('/notifications/broadcast', { title, message, recipientType: 'all' });
       } else {
-        await api.post('/notifications/send', { title, message, recipientId: null, recipientType: target });
+        await api.post('/notifications/send', { title, message, recipientId: selectedStudent, recipientType: 'student' });
       }
       setTitle('');
       setMessage('');
-      fetchHistory();
+      setSelectedStudent('');
+      fetchAll();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to send');
     } finally {
@@ -47,11 +72,15 @@ export default function NotificationsPage() {
     }
   };
 
-  const filtered = history.filter((h) =>
-    (h.title || '').toLowerCase().includes(search.toLowerCase())
+  const list = tab === 'received' ? received : sent;
+  const filtered = list.filter((h) =>
+    (h.title || '').toLowerCase().includes(search.toLowerCase()) ||
+    (h.message || '').toLowerCase().includes(search.toLowerCase())
   );
   const totalPages = Math.ceil(filtered.length / itemsPerPage);
   const paginated = filtered.slice((currentPage - 1) * itemsPerPage, currentPage * itemsPerPage);
+
+  const switchTab = (t) => { setTab(t); setCurrentPage(1); setSearch(''); };
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -65,7 +94,7 @@ export default function NotificationsPage() {
           <div className="grid grid-cols-5 gap-6 mb-8">
             <div className="col-span-2 bg-white rounded-xl border border-gray-200 p-6">
               <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                <Bell size={20} className="text-[#1A73E8]" /> Compose Notification
+                <Send size={20} className="text-[#1A73E8]" /> Compose Notification
               </h3>
               <div className="space-y-4">
                 <div>
@@ -82,12 +111,39 @@ export default function NotificationsPage() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">Target</label>
-                  <select value={target} onChange={(e) => setTarget(e.target.value)}
+                  <select value={target} onChange={(e) => handleTargetChange(e.target.value)}
                     className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8]">
                     <option value="all">All Students</option>
                     <option value="student">Single Student</option>
                   </select>
                 </div>
+                {target === 'student' && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Select Student <span className="text-red-500">*</span></label>
+                    <div className="flex items-center gap-2">
+                      <div className="relative flex-1">
+                        <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                        <input type="text" placeholder="Search student by name or CNIC..." value={search}
+                          onChange={(e) => { setSearch(e.target.value); loadStudents(e.target.value); }}
+                          className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#1A73E8]" />
+                      </div>
+                    </div>
+                    <select value={selectedStudent} onChange={(e) => setSelectedStudent(e.target.value)}
+                      className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8] mt-2">
+                      <option value="">-- Select Student --</option>
+                      {students.map((s) => (
+                        <option key={s._id} value={s._id}>
+                          {s.fullName} — {s.registrationNumber || s.cnicOrBform || ''}
+                        </option>
+                      ))}
+                    </select>
+                    {students.length === 0 && (
+                      <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                        <UserPlus size={12} /> Type to search students
+                      </p>
+                    )}
+                  </div>
+                )}
                 <button onClick={handleSend} disabled={!title || !message || sending}
                   className="w-full bg-[#1A73E8] text-white py-2 rounded-lg text-sm font-medium hover:bg-[#1557B0] disabled:opacity-50 flex items-center justify-center gap-2">
                   {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
@@ -96,9 +152,25 @@ export default function NotificationsPage() {
               </div>
             </div>
 
-            <div className="col-span-3 bg-white rounded-xl border border-gray-200">
+            <div className="col-span-3 bg-white rounded-xl border border-gray-200 flex flex-col">
               <div className="p-4 border-b border-gray-100 flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-gray-900">Sent History</h3>
+                <div className="flex items-center gap-1">
+                  <button onClick={() => switchTab('received')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      tab === 'received' ? 'bg-[#1A73E8]/10 text-[#1A73E8]' : 'text-gray-500 hover:bg-gray-50'
+                    }`}>
+                    <Inbox size={16} /> Received Alerts
+                    {received.length > 0 && (
+                      <span className="bg-[#1A73E8] text-white text-xs rounded-full px-2 py-0.5">{received.length}</span>
+                    )}
+                  </button>
+                  <button onClick={() => switchTab('sent')}
+                    className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      tab === 'sent' ? 'bg-[#1A73E8]/10 text-[#1A73E8]' : 'text-gray-500 hover:bg-gray-50'
+                    }`}>
+                    <Mail size={16} /> Sent History
+                  </button>
+                </div>
                 <div className="relative">
                   <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                   <input type="text" placeholder="Search..." value={search}
@@ -106,11 +178,13 @@ export default function NotificationsPage() {
                     className="pl-8 pr-3 py-1.5 border border-gray-300 rounded-lg text-xs outline-none focus:ring-2 focus:ring-[#1A73E8] w-48" />
                 </div>
               </div>
-              <div className="divide-y divide-gray-50">
+              <div className="divide-y divide-gray-50 flex-1">
                 {loading ? (
                   <div className="p-8 text-center"><Loader2 size={24} className="animate-spin text-primary mx-auto" /></div>
                 ) : paginated.length === 0 ? (
-                  <div className="p-8 text-center text-gray-400 text-sm">No notifications sent yet.</div>
+                  <div className="p-8 text-center text-gray-400 text-sm">
+                    {tab === 'received' ? 'No new alerts received yet.' : 'No notifications sent yet.'}
+                  </div>
                 ) : paginated.map((item, i) => (
                   <div key={item._id || i} className="p-4 hover:bg-gray-50">
                     <div className="flex items-start justify-between">
@@ -121,11 +195,14 @@ export default function NotificationsPage() {
                             {item.type || 'General'}
                           </span>
                         </div>
-                        <p className="text-xs text-gray-500">Target: {item.recipientType || 'all'}</p>
-                        <p className="text-xs text-gray-400 mt-1">{item.createdAt ? new Date(item.createdAt).toLocaleString() : '-'}</p>
+                        <p className="text-xs text-gray-600">{item.message}</p>
+                        <p className="text-xs text-gray-400 mt-1 flex items-center gap-1">
+                          <Clock size={11} />
+                          {item.createdAt ? new Date(item.createdAt).toLocaleString() : '-'}
+                        </p>
                       </div>
-                      <span className="flex items-center gap-1 text-xs font-medium text-green-600">
-                        <CheckCircle size={12} /> Sent
+                      <span className="flex items-center gap-1 text-xs font-medium text-green-600 shrink-0 ml-2">
+                        <CheckCircle size={12} /> {tab === 'received' ? 'Received' : 'Sent'}
                       </span>
                     </div>
                   </div>

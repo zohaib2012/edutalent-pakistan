@@ -4,6 +4,7 @@ const auth = require('../middleware/auth');
 const challanController = require('../controllers/challanController');
 
 router.post('/generate', auth, challanController.generate);
+router.get('/search', challanController.search);
 router.get('/:challanNumber', auth, challanController.getByNumber);
 router.get('/download/:challanNumber', auth, challanController.download);
 

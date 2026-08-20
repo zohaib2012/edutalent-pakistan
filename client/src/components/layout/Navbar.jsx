@@ -16,11 +16,11 @@ const navLinks = [
 ];
 
 const dropdownLinks = [
+  { name: 'Our Team', path: '/team' },
   { name: 'Find Challan', path: '/find-challan' },
   { name: 'Track Journey', path: '/track-journey' },
   { name: 'Find Certificate', path: '/find-certificate' },
   { name: 'Find Roll No Slip', path: '/find-slip' },
-  { name: 'Demo Test', path: '/demo-test' },
   { name: 'Award Winners', path: '/winners' },
   { name: 'Merit List', path: '/merit-list' },
   { name: 'Test Rules', path: '/test-rules' },
@@ -101,8 +101,8 @@ const Navbar = () => {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16 md:h-[72px]">
             <Link to="/" className="flex items-center gap-3 shrink-0">
-              <img src={logo} alt="EduTalent Pakistan" className="h-10 w-auto rounded-md" />
-              <div className="leading-tight">
+              <img src={logo} alt="EduTalent Pakistan" className="h-10 w-10 md:h-11 md:w-11 rounded-full object-cover ring-2 ring-primary/20 shrink-0" />
+              <div className="leading-tight hidden sm:block">
                 <span className="block text-primary font-heading font-bold text-lg md:text-xl tracking-tight">EduTalent</span>
                 <span className="block text-gray-500 font-heading text-sm md:text-base -mt-1">Pakistan</span>
               </div>
@@ -147,7 +147,7 @@ const Navbar = () => {
                   <Link to="/apply" className="hidden sm:inline-flex px-4 py-2.5 text-sm font-semibold text-primary border-2 border-primary rounded-lg hover:bg-primary-50 transition-colors">
                     Apply Now
                   </Link>
-                  <Link to="/login" className="btn-primary text-sm py-2.5 px-5">
+                  <Link to="/login" className="btn-primary text-sm py-2.5 px-3 sm:px-5">
                     Student Login
                   </Link>
                 </>

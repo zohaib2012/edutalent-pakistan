@@ -11,11 +11,21 @@ exports.startTest = async (req, res) => {
     const student = await Student.findById(req.studentId);
     if (!student || !student.rollNoSlip.rollNumber) return res.status(400).json({ message: 'No roll number slip found' });
     const existingSession = await TestSession.findOne({ studentId: req.studentId, status: { $in: ['completed', 'disqualified', 'in_progress'] } });
-    if (existingSession && (existingSession.status === 'completed' || existingSession.status === 'disqualified')) {
-      return res.status(400).json({ message: 'Test already attempted' });
-    }
     if (existingSession && existingSession.status === 'in_progress') {
       return res.json({ session: existingSession, message: 'Resuming test' });
+    }
+    if (existingSession && (existingSession.status === 'completed' || existingSession.status === 'disqualified')) {
+      const attempted = existingSession.attemptedQuestions || 0;
+      const total = existingSession.totalQuestions || 0;
+      if (attempted >= total && total > 0) {
+        return res.status(400).json({ message: 'Test already attempted' });
+      }
+      await TestSession.findByIdAndDelete(existingSession._id);
+      const TestResult = require('../models/TestResult');
+      await TestResult.deleteMany({ studentId: req.studentId });
+      student.test = { attempted: false };
+      student.status = 'slip_issued';
+      await student.save();
     }
     const questions = await Question.find({ phaseId: student.phaseId, isActive: true }).limit(100);
     const session = await TestSession.create({
@@ -35,7 +45,7 @@ exports.getQuestion = async (req, res) => {
     const index = parseInt(req.params.questionIndex);
     if (index < 0 || index >= questions.length) return res.status(400).json({ message: 'Invalid question index' });
     const q = questions[index];
-    res.json({ questionIndex: index, totalQuestions: questions.length, question: { id: q._id, text: q.questionText, options: q.options.map(o => ({ label: o.label, text: o.text })), timeLimit: q.timeLimit } });
+    res.json({ questionIndex: index, totalQuestions: questions.length, question: { id: q._id, text: q.questionText, questionImageUrl: q.questionImageUrl || null, options: q.options.map(o => ({ label: o.label, text: o.text })), timeLimit: q.timeLimit } });
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
@@ -53,7 +63,7 @@ exports.submitAnswer = async (req, res) => {
     session.correctAnswers = session.questions.filter(q => q.isCorrect).length;
     session.score = session.correctAnswers;
     await session.save();
-    res.json({ correct: isCorrect, correctOption: correctOption?.label });
+    res.json({ saved: true });
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
@@ -61,7 +71,7 @@ exports.flagCheat = async (req, res) => {
   try {
     const { type, details } = req.body;
     const session = await TestSession.findOne({ studentId: req.studentId, status: 'in_progress' });
-    if (!session) return res.status(404).json({ message: 'No active session' });
+    if (!session) return res.json({ violations: 0, disqualified: false });
     session.antiCheatLogs.push({ type: type || 'violation', details: details || '', timestamp: new Date() });
     if (session.antiCheatLogs.length >= 3) {
       session.status = 'disqualified';

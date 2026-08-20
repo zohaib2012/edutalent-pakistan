@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Search, CheckCircle, Clock, MapPin } from 'lucide-react';
+import { Search, CheckCircle, Clock, MapPin, Loader2, AlertCircle } from 'lucide-react';
+import { trackApplication } from '../../services/api';
 
 const steps = [
   { id: 1, label: 'Registration', desc: 'Application submitted & verified' },
@@ -10,17 +11,45 @@ const steps = [
   { id: 6, label: 'Result Published', desc: 'Scores and merit position released' },
 ];
 
+const statusProgressMap = {
+  registered: 0,
+  challan_issued: 1,
+  payment_pending: 1,
+  payment_verified: 2,
+  slip_issued: 3,
+  test_completed: 4,
+  result_published: 5,
+};
+
 const TrackJourneyPage = () => {
   const [query, setQuery] = useState('');
   const [trackedData, setTrackedData] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleTrack = (e) => {
+  const handleTrack = async (e) => {
     e.preventDefault();
-    setTrackedData({
-      name: 'Ahmed Khan',
-      currentStep: 3,
-      completedSteps: [1, 2, 3],
-    });
+    setLoading(true);
+    setError('');
+    setTrackedData(null);
+    try {
+      const res = await trackApplication(query);
+      const student = res.data;
+      const progress = statusProgressMap[student.status] ?? 0;
+      const completedSteps = Array.from({ length: progress + 1 }, (_, i) => i + 1);
+      const currentStep = progress + 2 <= 6 ? progress + 2 : null;
+      setTrackedData({
+        name: student.fullName,
+        registrationNumber: student.registrationNumber,
+        phase: student.phase,
+        currentStep,
+        completedSteps,
+      });
+    } catch (err) {
+      setError(err.response?.data?.message || 'No application found for the provided details.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const isCompleted = (stepId) => trackedData?.completedSteps.includes(stepId);
@@ -57,10 +86,17 @@ const TrackJourneyPage = () => {
                   />
                 </div>
               </div>
-              <button type="submit" className="btn-primary w-full justify-center text-base py-3.5">
-                <Search size={18} /> Track
+              <button type="submit" disabled={loading} className="btn-primary w-full justify-center text-base py-3.5 disabled:opacity-60 disabled:cursor-not-allowed">
+                {loading ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />} Track
               </button>
             </form>
+
+            {error && (
+              <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
+                <AlertCircle size={20} className="text-red-500" />
+                <p className="text-sm text-red-700">{error}</p>
+              </div>
+            )}
           </div>
 
           {trackedData && (
@@ -69,8 +105,19 @@ const TrackJourneyPage = () => {
                 <div className="text-center">
                   <p className="text-sm text-gray-500 mb-1">Tracking application for</p>
                   <p className="font-heading font-bold text-xl text-gray-900">{trackedData.name}</p>
+                  {trackedData.registrationNumber && (
+                    <p className="text-xs text-gray-400 font-mono mt-1">{trackedData.registrationNumber}</p>
+                  )}
                   <div className="mt-3 inline-flex items-center gap-2 bg-primary-50 text-primary text-sm font-semibold px-4 py-1.5 rounded-full">
-                    <Clock size={14} /> Step {trackedData.currentStep} of {steps.length}
+                    {trackedData.currentStep ? (
+                      <>
+                        <Clock size={14} /> Step {trackedData.currentStep} of {steps.length}
+                      </>
+                    ) : (
+                      <>
+                        <CheckCircle size={14} /> All Steps Completed
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

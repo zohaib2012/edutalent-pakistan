@@ -256,8 +256,8 @@ const seed = async () => {
     for (const entry of syllabusEntries) {
       const phaseId = phaseMap[entry.phaseSlug];
       const subjectEntries = entry.subjectSlugs.map((slug) => ({
-        subjectId: subjectMap[slug],
-        topics: syllabusTopicTemplates[slug] || ['General Topics'],
+        name: (subjectData.find((s) => s.slug === slug) || { name: slug }).name,
+        topics: (syllabusTopicTemplates[slug] || ['General Topics']).join(', '),
         totalMCQs: entry.weightagePerSubject,
         weightage: entry.weightagePerSubject,
       }));

@@ -1,6 +1,7 @@
 const bcrypt = require('bcryptjs');
 const Student = require('../models/Student');
 const Phase = require('../models/Phase');
+const Notification = require('../models/Notification');
 
 exports.create = async (req, res) => {
   try {
@@ -188,6 +189,17 @@ exports.submitApplication = async (req, res) => {
     };
 
     await student.save();
+
+    try {
+      await Notification.create({
+        recipientType: 'admin',
+        title: 'New Application Submitted',
+        message: `${student.fullName} (${student.registrationNumber}) submitted their scholarship application.`,
+        type: 'announcement',
+      });
+    } catch (nErr) {
+      console.error('Notification creation failed:', nErr.message);
+    }
 
     res.status(200).json({
       message: 'Application submitted successfully',

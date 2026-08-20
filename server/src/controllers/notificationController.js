@@ -15,6 +15,24 @@ exports.markAllRead = async (req, res) => {
   try { await Notification.updateMany({ $or: [{ recipientId: req.studentId }, { recipientType: 'all' }], isRead: false }, { isRead: true, readAt: new Date() }); res.json({ message: 'All marked read' }); } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
+exports.getAdminNotifications = async (req, res) => {
+  try {
+    const notifications = await Notification.find({ recipientType: 'admin' })
+      .sort({ createdAt: -1 })
+      .limit(100);
+    res.json(notifications);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+exports.getAdminSent = async (req, res) => {
+  try {
+    const notifications = await Notification.find({ recipientType: { $in: ['all', 'student', 'phase_specific'] } })
+      .sort({ createdAt: -1 })
+      .limit(100);
+    res.json(notifications);
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
 exports.send = async (req, res) => {
   try { const notification = await Notification.create(req.body); res.status(201).json(notification); } catch (error) { res.status(500).json({ message: error.message }); }
 };

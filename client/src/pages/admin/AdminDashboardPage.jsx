@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   Users, Banknote, ClipboardCheck, BarChart3, Trophy,
-  Search, ArrowRight, Wallet, FileDown, Megaphone, Loader2
+  ArrowRight, Wallet, FileDown, Megaphone, Loader2
 } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 import { getDashboardStats, getRecentActivity } from '../../services/api';
@@ -80,16 +80,6 @@ export default function AdminDashboardPage() {
             <div>
               <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
               <p className="text-gray-500 text-sm mt-1">Welcome back, Admin</p>
-            </div>
-            <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                <input
-                  type="text"
-                  placeholder="Search..."
-                  className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-[#1A73E8] focus:border-[#1A73E8] outline-none w-64"
-                />
-              </div>
             </div>
           </div>
 

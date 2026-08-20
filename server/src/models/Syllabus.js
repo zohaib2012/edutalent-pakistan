@@ -9,18 +9,21 @@ const syllabusSchema = new mongoose.Schema(
     },
     subjects: [
       {
-        subjectId: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: 'Subject',
+        name: {
+          type: String,
+          trim: true,
         },
         topics: {
-          type: [String],
+          type: String,
+          trim: true,
         },
         totalMCQs: {
           type: Number,
+          default: 0,
         },
         weightage: {
           type: Number,
+          default: 0,
         },
       },
     ],

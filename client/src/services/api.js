@@ -30,6 +30,7 @@ api.interceptors.request.use((config) => {
     (url.includes('/results') && !url.includes('/my-result') && !url.includes('/merit-list') && !url.includes('/overall-merit')) ||
     (url.includes('/awards') && !url.includes('/winners') && !url.includes('/my-award')) ||
     url.includes('/certificates/generate') ||
+    url.includes('/certificates/upload') ||
     url.includes('/certificates/types') ||
     url.includes('/notifications/send') ||
     url.includes('/notifications/broadcast') ||
@@ -37,7 +38,11 @@ api.interceptors.request.use((config) => {
     url.includes('/phases') ||
     url.includes('/students') ||
     url.includes('/announcements/admin') ||
-    (url.includes('/announcements') && method !== 'get')
+    (url.includes('/announcements') && method !== 'get') ||
+    (url.includes('/syllabus') && method !== 'get') ||
+    (url.includes('/merit-list') && method !== 'get') ||
+    (url.includes('/award-winners') && method !== 'get') ||
+    (url.includes('/contact') && method !== 'post')
   );
 
   if (isAdminPath && adminToken) {
@@ -82,6 +87,11 @@ export const getMySlip = () => api.get('/slips/my-slip');
 export const generateSlip = (studentId) => api.post(`/slips/generate/${studentId}`);
 export const generateBulkSlips = (data) => api.post('/slips/generate-bulk', data);
 export const getAllSlips = () => api.get('/slips/all');
+export const searchPublicSlip = (params) => api.get('/slips/search', { params });
+
+// ---- PUBLIC SEARCH ----
+export const searchPublicChallan = (params) => api.get('/challan/search', { params });
+export const trackApplication = (query) => api.get('/students/track', { params: { query } });
 
 // ---- TEST ----
 export const startTest = () => api.post('/test/start');
@@ -97,9 +107,22 @@ export const getMyResult = () => api.get('/results/my-result');
 export const getMeritList = (phaseId) => api.get(`/results/merit-list/${phaseId}`);
 export const getOverallMerit = () => api.get('/results/overall-merit');
 
+// ---- MERIT LIST (CRUD) ----
+export const getPublicMeritList = () => api.get('/merit-list');
+export const getAdminMeritList = () => api.get('/merit-list/admin/all');
+export const createMeritEntry = (data) => api.post('/merit-list', data);
+export const updateMeritEntry = (id, data) => api.put(`/merit-list/${id}`, data);
+export const deleteMeritEntry = (id) => api.delete(`/merit-list/${id}`);
+
 // ---- AWARDS ----
 export const getWinners = () => api.get('/awards/winners');
 export const getMyAward = () => api.get('/awards/my-award');
+export const getAllAwardWinners = () => api.get('/awards');
+export const getPublicAwardWinners = () => api.get('/award-winners');
+export const getAdminAwardWinners = () => api.get('/award-winners/admin/all');
+export const createAwardWinner = (data) => api.post('/award-winners', data);
+export const updateAwardWinner = (id, data) => api.put(`/award-winners/${id}`, data);
+export const deleteAwardWinner = (id) => api.delete(`/award-winners/${id}`);
 
 // ---- CERTIFICATES ----
 export const getMyCertificate = () => api.get('/certificates/my-certificate');
@@ -107,6 +130,8 @@ export const getMyCertificates = () => api.get('/certificates/my-certificates');
 export const verifyCertificate = (certNumber) => api.get(`/certificates/verify/${certNumber}`);
 export const getCertificateTypes = () => api.get('/certificates/types');
 export const generateCertificate = (studentId) => api.post(studentId ? `/certificates/generate/${studentId}` : '/certificates/generate');
+export const uploadCertificate = (formData) => api.post('/certificates/upload', formData, { headers: { 'Content-Type': 'multipart/form-data' } });
+export const searchCertificate = (params) => api.get('/certificates/search', { params });
 
 // ---- ANNOUNCEMENTS ----
 export const getAnnouncements = () => api.get('/announcements');
@@ -120,8 +145,19 @@ export const deleteAnnouncement = (id) => api.delete(`/announcements/${id}`);
 // ---- FAQs ----
 export const getFAQs = () => api.get('/faqs');
 
+// ---- SYLLABUS ----
+export const getSyllabus = () => api.get('/syllabus');
+export const getSyllabusByPhase = (phaseId) => api.get(`/syllabus/phase/${phaseId}`);
+export const getAdminSyllabus = () => api.get('/syllabus/admin/all');
+export const createSyllabus = (data) => api.post('/syllabus', data);
+export const updateSyllabus = (id, data) => api.put(`/syllabus/${id}`, data);
+export const deleteSyllabus = (id) => api.delete(`/syllabus/${id}`);
+
 // ---- CONTACT ----
 export const submitContact = (data) => api.post('/contact', data);
+export const getContactMessages = () => api.get('/contact');
+export const replyContactMessage = (id, data) => api.put(`/contact/${id}/reply`, data);
+export const markContactRead = (id) => api.patch(`/contact/${id}/read`);
 
 // ---- DASHBOARD ----
 export const getDashboardStats = () => api.get('/admindashboard/stats');

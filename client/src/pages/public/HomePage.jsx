@@ -1,15 +1,8 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Users, Award, FileCheck, Globe, BookOpen, Laptop, Shield, ChevronRight, Clock, CheckCircle, Megaphone, Loader2 } from 'lucide-react';
+import { ArrowRight, Users, Award, FileCheck, BookOpen, Laptop, Shield, ChevronRight, Clock, CheckCircle, Megaphone, Loader2 } from 'lucide-react';
 import { getAnnouncements } from '../../services/api';
 import logo from '../../assets/images/logo.jpeg';
-
-const stats = [
-  { icon: Users, value: '10,000+', label: 'Students Registered' },
-  { icon: Award, value: '500+', label: 'Awards Given' },
-  { icon: FileCheck, value: '12+', label: 'Tests Conducted' },
-  { icon: Globe, value: '7', label: 'Provinces Covered' },
-];
 
 const phases = [
   { title: 'Phase 1', sub: 'Primary Level', grades: 'Grades 1-5', awards: 'Scholarship Awards, Laptops, Chromebooks, Shields, Certificates, Trophy', color: 'from-blue-500 to-blue-600' },
@@ -86,31 +79,15 @@ const HomePage = () => {
               <div className="relative">
                 <div className="w-80 h-80 bg-white/5 rounded-full border border-white/10 flex items-center justify-center">
                   <div className="text-center">
-                    <div className="w-28 h-28 bg-white rounded-2xl flex items-center justify-center mx-auto mb-5 shadow-2xl overflow-hidden border-4 border-white/10">
-                      <img src={logo} alt="EduTalent Pakistan" className="w-full h-full object-contain" />
+                    <div className="w-28 h-28 bg-white rounded-full flex items-center justify-center mx-auto mb-5 shadow-2xl overflow-hidden border-4 border-gold/40">
+                      <img src={logo} alt="EduTalent Pakistan" className="w-full h-full object-cover rounded-full" />
                     </div>
                     <p className="text-gold font-heading font-bold text-lg">EduTalent Pakistan</p>
-                    <p className="text-white/60 text-sm">Est. 2025</p>
+                    <p className="text-white/60 text-sm">Est. 2026</p>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </div>
-      </section>
-
-      <section className="py-16 bg-white -mt-10 relative z-10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
-            {stats.map((stat, i) => (
-              <div key={i} className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 text-center hover:shadow-xl transition-shadow">
-                <div className="w-12 h-12 bg-primary-50 rounded-lg flex items-center justify-center mx-auto mb-3">
-                  <stat.icon size={24} className="text-primary" />
-                </div>
-                <div className="text-2xl md:text-3xl font-heading font-bold text-primary">{stat.value}</div>
-                <div className="text-sm text-gray-600 mt-1">{stat.label}</div>
-              </div>
-            ))}
           </div>
         </div>
       </section>
@@ -210,9 +187,13 @@ const HomePage = () => {
             <div className="grid md:grid-cols-3 gap-6">
               {latestAnnouncements.map((item) => (
                 <div key={item._id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow flex flex-col">
-                  <div className="bg-gradient-to-r from-primary to-primary-600 h-28 flex items-center justify-center">
-                    <Megaphone size={44} className="text-white/40" />
-                  </div>
+                  {item.imageUrl ? (
+                    <img src={item.imageUrl} alt={item.title} className="h-32 w-full object-cover" />
+                  ) : (
+                    <div className="bg-gradient-to-r from-primary to-primary-600 h-28 flex items-center justify-center">
+                      <Megaphone size={44} className="text-white/40" />
+                    </div>
+                  )}
                   <div className="p-5 flex-1 flex flex-col">
                     <div className="flex items-center gap-2 text-xs text-gray-500 mb-2">
                       <Clock size={12} />

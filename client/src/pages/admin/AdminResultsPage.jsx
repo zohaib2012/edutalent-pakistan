@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BarChart3, Download, TrendingUp, Award, Loader2 } from 'lucide-react';
+import { BarChart3, TrendingUp, Award, Loader2 } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 import api, { getSettings } from '../../services/api';
 
@@ -48,13 +48,15 @@ export default function AdminResultsPage() {
     }
   };
 
-  const avgScore = results.length > 0
-    ? (results.reduce((s, r) => s + (r.obtainedMarks || 0), 0) / results.length).toFixed(1)
+  const filteredResults = phase ? results.filter((r) => (r.phaseId?._id || r.phaseId) === phase) : results;
+
+  const avgScore = filteredResults.length > 0
+    ? (filteredResults.reduce((s, r) => s + (r.obtainedMarks || 0), 0) / filteredResults.length).toFixed(1)
     : '0';
-  const topScore = results.length > 0
-    ? Math.max(...results.map((r) => r.obtainedMarks || 0))
+  const topScore = filteredResults.length > 0
+    ? Math.max(...filteredResults.map((r) => r.obtainedMarks || 0))
     : 0;
-  const totalMarks = results[0]?.totalMarks || 100;
+  const totalMarks = filteredResults[0]?.totalMarks || 100;
 
   return (
     <div className="flex h-screen bg-gray-50">
@@ -63,9 +65,6 @@ export default function AdminResultsPage() {
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-2xl font-bold text-gray-900">Results Management</h1>
-            <div className="flex items-center gap-3">
-              <button className="flex items-center gap-2 border border-gray-300 text-gray-700 px-4 py-2 rounded-lg text-sm hover:bg-gray-50"><Download size={16} /> Export CSV</button>
-            </div>
           </div>
 
           <div className="flex items-center gap-4 mb-8">
@@ -117,9 +116,9 @@ export default function AdminResultsPage() {
                 <tbody>
                   {loading ? (
                     <tr><td colSpan={5} className="text-center py-10"><Loader2 size={24} className="animate-spin text-primary mx-auto" /></td></tr>
-                  ) : results.length === 0 ? (
+                  ) : filteredResults.length === 0 ? (
                     <tr><td colSpan={5} className="text-center py-10 text-gray-400">No results published yet.</td></tr>
-                  ) : results.map((r, i) => (
+                  ) : filteredResults.map((r, i) => (
                     <tr key={r._id} className="border-b border-gray-50 hover:bg-gray-50">
                       <td className="px-5 py-3 font-medium text-gray-900">{r.studentId?.fullName || '-'}</td>
                       <td className="px-5 py-3 font-mono text-xs text-gray-600">{r.rollNumber || '-'}</td>

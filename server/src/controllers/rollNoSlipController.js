@@ -53,6 +53,33 @@ exports.getMySlip = async (req, res) => {
   } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
+exports.search = async (req, res) => {
+  try {
+    const { registrationNumber, cnic } = req.query;
+    if (!registrationNumber && !cnic) {
+      return res.status(400).json({ message: 'Provide registration number or CNIC/B-Form' });
+    }
+    const filter = {};
+    if (registrationNumber) filter.registrationNumber = registrationNumber.trim();
+    if (cnic) filter.cnicOrBform = cnic.trim();
+    const student = await Student.findOne(filter).populate('phaseId');
+    if (!student || !student.rollNoSlip?.rollNumber) {
+      return res.status(404).json({ message: 'No roll number slip found. Please verify your registration number and CNIC/B-Form.' });
+    }
+    res.json({
+      fullName: student.fullName,
+      fatherName: student.fatherName,
+      registrationNumber: student.registrationNumber,
+      cnicOrBform: student.cnicOrBform,
+      phase: student.phaseId ? student.phaseId.name : null,
+      grade: student.grade,
+      rollNumber: student.rollNoSlip.rollNumber,
+      username: student.rollNoSlip.username,
+      passwordGiven: student.rollNoSlip.passwordGiven,
+    });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
 exports.download = async (req, res) => {
   try {
     const student = await Student.findById(req.studentId).populate('phaseId');

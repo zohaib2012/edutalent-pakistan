@@ -1,17 +1,48 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import {
   CheckCircle, Download, ShieldCheck,
   Banknote, LayoutDashboard, Loader2, KeyRound
 } from 'lucide-react';
+import { downloadChallanPDF } from '../../utils/challanPDF';
+import { getApplicationForm } from '../../services/api';
 
 const RegistrationSuccessPage = () => {
   const location = useLocation();
-  const registrationNumber = location.state?.registrationNumber || 'N/A';
+  const [registrationNumber, setRegistrationNumber] = useState(location.state?.registrationNumber || 'N/A');
   const studentPassword = location.state?.password || '';
-  const formData = location.state?.formData || {};
+  const [challanData, setChallanData] = useState(location.state?.challan || null);
+  const [formData, setFormData] = useState(location.state?.formData || {});
   const [downloadingApp, setDownloadingApp] = useState(false);
   const [downloadingChallan, setDownloadingChallan] = useState(false);
+
+  useEffect(() => {
+    if (!location.state) {
+      getApplicationForm()
+        .then((res) => {
+          const data = res.data || {};
+          if (data.registrationNumber) setRegistrationNumber(data.registrationNumber);
+          if (data.challan) {
+            setChallanData({
+              challanNumber: data.challan.challanNumber,
+              amount: data.challan.amount,
+              dueDate: data.challan.dueDate,
+              phase: data.phase?.name || null,
+            });
+          }
+          setFormData((prev) => ({
+            ...prev,
+            fullName: data.fullName || prev.fullName,
+            fatherName: data.fatherName || prev.fatherName,
+            cnicOrBform: data.cnicOrBform || prev.cnicOrBform,
+            mobileNumber: data.mobileNumber || prev.mobileNumber,
+            email: data.email || prev.email,
+            currentClass: data.currentClass || prev.currentClass,
+          }));
+        })
+        .catch(() => {});
+    }
+  }, []);
 
   const handleDownloadApplication = () => {
     setDownloadingApp(true);
@@ -102,84 +133,21 @@ const RegistrationSuccessPage = () => {
   const handleDownloadChallan = () => {
     setDownloadingChallan(true);
     try {
-      const win = window.open('', '_blank');
-      if (!win) { setDownloadingChallan(false); return; }
-      const today = new Date();
-      const dueDate = new Date(today);
-      dueDate.setDate(dueDate.getDate() + 15);
-      const dueDateStr = dueDate.toISOString().split('T')[0];
-      win.document.write(`
-        <html>
-          <head>
-            <title>Fee Challan - ${registrationNumber}</title>
-            <style>
-              @page { margin: 15mm; size: A4 portrait; }
-              body { font-family: 'Arial', sans-serif; padding: 30px; color: #222; }
-              .header { text-align: center; border-bottom: 3px solid #1A73E8; padding-bottom: 15px; margin-bottom: 20px; }
-              .header h1 { color: #1A73E8; font-size: 22px; margin: 0; letter-spacing: 1px; }
-              .header p { color: #666; font-size: 11px; margin: 3px 0 0; }
-              .challan-title { text-align: center; font-size: 15px; font-weight: bold; color: #1A73E8; margin: 15px 0; display: inline-block; padding: 5px 25px; border: 1px solid #1A73E8; background: #f0f6ff; }
-              table { width: 100%; border-collapse: collapse; margin: 12px 0; }
-              td, th { border: 1px solid #ccc; padding: 7px 10px; font-size: 12px; text-align: left; }
-              td.label { font-weight: bold; background: #f5f5f5; width: 35%; font-size: 11px; color: #555; text-transform: uppercase; }
-              td.value { font-weight: 600; color: #222; }
-              .amount-box { text-align: center; border: 2px solid #1A73E8; border-radius: 8px; padding: 15px; margin: 15px 0; background: #f8fbff; }
-              .amount-box .amount { font-size: 32px; font-weight: bold; color: #1A73E8; }
-              .amount-box .words { font-size: 11px; color: #666; margin-top: 5px; }
-              .section-title { font-size: 13px; font-weight: bold; color: #1A73E8; margin: 15px 0 8px; border-bottom: 2px solid #1A73E8; padding-bottom: 4px; }
-              .footer { margin-top: 25px; padding-top: 12px; border-top: 2px solid #ddd; text-align: center; font-size: 10px; color: #999; }
-              .payment-methods { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
-              .payment-method { border: 1px solid #ddd; padding: 6px 12px; font-size: 11px; border-radius: 4px; background: #f9f9f9; }
-            </style>
-          </head>
-          <body>
-            <div style="text-align: center;"><span class="challan-title">CHALLAN</span></div>
-            <div class="header">
-              <h1>EDUTALENT PAKISTAN</h1>
-              <p>Scholarship Testing Program — Fee Challan</p>
-            </div>
-            <div class="section-title">STUDENT DETAILS</div>
-            <table>
-              <tr><td class="label">Registration No</td><td class="value">${registrationNumber}</td></tr>
-              <tr><td class="label">Student Name</td><td class="value">${formData.fullName || '________________'}</td></tr>
-              <tr><td class="label">Father's Name</td><td class="value">${formData.fatherName || '________________'}</td></tr>
-              <tr><td class="label">CNIC / B-Form</td><td class="value">${formData.cnicOrBform || '________________'}</td></tr>
-              <tr><td class="label">Due Date</td><td class="value" style="color:#d32f2f;">${dueDateStr}</td></tr>
-            </table>
-            <div class="amount-box">
-              <div style="font-size: 11px; color: #666; margin-bottom: 5px;">REGISTRATION FEE</div>
-              <div class="amount">PKR 1,200/-</div>
-              <div class="words">One Thousand Two Hundred Rupees Only</div>
-            </div>
-            <div class="section-title">BANK DETAILS</div>
-            <table>
-              <tr><td class="label">Bank</td><td class="value">HBL (Habib Bank Limited)</td></tr>
-              <tr><td class="label">Account Title</td><td class="value">EduTalent Pakistan</td></tr>
-              <tr><td class="label">Account Number</td><td class="value">1234-5678-9012-3456</td></tr>
-              <tr><td class="label">Branch Code</td><td class="value">HBL-1234</td></tr>
-            </table>
-            <div style="margin: 10px 0; font-size: 11px; color: #555;">
-              <strong>Alternative Banks:</strong><br>
-              &bull; UBL (United Bank Limited) — A/C: 5678-1234-5678-1234<br>
-              &bull; Allied Bank Limited — A/C: 9012-3456-7890-1234
-            </div>
-            <div class="section-title">PAYMENT METHODS</div>
-            <div class="payment-methods">
-              <span class="payment-method">OneBill</span>
-              <span class="payment-method">Bank Deposit (HBL/UBL/Allied)</span>
-              <span class="payment-method">JazzCash</span>
-              <span class="payment-method">Easypaisa</span>
-            </div>
-            <div class="footer">
-              <p>EduTalent Pakistan — Helpline: 0800-EDUTALENT | www.edutalentpakistan.com</p>
-              <p>Fee once paid is non-refundable. This is a system-generated challan.</p>
-            </div>
-          </body>
-        </html>
-      `);
-      win.document.close();
-      win.focus();
-      win.print();
+      const dueDate = challanData?.dueDate || (() => { const d = new Date(); d.setDate(d.getDate() + 15); return d; })();
+      downloadChallanPDF({
+        challanNumber: challanData?.challanNumber || `ETP-CH-${Date.now()}`,
+        registrationNumber,
+        fullName: formData.fullName || '',
+        fatherName: formData.fatherName || '',
+        cnicOrBform: formData.cnicOrBform || '',
+        mobileNumber: formData.mobileNumber || '',
+        email: formData.email || '',
+        phase: challanData?.phase || 'N/A',
+        grade: formData.currentClass || '',
+        dueDate,
+        amount: challanData?.amount || 1200,
+        bank: {},
+      });
     } catch {
       // fallback
     } finally {

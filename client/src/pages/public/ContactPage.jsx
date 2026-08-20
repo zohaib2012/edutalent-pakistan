@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Mail, Phone, MapPin, MessageSquare, Send } from 'lucide-react';
+import { Mail, Phone, MapPin, MessageSquare, Send, Loader2 } from 'lucide-react';
 import { FacebookIcon, InstagramIcon, TikTokIcon, WhatsAppIcon } from '../../components/icons/SocialIcons';
+import { submitContact } from '../../services/api';
 
 const SOCIAL_LINKS = [
   { label: 'Facebook', url: 'https://www.facebook.com/share/1JY7SmAuEC/', Icon: FacebookIcon },
@@ -16,10 +17,21 @@ const SUPPORT_NUMBER = '+923202603464';
 const ContactPage = () => {
   const [form, setForm] = useState({ name: '', email: '', phone: '', subject: '', message: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSending(true);
+    setError('');
+    try {
+      await submitContact(form);
+      setSubmitted(true);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to send message. Please try again.');
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -104,8 +116,11 @@ const ContactPage = () => {
                       placeholder="Write your message here..."
                     />
                   </div>
-                  <button type="submit" className="btn-primary">
-                    <Send size={16} /> Send Message
+                  {error && (
+                    <p className="text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg px-4 py-2">{error}</p>
+                  )}
+                  <button type="submit" disabled={sending} className="btn-primary disabled:opacity-60 disabled:cursor-not-allowed">
+                    {sending ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />} Send Message
                   </button>
                 </form>
               )}
@@ -147,7 +162,7 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h4 className="font-heading font-bold text-sm">Head Office Address</h4>
-                    <p className="text-gray-600 text-sm">Pakistan</p>
+                    <p className="text-gray-600 text-sm">Sindh, Hyderabad, Latifabad, Unit No#1, G.O.R Colony Street No#50</p>
                   </div>
                 </div>
               </div>
@@ -163,12 +178,22 @@ const ContactPage = () => {
               </div>
 
               <h3 className="font-heading font-bold text-base mb-3">Our Location</h3>
-              <div className="bg-gray-200 rounded-xl h-48 flex items-center justify-center border border-gray-100">
-                <div className="text-center text-gray-500">
-                  <MapPin size={32} className="mx-auto mb-2" />
-                  <p className="text-sm">Google Map Placeholder</p>
-                </div>
+              <div className="bg-gray-200 rounded-xl overflow-hidden border border-gray-100 h-64">
+                <iframe
+                  title="EduTalent Pakistan Location"
+                  src="https://maps.google.com/maps?q=Sindh%2C%20Hyderabad%2C%20Latifabad%2C%20Unit%20No%201%2C%20G.O.R%20Colony%20Street%20No%2050&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0 }}
+                  allowFullScreen
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                />
               </div>
+              <p className="text-xs text-gray-500 mt-2 flex items-start gap-1">
+                <MapPin size={14} className="mt-0.5 flex-shrink-0" />
+                Sindh, Hyderabad, Latifabad, Unit No#1, G.O.R Colony Street No#50
+              </p>
             </div>
           </div>
         </div>

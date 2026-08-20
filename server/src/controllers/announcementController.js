@@ -36,6 +36,9 @@ exports.create = async (req, res) => {
   try {
     const slug = req.body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
     const payload = { ...req.body, slug, createdBy: req.adminId };
+    if (req.file) payload.imageUrl = req.file.path;
+    if (payload.isFeatured !== undefined) payload.isFeatured = payload.isFeatured === 'true' || payload.isFeatured === true;
+    if (payload.publishDate === '' || payload.publishDate === 'undefined') delete payload.publishDate;
     if (payload.targetPhase === '' || payload.targetPhase === 'All' || payload.targetPhase === null) {
       payload.targetPhase = null;
     }
@@ -48,7 +51,15 @@ exports.create = async (req, res) => {
 };
 
 exports.update = async (req, res) => {
-  try { const announcement = await Announcement.findByIdAndUpdate(req.params.id, req.body, { new: true }); res.json(announcement); } catch (error) { res.status(500).json({ message: error.message }); }
+  try {
+    const updates = { ...req.body };
+    if (req.file) updates.imageUrl = req.file.path;
+    if (updates.isFeatured !== undefined) updates.isFeatured = updates.isFeatured === 'true' || updates.isFeatured === true;
+    if (updates.publishDate === '' || updates.publishDate === 'undefined') delete updates.publishDate;
+    if (updates.targetPhase === '' || updates.targetPhase === 'All') updates.targetPhase = null;
+    const announcement = await Announcement.findByIdAndUpdate(req.params.id, updates, { new: true });
+    res.json(announcement);
+  } catch (error) { res.status(500).json({ message: error.message }); }
 };
 
 exports.delete = async (req, res) => {

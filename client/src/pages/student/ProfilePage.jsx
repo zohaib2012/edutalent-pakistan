@@ -148,6 +148,7 @@ const ProfilePage = () => {
     { label: 'Check Application Status', icon: ListChecks, color: 'from-primary to-primary-600', to: '/profile' },
     { label: 'Download Application Form', icon: FileDown, color: 'from-purple-500 to-purple-600', to: '/registration-success' },
     { label: 'Download Challan', icon: CreditCard, color: 'from-orange-500 to-orange-600', to: '/challan', show: !!challanAvailable },
+    { label: 'Upload Challan', icon: BadgeCheck, color: 'from-emerald-500 to-emerald-600', to: '/challan', show: student.status === 'challan_issued' || student.status === 'payment_pending' },
     { label: 'Download Roll Slip', icon: ScrollText, color: 'from-indigo-500 to-indigo-600', to: '/slip', show: !!slipAvailable },
     { label: 'Take Test', icon: GraduationCap, color: 'from-cyan-500 to-cyan-600', to: '/test', show: student.status === 'slip_issued' },
     { label: 'My Results', icon: Award, color: 'from-gold to-yellow-600', to: '/my-results', show: student.status === 'test_completed' || student.status === 'result_published' },

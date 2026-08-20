@@ -1,34 +1,35 @@
-import { useState } from 'react';
-import { Medal, Award, ArrowRight, Search } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Medal, Award, ArrowRight, Search, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
-
-const phases = ['Phase 1', 'Phase 2', 'Phase 3', 'Phase 4'];
-
-const generateMerit = (phase) => {
-  const names = {
-    'Phase 1': ['Ahmed Khan', 'Fatima Ali', 'Usman Raza', 'Ayesha Khan', 'Bilal Ahmed', 'Hira Batool', 'Zain Ali', 'Sara Khan', 'Ali Raza', 'Mahnoor Fatima', 'Hassan Ali', 'Iqra Shah', 'Omar Farooq', 'Zainab Malik', 'Tariq Mehmood'],
-    'Phase 2': ['Hira Batool', 'Zain Ali', 'Sara Khan', 'Ali Raza', 'Mahnoor Fatima', 'Hassan Ali', 'Iqra Shah', 'Omar Farooq', 'Zainab Malik', 'Tariq Mehmood', 'Amina Tariq', 'Kamran Ali', 'Sadia Khan', 'Fahad Iqbal', 'Nadia Shah'],
-    'Phase 3': ['Ali Raza', 'Mahnoor Fatima', 'Hassan Ali', 'Iqra Shah', 'Omar Farooq', 'Zainab Malik', 'Tariq Mehmood', 'Amina Tariq', 'Kamran Ali', 'Sadia Khan', 'Fahad Iqbal', 'Nadia Shah', 'Jawad Ahmed', 'Sana Mir', 'Usman Khalid'],
-    'Phase 4': ['Omar Farooq', 'Zainab Malik', 'Tariq Mehmood', 'Amina Tariq', 'Kamran Ali', 'Sadia Khan', 'Fahad Iqbal', 'Nadia Shah', 'Jawad Ahmed', 'Sana Mir', 'Usman Khalid', 'Maryam Bibi', 'Imran Ali', 'Rabia Khan', 'Ahsan Raza'],
-  };
-  const n = names[phase] || names['Phase 1'];
-  return n.slice(0, 15).map((name, i) => ({
-    pos: i + 1,
-    roll: `ETP-2025-${String(100 + i).padStart(3, '0')}`,
-    name,
-    score: Math.max(50, 98 - i * 3 - Math.floor(Math.random() * 2)),
-    percentage: `${Math.max(50, 98 - i * 3 - Math.floor(Math.random() * 2))}%`,
-  }));
-};
+import { getPublicMeritList } from '../../services/api';
 
 const MeritListPage = () => {
+  const [entries, setEntries] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
-  const meritData = generateMerit(phases[activeTab]);
 
-  const filteredData = meritData.filter(r =>
-    r.roll.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  useEffect(() => {
+    getPublicMeritList()
+      .then((res) => setEntries(res.data?.data || []))
+      .catch(() => setEntries([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const phaseIds = Array.from(new Set(entries.map((e) => e.phaseId?._id).filter(Boolean)));
+  const phaseNames = entries.map((e) => e.phaseId?.name || 'Unknown').filter((v, i, a) => a.indexOf(v) === i);
+  const activePhaseId = phaseIds[activeTab];
+  const meritData = entries
+    .filter((e) => e.phaseId?._id === activePhaseId)
+    .sort((a, b) => (a.position || 0) - (b.position || 0));
+
+  const filteredData = meritData.filter((r) => {
+    const q = searchQuery.toLowerCase();
+    return (
+      (r.registrationNumber || '').toLowerCase().includes(q) ||
+      (r.studentName || '').toLowerCase().includes(q)
+    );
+  });
 
   return (
     <div>
@@ -46,92 +47,105 @@ const MeritListPage = () => {
 
       <section className="py-16 md:py-24 bg-gray-50">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
-            <div className="flex flex-wrap gap-2">
-              {phases.map((phase, i) => (
-                <button
-                  key={phase}
-                  onClick={() => setActiveTab(i)}
-                  className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all ${
-                    activeTab === i
-                      ? 'bg-primary text-white shadow-lg'
-                      : 'bg-white text-gray-700 border border-gray-200 hover:bg-primary-50'
-                  }`}
-                >
-                  {phase}
-                </button>
-              ))}
+          {loading ? (
+            <div className="flex justify-center py-16"><Loader2 size={28} className="animate-spin text-primary" /></div>
+          ) : phaseNames.length === 0 ? (
+            <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-12 text-center text-gray-500">
+              Merit list has not been published yet. Please check back soon.
             </div>
-            <div className="relative w-full sm:w-auto">
-              <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-              <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search by Registration ID..."
-                className="w-full sm:w-64 pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
-              />
-            </div>
-          </div>
-
-          <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-primary text-white">
-                    <th className="text-left px-6 py-4 text-sm font-semibold">Position</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold">Registration ID</th>
-                    <th className="text-left px-6 py-4 text-sm font-semibold">Name</th>
-                    <th className="text-center px-6 py-4 text-sm font-semibold">Score</th>
-                    <th className="text-center px-6 py-4 text-sm font-semibold">Percentage</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {filteredData.length > 0 ? filteredData.map((r, i) => (
-                    <tr
-                      key={i}
-                      className={`border-t border-gray-100 hover:bg-gray-50 transition-colors ${
-                        i < 10 ? 'bg-gold/5' : ''
+          ) : (
+            <>
+              <div className="flex flex-wrap items-center justify-between gap-4 mb-8">
+                <div className="flex flex-wrap gap-2">
+                  {phaseNames.map((name, i) => (
+                    <button
+                      key={name}
+                      onClick={() => setActiveTab(i)}
+                      className={`px-6 py-3 rounded-lg font-semibold text-sm transition-all ${
+                        activeTab === i
+                          ? 'bg-primary text-white shadow-lg'
+                          : 'bg-white text-gray-700 border border-gray-200 hover:bg-primary-50'
                       }`}
                     >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          {i === 0 && <span className="text-lg">🥇</span>}
-                          {i === 1 && <span className="text-lg">🥈</span>}
-                          {i === 2 && <span className="text-lg">🥉</span>}
-                          {i >= 3 && i < 10 && <Medal size={16} className="text-gold" />}
-                          <span className={`text-sm font-bold ${
-                            i === 0 ? 'text-gold text-lg' :
-                            i === 1 ? 'text-gray-400 text-lg' :
-                            i === 2 ? 'text-amber-700 text-lg' :
-                            'text-gray-900'
-                          }`}>{r.pos}</span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-gray-700 font-mono">{r.roll}</td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm font-semibold text-gray-900">{r.name}</span>
-                      </td>
-                      <td className="px-6 py-4 text-sm text-center font-semibold text-primary">{r.score}/100</td>
-                      <td className="px-6 py-4 text-sm text-center">
-                        <span className={`inline-block font-semibold text-xs px-3 py-1 rounded-full ${
-                          parseInt(r.percentage) >= 90 ? 'bg-green-50 text-success' :
-                          parseInt(r.percentage) >= 80 ? 'bg-primary-50 text-primary' :
-                          'bg-gold/10 text-gold'
-                        }`}>{r.percentage}</span>
-                      </td>
-                    </tr>
-                  )) : (
-                    <tr>
-                      <td colSpan="5" className="px-6 py-12 text-center text-gray-500 text-sm">
-                        No results found for "{searchQuery}"
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                      {name}
+                    </button>
+                  ))}
+                </div>
+                <div className="relative w-full sm:w-auto">
+                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search by Registration ID..."
+                    className="w-full sm:w-64 pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
+                  />
+                </div>
+              </div>
+
+              <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-primary text-white">
+                        <th className="text-left px-6 py-4 text-sm font-semibold">Position</th>
+                        <th className="text-left px-6 py-4 text-sm font-semibold">Registration ID</th>
+                        <th className="text-left px-6 py-4 text-sm font-semibold">Name</th>
+                        <th className="text-center px-6 py-4 text-sm font-semibold">Score</th>
+                        <th className="text-center px-6 py-4 text-sm font-semibold">Percentage</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {filteredData.length > 0 ? filteredData.map((r, i) => {
+                        const pct = r.percentage != null ? r.percentage : (r.totalMarks ? Math.round((r.score / r.totalMarks) * 100) : 0);
+                        return (
+                          <tr
+                            key={r._id}
+                            className={`border-t border-gray-100 hover:bg-gray-50 transition-colors ${
+                              i < 10 ? 'bg-gold/5' : ''
+                            }`}
+                          >
+                            <td className="px-6 py-4">
+                              <div className="flex items-center gap-2">
+                                {i === 0 && <span className="text-lg">🥇</span>}
+                                {i === 1 && <span className="text-lg">🥈</span>}
+                                {i === 2 && <span className="text-lg">🥉</span>}
+                                {i >= 3 && i < 10 && <Medal size={16} className="text-gold" />}
+                                <span className={`text-sm font-bold ${
+                                  i === 0 ? 'text-gold text-lg' :
+                                  i === 1 ? 'text-gray-400 text-lg' :
+                                  i === 2 ? 'text-amber-700 text-lg' :
+                                  'text-gray-900'
+                                }`}>{r.position}</span>
+                              </div>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-gray-700 font-mono">{r.registrationNumber || '-'}</td>
+                            <td className="px-6 py-4">
+                              <span className="text-sm font-semibold text-gray-900">{r.studentName}</span>
+                            </td>
+                            <td className="px-6 py-4 text-sm text-center font-semibold text-primary">{r.score}/{r.totalMarks || 100}</td>
+                            <td className="px-6 py-4 text-sm text-center">
+                              <span className={`inline-block font-semibold text-xs px-3 py-1 rounded-full ${
+                                pct >= 90 ? 'bg-green-50 text-success' :
+                                pct >= 80 ? 'bg-primary-50 text-primary' :
+                                'bg-gold/10 text-gold'
+                              }`}>{pct}%</span>
+                            </td>
+                          </tr>
+                        );
+                      }) : (
+                        <tr>
+                          <td colSpan="5" className="px-6 py-12 text-center text-gray-500 text-sm">
+                            No results found for "{searchQuery}"
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </>
+          )}
 
           <div className="text-center mt-8">
             <Link to="/awards" className="btn-primary">View Awards <ArrowRight size={18} /></Link>

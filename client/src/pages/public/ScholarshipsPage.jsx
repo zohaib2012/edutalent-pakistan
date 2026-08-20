@@ -10,7 +10,7 @@ const phases = [
     grades: 'Grades 1 – 5',
     eligibility: 'Students currently enrolled in Grade 1 to Grade 5 in any recognized school in Pakistan.',
     awards: 'Scholarship Awards: Laptops, Chromebooks, Shields, Certificates 🏆',
-    fee: 'PKR 1,500',
+    fee: 'PKR 1,200',
     testPattern: '100 MCQs | 60 Minutes | Subjects: English, Math, Science, Social Studies, Islamiat, IQ',
   },
   {
@@ -20,7 +20,7 @@ const phases = [
     grades: 'Grades 6 – 8',
     eligibility: 'Students currently enrolled in Grade 6 to Grade 8 in any recognized school in Pakistan.',
     awards: 'Scholarship Awards: Laptops, Chromebooks, Shields, Certificates 🏆',
-    fee: 'PKR 1,500',
+    fee: 'PKR 1,200',
     testPattern: '100 MCQs | 60 Minutes | Subjects: English, Math, Science, Pakistan Studies, Islamiat, IQ',
   },
   {
@@ -30,7 +30,7 @@ const phases = [
     grades: 'Grades 9 – 10',
     eligibility: 'Students currently enrolled in Grade 9 or Grade 10 in any recognized school in Pakistan.',
     awards: 'Scholarship Awards: Laptops, Chromebooks, Shields, Certificates 🏆',
-    fee: 'PKR 1,500',
+    fee: 'PKR 1,200',
     testPattern: '100 MCQs | 75 Minutes | Subjects: English, Math, Physics, Biology, Chemistry, Pakistan Studies, Islamiat, IQ',
   },
   {
@@ -40,7 +40,7 @@ const phases = [
     grades: 'Grade 11 – 12 & University',
     eligibility: 'Students currently enrolled in Grade 11, Grade 12, or any university degree program in Pakistan.',
     awards: 'Scholarship Awards: Laptops, Chromebooks, Shields, Certificates 🏆',
-    fee: 'PKR 1,500',
+    fee: 'PKR 1,200',
     testPattern: '100 MCQs | 90 Minutes | Subjects: Advanced English, Science, General Knowledge, Pakistan Affairs, Islamiat, IQ & Analytical Reasoning, Math',
   },
 ];

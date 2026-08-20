@@ -9,7 +9,7 @@ const notificationSchema = new mongoose.Schema(
     },
     recipientType: {
       type: String,
-      enum: ['student', 'all', 'phase_specific'],
+      enum: ['student', 'all', 'phase_specific', 'admin'],
     },
     phaseId: {
       type: mongoose.Schema.Types.ObjectId,

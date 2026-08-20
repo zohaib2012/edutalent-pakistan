@@ -75,6 +75,8 @@ const studentSchema = new mongoose.Schema({
     certificateNumber: { type: String },
     issuedAt: { type: Date },
     pdfUrl: { type: String },
+    fileUrl: { type: String },
+    fileType: { type: String },
     qrCodeUrl: { type: String },
   },
   status: {

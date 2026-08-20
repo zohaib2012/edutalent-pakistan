@@ -43,6 +43,7 @@ const AboutPage = () => {
               <div className="flex flex-wrap gap-4">
                 <Link to="/mission" className="btn-primary">Our Mission <ChevronRight size={18} /></Link>
                 <Link to="/vision" className="btn-outline">Our Vision</Link>
+                <Link to="/team" className="btn-outline"><Users size={16} /> Our Team</Link>
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">

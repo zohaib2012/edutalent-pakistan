@@ -21,5 +21,7 @@ router.use('/contact', require('./contactRoutes'));
 router.use('/notifications', require('./notificationRoutes'));
 router.use('/settings', require('./settingRoutes'));
 router.use('/phases', require('./phaseRoutes'));
+router.use('/merit-list', require('./meritRoutes'));
+router.use('/award-winners', require('./awardWinnerRoutes'));
 
 module.exports = router;

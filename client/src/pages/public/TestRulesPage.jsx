@@ -1,5 +1,4 @@
-import { Link } from 'react-router-dom';
-import { Camera, Mic, MessageSquare, UserX, Monitor, CameraOff, AlertTriangle, Clock, MonitorSmartphone, ShieldCheck, Laptop, Wifi, Smartphone, Tablet, ArrowRight } from 'lucide-react';
+import { Camera, Mic, MessageSquare, UserX, Monitor, CameraOff, AlertTriangle, Clock, MonitorSmartphone, ShieldCheck, Laptop, Wifi, Smartphone, Tablet } from 'lucide-react';
 
 const rules = [
   { icon: Camera, title: 'Camera & Mic Must Stay ON', desc: 'Your camera and microphone must remain active throughout the entire test duration. Any interruption may result in disqualification.' },
@@ -50,9 +49,6 @@ const TestRulesPage = () => {
                 <h3 className="font-heading font-bold text-primary text-base md:text-lg mb-1">Works on All Devices</h3>
                 <p className="text-sm text-gray-600">Our online test supports: Laptop, Desktop Computer, Mobile Phone, Tablet, and Chromebook</p>
               </div>
-              <Link to="/demo-test" className="btn-primary text-sm py-2.5 px-6 w-full md:w-auto justify-center flex-shrink-0">
-                Try Demo Test <ArrowRight size={16} />
-              </Link>
             </div>
           </div>
         </div>

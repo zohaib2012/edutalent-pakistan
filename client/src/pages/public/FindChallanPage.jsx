@@ -1,23 +1,62 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Search, FileText, Download, User, Hash, Calendar, CheckCircle, Clock, AlertCircle, Landmark, Banknote } from 'lucide-react';
+import { Search, FileText, Download, User, Hash, Calendar, CheckCircle, Clock, AlertCircle, Landmark, Banknote, Loader2 } from 'lucide-react';
+import { searchPublicChallan } from '../../services/api';
+import { downloadChallanPDF } from '../../utils/challanPDF';
 import logo from '../../assets/images/logo.jpeg';
 
 const FindChallanPage = () => {
   const [regNumber, setRegNumber] = useState('');
   const [cnic, setCnic] = useState('');
   const [challanData, setChallanData] = useState(null);
+  const [rawData, setRawData] = useState(null);
   const [searched, setSearched] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
-  const handleSearch = (e) => {
+  const handleSearch = async (e) => {
     e.preventDefault();
+    setLoading(true);
+    setError('');
     setSearched(true);
-    setChallanData({
-      studentName: 'Ahmed Khan',
-      challanNumber: 'CH-2025-00142',
-      amount: 'PKR 500',
-      dueDate: 'August 20, 2025',
-      status: 'Paid',
+    setChallanData(null);
+    setRawData(null);
+    try {
+      const res = await searchPublicChallan({ registrationNumber: regNumber, cnic });
+      const { challan, student } = res.data;
+      setRawData(res.data);
+      setChallanData({
+        studentName: student.fullName,
+        challanNumber: challan.challanNumber,
+        amount: `PKR ${(challan.amount || 1200).toLocaleString()}`,
+        amountNum: challan.amount || 1200,
+        dueDate: challan.dueDate ? new Date(challan.dueDate).toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A',
+        status: challan.paymentVerified ? 'Verified' : challan.isPaid ? 'Pending' : 'Unpaid',
+        isPaid: !!challan.paymentVerified,
+      });
+    } catch (err) {
+      setError(err.response?.data?.message || 'No challan found for the provided details.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDownload = () => {
+    if (!rawData) return;
+    const { challan, student } = rawData;
+    downloadChallanPDF({
+      challanNumber: challan.challanNumber,
+      registrationNumber: student.registrationNumber,
+      fullName: student.fullName,
+      fatherName: student.fatherName,
+      cnicOrBform: student.cnicOrBform,
+      mobileNumber: student.mobileNumber,
+      email: student.email,
+      phase: student.phase,
+      grade: student.grade,
+      dueDate: challan.dueDate,
+      amount: challan.amount || 1200,
+      bank: {},
     });
   };
 
@@ -66,15 +105,15 @@ const FindChallanPage = () => {
                   />
                 </div>
               </div>
-              <button type="submit" className="btn-primary w-full justify-center text-base py-3.5">
-                <Search size={18} /> Search Challan
+              <button type="submit" disabled={loading} className="btn-primary w-full justify-center text-base py-3.5 disabled:opacity-60 disabled:cursor-not-allowed">
+                {loading ? <Loader2 size={18} className="animate-spin" /> : <Search size={18} />} Search Challan
               </button>
             </form>
 
-            {searched && !challanData && (
+            {searched && error && (
               <div className="mt-6 bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
                 <AlertCircle size={20} className="text-red-500" />
-                <p className="text-sm text-red-700">No challan found for the provided details. Please check your information and try again.</p>
+                <p className="text-sm text-red-700">{error}</p>
               </div>
             )}
 
@@ -115,7 +154,7 @@ const FindChallanPage = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                    {challanData.status === 'Paid' ? (
+                    {challanData.isPaid ? (
                       <CheckCircle size={16} className="text-success shrink-0" />
                     ) : (
                       <Clock size={16} className="text-amber-500 shrink-0" />
@@ -123,7 +162,7 @@ const FindChallanPage = () => {
                     <div>
                       <div className="text-xs text-gray-500">Status</div>
                       <span className={`inline-block text-xs font-semibold px-2.5 py-0.5 rounded-full ${
-                        challanData.status === 'Paid' ? 'bg-green-50 text-success' : 'bg-amber-50 text-amber-600'
+                        challanData.isPaid ? 'bg-green-50 text-success' : 'bg-amber-50 text-amber-600'
                       }`}>
                         {challanData.status}
                       </span>
@@ -136,7 +175,7 @@ const FindChallanPage = () => {
                   </div>
                 </div>
                 <div className="px-6 pb-6">
-                  <button className="btn-primary w-full justify-center text-sm py-3 shadow-lg shadow-primary/20">
+                  <button onClick={handleDownload} className="btn-primary w-full justify-center text-sm py-3 shadow-lg shadow-primary/20">
                     <Download size={16} /> Download Challan PDF
                   </button>
                 </div>

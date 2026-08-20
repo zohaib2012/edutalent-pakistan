@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Megaphone, Plus, X, Edit, Trash2, Calendar, Star, ChevronDown, ChevronUp, Loader2 } from 'lucide-react';
+import { Megaphone, Plus, X, Edit, Trash2, Calendar, Star, ChevronDown, ChevronUp, Loader2, Image as ImageIcon } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
-import { getAdminAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, getPhases } from '../../services/api';
+import api, { getPhases } from '../../services/api';
 
 const inputClass = "w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8] bg-white transition-colors";
 
@@ -13,6 +13,8 @@ export default function AdminAnnouncementsPage() {
   const [editingId, setEditingId] = useState(null);
   const [showInactive, setShowInactive] = useState(false);
   const [hoveredId, setHoveredId] = useState(null);
+  const [imageFile, setImageFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState('');
 
   const [form, setForm] = useState({
     title: '', content: '', summary: '', isFeatured: false, targetPhase: '', publishDate: '',
@@ -35,7 +37,7 @@ export default function AdminAnnouncementsPage() {
   const fetchAnnouncements = async () => {
     setLoading(true);
     try {
-      const res = await getAdminAnnouncements();
+      const res = await api.get('/announcements/admin/all');
       setAnnouncements(res.data || []);
     } catch {
       setAnnouncements([]);
@@ -47,6 +49,8 @@ export default function AdminAnnouncementsPage() {
   const openCreate = () => {
     setEditingId(null);
     setForm({ title: '', content: '', summary: '', isFeatured: false, targetPhase: '', publishDate: '' });
+    setImageFile(null);
+    setImagePreview('');
     setShowModal(true);
   };
 
@@ -57,6 +61,8 @@ export default function AdminAnnouncementsPage() {
       isFeatured: a.isFeatured || false, targetPhase: a.targetPhase?._id || a.targetPhase || '',
       publishDate: a.publishDate?.split('T')[0] || '',
     });
+    setImageFile(null);
+    setImagePreview(a.imageUrl || '');
     setShowModal(true);
   };
 
@@ -74,10 +80,19 @@ export default function AdminAnnouncementsPage() {
       publishDate: form.publishDate || undefined,
     };
     try {
-      if (editingId) {
-        await updateAnnouncement(editingId, payload);
+      if (imageFile) {
+        const fd = new FormData();
+        Object.entries(payload).forEach(([k, v]) => fd.append(k, v === undefined ? '' : v));
+        fd.append('image', imageFile);
+        if (editingId) {
+          await api.put(`/announcements/${editingId}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        } else {
+          await api.post('/announcements', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+        }
+      } else if (editingId) {
+        await api.put(`/announcements/${editingId}`, payload);
       } else {
-        await createAnnouncement(payload);
+        await api.post('/announcements', payload);
       }
       setShowModal(false);
       fetchAnnouncements();
@@ -89,7 +104,7 @@ export default function AdminAnnouncementsPage() {
   const handleDelete = async (id) => {
     if (!confirm('Delete this announcement?')) return;
     try {
-      await deleteAnnouncement(id);
+      await api.delete(`/announcements/${id}`);
       fetchAnnouncements();
     } catch {
       alert('Failed to delete');
@@ -100,7 +115,7 @@ export default function AdminAnnouncementsPage() {
     const ann = announcements.find(a => a._id === id);
     if (!ann) return;
     try {
-      await updateAnnouncement(id, { isActive: !ann.isActive });
+      await api.put(`/announcements/${id}`, { isActive: !ann.isActive });
       fetchAnnouncements();
     } catch {
       alert('Failed to update status');
@@ -160,16 +175,22 @@ export default function AdminAnnouncementsPage() {
                     <tr key={a._id} className="border-b border-gray-50 hover:bg-gray-50 relative">
                       <td className="px-5 py-3 text-gray-500">{i + 1}</td>
                       <td className="px-5 py-3">
-                        <div onMouseEnter={() => setHoveredId(a._id)} onMouseLeave={() => setHoveredId(null)} className="relative">
-                          <span className="font-medium text-gray-900 cursor-pointer hover:text-[#1A73E8]">
-                            {a.title}
-                          </span>
-                          {hoveredId === a._id && (
-                            <div className="absolute left-0 top-full mt-2 z-20 w-72 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl">
-                              <p className="text-white/80 mb-1 font-medium">{a.title}</p>
-                              <p className="text-white/60 leading-relaxed">{a.summary || a.content?.slice(0, 120)}</p>
-                            </div>
+                        <div className="flex items-center gap-3">
+                          {a.imageUrl && (
+                            <img src={a.imageUrl} alt="" className="w-12 h-10 object-cover rounded-md border border-gray-200" />
                           )}
+                          <div onMouseEnter={() => setHoveredId(a._id)} onMouseLeave={() => setHoveredId(null)} className="relative">
+                            <span className="font-medium text-gray-900 cursor-pointer hover:text-[#1A73E8]">
+                              {a.title}
+                            </span>
+                            {hoveredId === a._id && (
+                              <div className="absolute left-0 top-full mt-2 z-20 w-72 bg-gray-900 text-white text-xs rounded-lg p-3 shadow-xl">
+                                {a.imageUrl && <img src={a.imageUrl} alt="" className="w-full h-32 object-cover rounded-md mb-2" />}
+                                <p className="text-white/80 mb-1 font-medium">{a.title}</p>
+                                <p className="text-white/60 leading-relaxed">{a.summary || a.content?.slice(0, 120)}</p>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="px-5 py-3 text-gray-600">{(a.publishDate || a.createdAt) ? new Date(a.publishDate || a.createdAt).toLocaleDateString() : '-'}</td>
@@ -235,6 +256,31 @@ export default function AdminAnnouncementsPage() {
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-1.5">Content *</label>
                     <textarea rows={5} value={form.content} onChange={(e) => setForm({ ...form, content: e.target.value })} placeholder="Full announcement content..." className={inputClass + " resize-none"} />
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1.5">Image <span className="text-gray-400 text-xs">(Optional)</span></label>
+                    <div className="border-2 border-dashed border-gray-300 rounded-lg p-3 text-center cursor-pointer hover:border-[#1A73E8] hover:bg-blue-50/30 transition-colors"
+                      onClick={() => document.getElementById('announcement-image-input').click()}>
+                      {imagePreview ? (
+                        <img src={imagePreview} alt="Preview" className="h-28 w-auto object-contain mx-auto" />
+                      ) : (
+                        <p className="text-sm text-gray-500 flex items-center justify-center gap-2">
+                          <ImageIcon size={16} /> Click to upload announcement image
+                        </p>
+                      )}
+                      <input id="announcement-image-input" type="file" accept="image/*" className="hidden"
+                        onChange={(e) => {
+                          const file = e.target.files[0];
+                          if (file) {
+                            setImageFile(file);
+                            setImagePreview(URL.createObjectURL(file));
+                          }
+                        }} />
+                    </div>
+                    {imagePreview && (
+                      <button onClick={() => { setImageFile(null); setImagePreview(''); }}
+                        className="mt-2 text-xs text-red-600 hover:underline">Remove image</button>
+                    )}
                   </div>
                   <div className="grid grid-cols-2 gap-4">
                     <div>

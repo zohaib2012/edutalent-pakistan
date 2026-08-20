@@ -48,14 +48,20 @@ const AnnouncementsPage = () => {
             <div className="grid gap-6">
               {paginated.map((item) => (
                 <div key={item._id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow flex flex-col md:flex-row">
-                  <div className="bg-gradient-to-r from-primary to-primary-600 md:w-48 flex items-center justify-center p-6 text-white">
-                    <div className="text-center">
-                      <Calendar size={32} className="mx-auto mb-2 opacity-80" />
-                      <p className="text-sm font-semibold">
-                        {new Date(item.publishDate || item.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
-                      </p>
+                  {item.imageUrl ? (
+                    <div className="md:w-56 flex-shrink-0">
+                      <img src={item.imageUrl} alt={item.title} className="w-full h-40 md:h-full object-cover" />
                     </div>
-                  </div>
+                  ) : (
+                    <div className="bg-gradient-to-r from-primary to-primary-600 md:w-48 flex items-center justify-center p-6 text-white">
+                      <div className="text-center">
+                        <Calendar size={32} className="mx-auto mb-2 opacity-80" />
+                        <p className="text-sm font-semibold">
+                          {new Date(item.publishDate || item.createdAt).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                   <div className="p-6 flex-1">
                     <div className="flex flex-wrap items-center gap-2 mb-2">
                       {item.isFeatured && (
