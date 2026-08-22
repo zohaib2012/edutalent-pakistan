@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Download, Upload, CheckCircle, Clock, AlertCircle, Landmark, Loader2, Banknote, ImagePlus } from 'lucide-react';
-import { getStudentProfile, uploadChallan } from '../../services/api';
+import { getStudentProfile, postFormData } from '../../services/api';
 import { downloadChallanPDF } from '../../utils/challanPDF';
 import logo from '../../assets/images/logo.jpeg';
 
@@ -51,7 +51,7 @@ const ChallanDownloadPage = () => {
     try {
       const fd = new FormData();
       fd.append('challanImage', paidChallan);
-      await uploadChallan(fd);
+      await postFormData('/payments/upload', fd);
       await fetchStudentData();
       setPaidChallan(null);
       setUploadSuccess(true);

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Award, Search, CheckCircle, Loader2, Upload, X } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
-import { uploadCertificate } from '../../services/api';
+import { postFormData } from '../../services/api';
 import api from '../../services/api';
 
 const inputClass = "w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8] bg-white transition-colors";
@@ -54,7 +54,7 @@ export default function AdminCertificatesPage() {
       fd.append('cnic', cnic);
       fd.append('certificateType', certType);
       fd.append('certificateFile', certFile);
-      const res = await uploadCertificate(fd);
+      const res = await postFormData('/certificates/upload', fd);
       setUploadResult({ success: true, data: res.data });
     } catch (err) {
       setUploadResult({ success: false, message: err.response?.data?.message || 'Upload failed' });

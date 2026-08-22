@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Megaphone, Plus, X, Edit, Trash2, Calendar, Star, ChevronDown, ChevronUp, Loader2, Image as ImageIcon } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
-import api, { getPhases } from '../../services/api';
+import api, { getPhases, fetchFormData } from '../../services/api';
 
 const inputClass = "w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8] bg-white transition-colors";
 
@@ -85,9 +85,9 @@ export default function AdminAnnouncementsPage() {
         Object.entries(payload).forEach(([k, v]) => fd.append(k, v === undefined ? '' : v));
         fd.append('image', imageFile);
         if (editingId) {
-          await api.put(`/announcements/${editingId}`, fd);
+          await fetchFormData(`/announcements/${editingId}`, fd, 'PUT');
         } else {
-          await api.post('/announcements', fd);
+          await fetchFormData('/announcements', fd);
         }
       } else if (editingId) {
         await api.put(`/announcements/${editingId}`, payload);

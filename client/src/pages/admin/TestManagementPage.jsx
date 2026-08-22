@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Plus, Trash2, Search, X, Loader2 } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
-import api, { getPhases } from '../../services/api';
+import api, { getPhases, postFormData } from '../../services/api';
 
 export default function TestManagementPage() {
   const [activeTab, setActiveTab] = useState('Questions');
@@ -70,7 +70,7 @@ export default function TestManagementPage() {
         timeLimit: Number(form.timeLimit) || 25,
       }).forEach(([k, v]) => fd.append(k, v));
       if (questionImage) fd.append('questionImage', questionImage);
-      await api.post('/questions', fd);
+      await postFormData('/questions', fd);
       setShowAddModal(false);
       setForm({ question: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: '', subject: '', phase: '', difficulty: 'Medium', timeLimit: '25' });
       setQuestionImage(null);

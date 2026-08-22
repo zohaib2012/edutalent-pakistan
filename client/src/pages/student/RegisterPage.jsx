@@ -5,7 +5,7 @@ import {
   Phone, FileText, ClipboardList, CheckCircle, AlertCircle,
   X, Loader2
 } from 'lucide-react';
-import { createAccount, submitApplication, getApplicationForm, studentLogin } from '../../services/api';
+import { createAccount, getApplicationForm, studentLogin, postFormData } from '../../services/api';
 
 const provinces = ['Sindh','Punjab','KPK','Balochistan','AJK','GB','Islamabad'];
 
@@ -277,7 +277,7 @@ const RegisterPage = () => {
       if (documents.certificate) fd.append('documents[certificate]', documents.certificate);
       if (documents.photo) fd.append('documents[photo]', documents.photo);
 
-      const res = await submitApplication(fd);
+      const res = await postFormData('/registration/submit-application', fd);
       navigate('/registration-success', {
         state: {
           registrationNumber: res.data?.registrationNumber || registrationNumber || form.cnicOrBform || '',

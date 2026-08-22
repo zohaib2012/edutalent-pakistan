@@ -24,6 +24,23 @@ export const postFormData = async (url, formData) => {
   return { data };
 };
 
+export const fetchFormData = async (url, formData, method = 'POST') => {
+  const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
+  const res = await fetch(`${API_BASE}${url}`, {
+    method,
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  let data = {};
+  try { data = await res.json(); } catch { /* ignore */ }
+  if (!res.ok) {
+    const err = new Error(data.message || 'Upload failed');
+    err.response = { data: data || { message: 'Upload failed' } };
+    throw err;
+  }
+  return { data };
+};
+
 // Request interceptor to attach token
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token');
