@@ -7,49 +7,9 @@ const api = axios.create({
   headers: { 'Content-Type': 'application/json' },
 });
 
-export const postFormData = async (url, formData) => {
-  const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-  const res = await fetch(`${API_BASE}${url}`, {
-    method: 'POST',
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    body: formData,
-  });
-  let data = {};
-  try { data = await res.json(); } catch { /* ignore */ }
-  if (!res.ok) {
-    const err = new Error(data.message || 'Upload failed');
-    err.response = { data: data || { message: 'Upload failed' } };
-    throw err;
-  }
-  return { data };
-};
-
-export const fetchFormData = async (url, formData, method = 'POST') => {
-  const token = localStorage.getItem('adminToken') || localStorage.getItem('token');
-  const res = await fetch(`${API_BASE}${url}`, {
-    method,
-    headers: token ? { Authorization: `Bearer ${token}` } : {},
-    body: formData,
-  });
-  let data = {};
-  try { data = await res.json(); } catch { /* ignore */ }
-  if (!res.ok) {
-    const err = new Error(data.message || 'Upload failed');
-    err.response = { data: data || { message: 'Upload failed' } };
-    throw err;
-  }
-  return { data };
-};
-
-// Request interceptor to attach token
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('token');
-  const adminToken = localStorage.getItem('adminToken');
-  const url = config.url || '';
-  const method = (config.method || 'get').toLowerCase();
-
+const isAdminUrl = (url, method = 'get') => {
   const isStudentProfile = url.includes('/students/profile');
-  const isAdminPath = !isStudentProfile && (
+  return !isStudentProfile && (
     url.includes('/admin') ||
     url.includes('/admindashboard') ||
     url.includes('/slips/generate') ||
@@ -81,6 +41,57 @@ api.interceptors.request.use((config) => {
     (url.includes('/award-winners') && method !== 'get') ||
     (url.includes('/contact') && method !== 'post' && !url.includes('/contact/my-replies'))
   );
+};
+
+const resolveToken = (url, method = 'get') => {
+  const token = localStorage.getItem('token');
+  const adminToken = localStorage.getItem('adminToken');
+  if (isAdminUrl(url, method) && adminToken) return adminToken;
+  return token || null;
+};
+
+export const postFormData = async (url, formData) => {
+  const token = resolveToken(url, 'post');
+  const res = await fetch(`${API_BASE}${url}`, {
+    method: 'POST',
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  let data = {};
+  try { data = await res.json(); } catch { /* ignore */ }
+  if (!res.ok) {
+    const err = new Error(data.message || 'Upload failed');
+    err.response = { data: data || { message: 'Upload failed' } };
+    throw err;
+  }
+  return { data };
+};
+
+export const fetchFormData = async (url, formData, method = 'POST') => {
+  const token = resolveToken(url, method.toLowerCase());
+  const res = await fetch(`${API_BASE}${url}`, {
+    method,
+    headers: token ? { Authorization: `Bearer ${token}` } : {},
+    body: formData,
+  });
+  let data = {};
+  try { data = await res.json(); } catch { /* ignore */ }
+  if (!res.ok) {
+    const err = new Error(data.message || 'Upload failed');
+    err.response = { data: data || { message: 'Upload failed' } };
+    throw err;
+  }
+  return { data };
+};
+
+// Request interceptor to attach token
+api.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token');
+  const adminToken = localStorage.getItem('adminToken');
+  const url = config.url || '';
+  const method = (config.method || 'get').toLowerCase();
+
+  const isAdminPath = isAdminUrl(url, method);
 
   if (isAdminPath && adminToken) {
     config.headers.Authorization = `Bearer ${adminToken}`;

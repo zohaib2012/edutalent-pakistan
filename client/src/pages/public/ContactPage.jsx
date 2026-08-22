@@ -162,7 +162,7 @@ const ContactPage = () => {
                   </div>
                   <div>
                     <h4 className="font-heading font-bold text-sm">Head Office Address</h4>
-                    <p className="text-gray-600 text-sm">Sindh, Hyderabad, Latifabad, Unit No#1, G.O.R Colony Street No#50</p>
+                    <p className="text-gray-600 text-sm">Opposite Al-Shafay Hospital, Pizza City Street, Banglow No D-34, Data Nagar, Qasimabad, Hyderabad</p>
                   </div>
                 </div>
               </div>
@@ -181,7 +181,7 @@ const ContactPage = () => {
               <div className="bg-gray-200 rounded-xl overflow-hidden border border-gray-100 h-64">
                 <iframe
                   title="EduTalent Pakistan Location"
-                  src="https://maps.google.com/maps?q=Sindh%2C%20Hyderabad%2C%20Latifabad%2C%20Unit%20No%201%2C%20G.O.R%20Colony%20Street%20No%2050&t=&z=15&ie=UTF8&iwloc=&output=embed"
+                  src="https://maps.google.com/maps?q=Qasimabad%2C%20Hyderabad%2C%20Data%20Nagar&t=&z=15&ie=UTF8&iwloc=&output=embed"
                   width="100%"
                   height="100%"
                   style={{ border: 0 }}
@@ -192,7 +192,7 @@ const ContactPage = () => {
               </div>
               <p className="text-xs text-gray-500 mt-2 flex items-start gap-1">
                 <MapPin size={14} className="mt-0.5 flex-shrink-0" />
-                Sindh, Hyderabad, Latifabad, Unit No#1, G.O.R Colony Street No#50
+                Opposite Al-Shafay Hospital, Pizza City Street, Banglow No D-34, Data Nagar, Qasimabad, Hyderabad
               </p>
             </div>
           </div>
