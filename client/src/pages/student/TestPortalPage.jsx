@@ -19,6 +19,7 @@ const TestPortalPage = () => {
   const [questions, setQuestions] = useState([]);
   const [totalQuestions, setTotalQuestions] = useState(0);
   const [loadingQuestion, setLoadingQuestion] = useState(false);
+  const [startError, setStartError] = useState('');
   const [currentQ, setCurrentQ] = useState(0);
   const [answers, setAnswers] = useState({});
   const [timeLeft, setTimeLeft] = useState(PER_QUESTION_TIME);
@@ -145,6 +146,7 @@ const TestPortalPage = () => {
   const startTestSession = async () => {
     try {
       setLoadingQuestion(true);
+      setStartError('');
       const res = await startTest();
       const total = res.data?.totalQuestions || 0;
       setTotalQuestions(total);
@@ -153,8 +155,13 @@ const TestPortalPage = () => {
       setAnswers({});
       await loadQuestion(0);
     } catch (err) {
-      alert(err.response?.data?.message || 'Failed to start test');
-      navigate('/profile');
+      if (err.response?.status === 403) {
+        setStartError(err.response?.data?.message || 'Test has not been issued to you yet.');
+        setPhase('intro');
+      } else {
+        alert(err.response?.data?.message || 'Failed to start test');
+        navigate('/profile');
+      }
     } finally {
       setLoadingQuestion(false);
     }
@@ -364,6 +371,13 @@ const TestPortalPage = () => {
               <input type="checkbox" checked={agreed} onChange={e => setAgreed(e.target.checked)} className="w-5 h-5 accent-primary" />
               <span className="text-sm text-gray-700">I agree to Test Rules and Anti-Cheating Policy</span>
             </label>
+
+            {startError && (
+              <div className="mb-6 bg-red-50 border border-red-200 rounded-xl p-4 flex items-center gap-3">
+                <AlertTriangle size={18} className="text-red-500 flex-shrink-0" />
+                <p className="text-sm text-red-700">{startError}</p>
+              </div>
+            )}
 
             <button disabled={!allPassed || !agreed || loadingQuestion}
               onClick={async () => { setPhase('test'); setTimeLeft(PER_QUESTION_TIME); await startTestSession(); }}

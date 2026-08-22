@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, Award, Trophy, Medal, TrendingUp, CheckCircle, XCircle, MinusCircle, Loader2, AlertCircle } from 'lucide-react';
+import { Download, Trophy, Medal, TrendingUp, CheckCircle, XCircle, MinusCircle, Loader2, AlertCircle } from 'lucide-react';
 import { getMyResult } from '../../services/api';
 
 const MyResultsPage = () => {
@@ -156,17 +156,6 @@ const MyResultsPage = () => {
                   <div>
                     <p className="text-xs text-gray-400 uppercase tracking-wider">Phase Rank</p>
                     <p className="text-xl font-heading font-bold text-gray-800">#{phaseRank}</p>
-                  </div>
-                </div>
-              )}
-              {result.awardCategory && (
-                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 flex items-center gap-4">
-                  <div className="w-12 h-12 bg-purple-50 rounded-xl flex items-center justify-center">
-                    <Award size={24} className="text-purple-600" />
-                  </div>
-                  <div>
-                    <p className="text-xs text-gray-400 uppercase tracking-wider">Award</p>
-                    <p className="text-xl font-heading font-bold text-gray-800">{result.awardCategory}</p>
                   </div>
                 </div>
               )}

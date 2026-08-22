@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowRight, Users, Award, FileCheck, BookOpen, Laptop, Shield, ChevronRight, Clock, CheckCircle, Megaphone, Loader2 } from 'lucide-react';
+import { ArrowRight, Users, Award, FileCheck, BookOpen, Laptop, Shield, ChevronRight, Clock, CheckCircle, Megaphone, Loader2, Download, ShieldCheck } from 'lucide-react';
 import { getAnnouncements } from '../../services/api';
+import { downloadFile } from '../../utils/download';
 import logo from '../../assets/images/logo.jpeg';
+import fbrRegisteration from '../../assets/images/fbrregisteration.png';
+import filerCertification from '../../assets/images/filer certification.png';
 
 const phases = [
   { title: 'Phase 1', sub: 'Primary Level', grades: 'Grades 1-5', awards: 'Scholarship Awards, Laptops, Chromebooks, Shields, Certificates, Trophy', color: 'from-blue-500 to-blue-600' },
@@ -88,6 +91,21 @@ const HomePage = () => {
                 </div>
               </div>
             </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="bg-white border-b border-gray-100">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex flex-col sm:flex-row items-center justify-center gap-4">
+          <div className="flex items-center gap-2 text-sm text-gray-500">
+            <ShieldCheck size={18} className="text-primary" />
+            <span className="font-medium">FBR Registered &amp; Verified Platform</span>
+          </div>
+          <div className="flex items-center gap-4">
+            <img src={fbrRegisteration} alt="FBR Registration" title="FBR Registration"
+              className="h-16 w-auto bg-white rounded-lg border border-gray-200 p-1.5 object-contain" />
+            <img src={filerCertification} alt="NTN Filer Certification" title="NTN Filer Certification"
+              className="h-16 w-auto bg-white rounded-lg border border-gray-200 p-1.5 object-contain" />
           </div>
         </div>
       </section>
@@ -188,7 +206,14 @@ const HomePage = () => {
               {latestAnnouncements.map((item) => (
                 <div key={item._id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow flex flex-col">
                   {item.imageUrl ? (
-                    <img src={item.imageUrl} alt={item.title} className="h-32 w-full object-cover" />
+                    <div className="relative group">
+                      <img src={item.imageUrl} alt={item.title} className="h-32 w-full object-cover" />
+                      <button onClick={() => downloadFile(item.imageUrl, 'Announcement')}
+                        className="absolute bottom-2 right-2 p-1.5 bg-black/60 text-white rounded-lg hover:bg-black/80 transition-colors"
+                        title="Download image">
+                        <Download size={13} />
+                      </button>
+                    </div>
                   ) : (
                     <div className="bg-gradient-to-r from-primary to-primary-600 h-28 flex items-center justify-center">
                       <Megaphone size={44} className="text-white/40" />

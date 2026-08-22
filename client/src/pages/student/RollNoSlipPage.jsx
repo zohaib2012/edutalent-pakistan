@@ -78,7 +78,7 @@ const RollNoSlipPage = () => {
         <p>Scholarship Testing Program — Roll No Slip</p>
       </div>
       <div class="header clearfix">
-        <div class="photo-box">PHOTO</div>
+        ${studentData.photoUrl ? `<img src="${studentData.photoUrl}" alt="Candidate Photo" style="width:100px;height:100px;object-fit:cover;border:2px solid #cbd5e1;float:right;border-radius:8px;" />` : '<div class="photo-box">PHOTO</div>'}
       </div>
       <div style="text-align:center;"><span class="badge">ROLL NO: ${slipData.rollNumber || ''}</span></div>
       <table>
@@ -173,51 +173,85 @@ const RollNoSlipPage = () => {
 
               <div className="p-6 md:p-8 relative">
                 <div className="absolute -right-8 -top-8 w-40 h-40 rounded-full bg-primary-50/60 pointer-events-none" />
+                <div className="absolute -left-6 -bottom-6 opacity-[0.04] select-none pointer-events-none">
+                  <img src={logo} alt="" className="w-56 h-56 rounded-full object-cover" />
+                </div>
                 <div className="relative">
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3 p-3 bg-gray-50 rounded-lg">
-                      <User size={16} className="text-primary mt-0.5" />
-                      <div className="flex-1 flex justify-between">
-                        <div>
-                          <p className="text-xs text-gray-500">Student Name</p>
-                          <p className="text-sm font-semibold text-gray-800">{studentData?.fullName}</p>
+                  <div className="flex flex-col sm:flex-row gap-5 mb-5">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary to-primary-700 flex items-center justify-center shadow-md shadow-primary/20">
+                          <User size={24} className="text-white" />
                         </div>
-                        <div className="text-right">
-                          <p className="text-xs text-gray-500">Father Name</p>
-                          <p className="text-sm font-semibold text-gray-800">{studentData?.fatherName}</p>
+                        <div className="min-w-0">
+                          <p className="text-[10px] text-gray-400 uppercase tracking-widest">Candidate Name</p>
+                          <p className="text-lg font-heading font-bold text-gray-900 truncate">{studentData?.fullName}</p>
                         </div>
                       </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-3">
-                      <div className="p-3 bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg border border-primary-100 relative overflow-hidden">
-                        <div className="absolute -right-3 -bottom-3 text-primary/10"><BadgeCheck size={40} /></div>
-                        <p className="text-xs text-gray-500">Roll Number</p>
-                        <p className="text-sm font-heading font-bold text-primary">{slipData.rollNumber}</p>
-                      </div>
-                      <div className="p-3 bg-gradient-to-br from-gold-50 to-gold-100 rounded-lg border border-gold-100 relative overflow-hidden">
-                        <p className="text-xs text-gray-500">Phase</p>
-                        <p className="text-sm font-semibold text-gray-800">{studentData?.phaseId?.name || ''}</p>
-                      </div>
-                    </div>
-
-                    <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg">
-                      <MapPin size={16} className="text-primary" />
-                      <div>
-                        <p className="text-xs text-gray-500">Test Center</p>
-                        <p className="text-sm font-semibold">{slipData.testCenter || 'Online / Designated Center'}</p>
+                      <div className="space-y-2.5">
+                        <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                          <span className="text-xs text-gray-500">Father's Name</span>
+                          <span className="text-sm font-semibold text-gray-800">{studentData?.fatherName}</span>
+                        </div>
+                        <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                          <span className="text-xs text-gray-500">Registration No.</span>
+                          <span className="text-sm font-semibold text-gray-800 font-mono">{studentData?.registrationNumber}</span>
+                        </div>
+                        <div className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                          <span className="text-xs text-gray-500">CNIC / B-Form</span>
+                          <span className="text-sm font-semibold text-gray-800 font-mono">{studentData?.cnicOrBform}</span>
+                        </div>
                       </div>
                     </div>
 
-                    <div className="flex items-start gap-2 p-4 bg-amber-50 border border-amber-200 rounded-lg">
-                      <Phone size={16} className="text-amber-700 mt-0.5" />
-                      <div>
-                        <p className="text-xs font-semibold text-amber-800">Test Date &amp; Timing</p>
-                        <p className="text-xs text-amber-700 mt-1">
-                          Test date and timing will be shared via SMS/WhatsApp. Contact or message
-                          <span className="font-bold"> 03468275954</span> to confirm your test date and time.
-                        </p>
+                    <div className="shrink-0 mx-auto sm:mx-0">
+                      <div className="w-28 h-32 rounded-xl border-2 border-dashed border-gray-300 bg-gradient-to-b from-gray-50 to-white overflow-hidden relative">
+                        {studentData?.photoUrl ? (
+                          <img src={studentData.photoUrl} alt="Candidate" className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-full text-gray-300">
+                            <User size={28} />
+                            <p className="text-[9px] mt-1">PHOTO</p>
+                          </div>
+                        )}
                       </div>
+                    </div>
+                  </div>
+
+                  <div className="border-2 border-dashed border-primary/40 rounded-xl px-4 py-3 mb-4 bg-primary-50/40 text-center">
+                    <p className="text-[10px] text-gray-500 uppercase tracking-widest mb-0.5">Roll No.</p>
+                    <p className="text-xl md:text-2xl font-heading font-bold tracking-[0.15em] text-primary">{slipData.rollNumber}</p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3 mb-4">
+                    <div className="p-3 bg-gradient-to-br from-primary-50 to-primary-100 rounded-lg border border-primary-100 relative overflow-hidden">
+                      <div className="absolute -right-3 -bottom-3 text-primary/10"><BadgeCheck size={40} /></div>
+                      <p className="text-xs text-gray-500">Phase</p>
+                      <p className="text-sm font-semibold text-gray-800">{studentData?.phaseId?.name || ''}</p>
+                    </div>
+                    <div className="p-3 bg-gradient-to-br from-gold-50 to-gold-100 rounded-lg border border-gold-100 relative overflow-hidden">
+                      <p className="text-xs text-gray-500">Grade / Class</p>
+                      <p className="text-sm font-semibold text-gray-800">{studentData?.grade || 'N/A'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2 p-3 bg-gray-50 rounded-lg mb-4">
+                    <MapPin size={16} className="text-primary shrink-0" />
+                    <div>
+                      <p className="text-xs text-gray-500">Test Center</p>
+                      <p className="text-sm font-semibold">{slipData.testCenter || 'Online / Designated Center'}</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-2 p-4 bg-amber-50 border border-amber-200 rounded-lg mb-5">
+                    <Phone size={16} className="text-amber-700 mt-0.5 shrink-0" />
+                    <div>
+                      <p className="text-xs font-semibold text-amber-800">Test Date &amp; Timing</p>
+                      <p className="text-xs text-amber-700 mt-1">
+                        Test date and timing will be shared via SMS/WhatsApp. Contact or message
+                        <span className="font-bold"> 03468275954</span> to confirm your test date and time.
+                      </p>
                     </div>
                   </div>
 

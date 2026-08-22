@@ -44,6 +44,11 @@ const studentSchema = new mongoose.Schema({
     paymentVerifiedBy: { type: mongoose.Schema.Types.ObjectId, ref: 'Admin' },
     rejectionReason: { type: String },
   },
+  testMode: {
+    type: String,
+    enum: ['physical', 'online'],
+    default: 'online',
+  },
   rollNoSlip: {
     rollNumber: { type: String },
     testDate: { type: Date },
@@ -55,6 +60,8 @@ const studentSchema = new mongoose.Schema({
   },
   test: {
     attempted: { type: Boolean, default: false },
+    issued: { type: Boolean, default: false },
+    issuedAt: { type: Date },
     sessionId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestSession' },
     resultId: { type: mongoose.Schema.Types.ObjectId, ref: 'TestResult' },
     score: { type: Number },
@@ -81,7 +88,7 @@ const studentSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ['registered', 'challan_issued', 'payment_pending', 'payment_verified', 'slip_issued', 'test_completed', 'result_published'],
+    enum: ['registered', 'challan_issued', 'payment_pending', 'payment_verified', 'slip_issued', 'test_issued', 'test_completed', 'result_published'],
     default: 'registered',
   },
   isActive: { type: Boolean, default: true },

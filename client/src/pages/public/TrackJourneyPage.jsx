@@ -17,6 +17,7 @@ const statusProgressMap = {
   payment_pending: 1,
   payment_verified: 2,
   slip_issued: 3,
+  test_issued: 4,
   test_completed: 4,
   result_published: 5,
 };

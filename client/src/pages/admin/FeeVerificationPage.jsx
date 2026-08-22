@@ -1,11 +1,18 @@
 import { useState, useEffect } from 'react';
 import {
   CheckCircle, XCircle, Search, Download,
-  ChevronLeft, ChevronRight, Image, ExternalLink, Loader2
+  ChevronLeft, ChevronRight, Image, ExternalLink, Loader2, FileText
 } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 import { verifyPayment, rejectPayment, getPhases } from '../../services/api';
 import api from '../../services/api';
+import { downloadFile } from '../../utils/download';
+
+const isPdf = (url) => {
+  if (!url) return false;
+  const u = url.toLowerCase();
+  return u.includes('/raw/') || u.includes('.pdf') || u.includes('application/pdf');
+};
 
 const tabs = ['Pending', 'Verified', 'Rejected'];
 
@@ -347,11 +354,22 @@ export default function FeeVerificationPage() {
                 </div>
                 {showImageModal.challan?.paidChallanImageUrl ? (
                   <div className="mb-4">
-                    <img
-                      src={showImageModal.challan.paidChallanImageUrl}
-                      alt="Paid Challan"
-                      className="w-full rounded-lg border border-gray-200"
-                    />
+                    {isPdf(showImageModal.challan.paidChallanImageUrl) ? (
+                      <div className="bg-gray-100 rounded-lg border border-gray-200 p-6 text-center">
+                        <FileText size={48} className="text-gray-400 mx-auto mb-3" />
+                        <p className="text-sm text-gray-500 mb-3">This challan was uploaded as a PDF file.</p>
+                        <button onClick={() => downloadFile(showImageModal.challan.paidChallanImageUrl, `Challan-${showImageModal.challan.challanNumber || ''}`)}
+                          className="inline-flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1557B0]">
+                          <Download size={16} /> View / Download PDF
+                        </button>
+                      </div>
+                    ) : (
+                      <img
+                        src={showImageModal.challan.paidChallanImageUrl}
+                        alt="Paid Challan"
+                        className="w-full rounded-lg border border-gray-200"
+                      />
+                    )}
                     <a
                       href={showImageModal.challan.paidChallanImageUrl}
                       target="_blank"

@@ -1,27 +1,46 @@
 import { useState, useEffect } from 'react';
-import { Medal, Award, ArrowRight, Search, Loader2 } from 'lucide-react';
+import { Medal, Award, ArrowRight, Search, Loader2, FileDown, Image } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { getPublicMeritList } from '../../services/api';
+import { getPublicMeritList, getPublicMeritDocuments } from '../../services/api';
+import { downloadFile } from '../../utils/download';
 
 const MeritListPage = () => {
   const [entries, setEntries] = useState([]);
+  const [documents, setDocuments] = useState([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    getPublicMeritList()
-      .then((res) => setEntries(res.data?.data || []))
-      .catch(() => setEntries([]))
+    Promise.all([getPublicMeritList(), getPublicMeritDocuments()])
+      .then(([listRes, docRes]) => {
+        setEntries(listRes.data?.data || []);
+        setDocuments(docRes.data?.data || []);
+      })
+      .catch(() => {
+        setEntries([]);
+        setDocuments([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 
   const phaseIds = Array.from(new Set(entries.map((e) => e.phaseId?._id).filter(Boolean)));
   const phaseNames = entries.map((e) => e.phaseId?.name || 'Unknown').filter((v, i, a) => a.indexOf(v) === i);
   const activePhaseId = phaseIds[activeTab];
+  const activePhaseName = phaseNames[activeTab];
   const meritData = entries
     .filter((e) => e.phaseId?._id === activePhaseId)
     .sort((a, b) => (a.position || 0) - (b.position || 0));
+  const phaseDoc = documents.find((d) => (d.phaseId?._id || d.phaseId) === activePhaseId);
+  const isPdf = (url) => {
+    if (!url) return false;
+    const u = url.toLowerCase();
+    return u.includes('/raw/') || u.includes('.pdf');
+  };
+  const downloadDoc = () => {
+    if (!phaseDoc?.fileUrl) return;
+    downloadFile(phaseDoc.fileUrl, `${activePhaseName || 'Merit'} List`);
+  };
 
   const filteredData = meritData.filter((r) => {
     const q = searchQuery.toLowerCase();
@@ -71,15 +90,24 @@ const MeritListPage = () => {
                     </button>
                   ))}
                 </div>
-                <div className="relative w-full sm:w-auto">
-                  <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                  <input
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search by Registration ID..."
-                    className="w-full sm:w-64 pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
-                  />
+                <div className="flex items-center gap-3">
+                  <div className="relative w-full sm:w-auto">
+                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search by Registration ID..."
+                      className="w-full sm:w-64 pl-10 pr-4 py-3 border border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-primary focus:border-primary outline-none bg-white"
+                    />
+                  </div>
+                  {phaseDoc?.fileUrl && (
+                    <button onClick={downloadDoc}
+                      className="inline-flex items-center gap-2 bg-gold text-gray-900 px-4 py-3 rounded-lg text-sm font-semibold hover:bg-yellow-500 transition-colors whitespace-nowrap shrink-0">
+                      {isPdf(phaseDoc.fileUrl) ? <FileDown size={16} /> : <Image size={16} />}
+                      Download {activePhaseName} Merit List
+                    </button>
+                  )}
                 </div>
               </div>
 

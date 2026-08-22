@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, Megaphone, Loader2 } from 'lucide-react';
+import { ArrowLeft, Calendar, Megaphone, Loader2, Download } from 'lucide-react';
 import { getAnnouncementBySlug } from '../../services/api';
+import { downloadFile } from '../../utils/download';
+
+const downloadImage = (url) => {
+  if (!url) return;
+  downloadFile(url, 'Announcement');
+};
 
 const AnnouncementDetailPage = () => {
   const { slug } = useParams();
@@ -74,8 +80,16 @@ const AnnouncementDetailPage = () => {
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-8 md:p-12">
             {announcement.imageUrl && (
-              <img src={announcement.imageUrl} alt={announcement.title}
-                className="w-full max-h-96 object-cover rounded-xl border border-gray-200 mb-8" />
+              <div className="mb-8">
+                <img src={announcement.imageUrl} alt={announcement.title}
+                  className="w-full max-h-96 object-cover rounded-xl border border-gray-200" />
+                <div className="flex justify-end mt-3">
+                  <button onClick={() => downloadImage(announcement.imageUrl)}
+                    className="inline-flex items-center gap-2 bg-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-primary-600 transition-colors">
+                    <Download size={16} /> Download Image
+                  </button>
+                </div>
+              </div>
             )}
             <div className="prose prose-gray max-w-none">
               {contentParagraphs.map((para, i) => (

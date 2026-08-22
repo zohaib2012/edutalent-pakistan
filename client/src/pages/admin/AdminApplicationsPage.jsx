@@ -5,12 +5,12 @@ import api from '../../services/api';
 
 const statusLabels = {
   registered: 'Registered', challan_issued: 'Challan Issued', payment_pending: 'Payment Pending',
-  payment_verified: 'Payment Verified', slip_issued: 'Slip Issued', test_completed: 'Test Completed', result_published: 'Result Published',
+  payment_verified: 'Payment Verified', slip_issued: 'Slip Issued', test_issued: 'Test Issued', test_completed: 'Test Completed', result_published: 'Result Published',
 };
 const statusBadgeColors = {
   registered: 'bg-gray-100 text-gray-700', challan_issued: 'bg-blue-50 text-blue-700',
   payment_pending: 'bg-yellow-50 text-yellow-700', payment_verified: 'bg-green-50 text-green-700',
-  slip_issued: 'bg-purple-50 text-purple-700', test_completed: 'bg-teal-50 text-teal-700', result_published: 'bg-emerald-50 text-emerald-700',
+  slip_issued: 'bg-purple-50 text-purple-700', test_issued: 'bg-cyan-50 text-cyan-700', test_completed: 'bg-teal-50 text-teal-700', result_published: 'bg-emerald-50 text-emerald-700',
 };
 
 const inputClass = "w-full border border-gray-300 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8] bg-white transition-colors";
@@ -158,6 +158,7 @@ export default function AdminApplicationsPage() {
                       <div><span className={detailLabelClass}>Institution</span><p className={detailValueClass}>{viewApp.schoolOrCollege || viewApp.institutionName || '-'}</p></div>
                       <div><span className={detailLabelClass}>Grade / Class</span><p className={detailValueClass}>{viewApp.grade || '-'}</p></div>
                       <div><span className={detailLabelClass}>Phase</span><p className={detailValueClass}>{viewApp.phaseId?.name || '-'}</p></div>
+                      <div><span className={detailLabelClass}>Test Mode</span><p className={detailValueClass}>{viewApp.testMode === 'physical' ? 'Physical / In-Person' : viewApp.testMode === 'online' ? 'Online' : '-'}</p></div>
                       <div><span className={detailLabelClass}>Current Qualification</span><p className={detailValueClass}>{viewApp.currentQualification || '-'}</p></div>
                       <div><span className={detailLabelClass}>Last Qualification</span><p className={detailValueClass}>{viewApp.lastQualification || '-'}</p></div>
                       <div><span className={detailLabelClass}>Marks</span><p className={detailValueClass}>{viewApp.obtainedMarks != null ? `${viewApp.obtainedMarks} / ${viewApp.totalMarks || '-'}` : '-'}</p></div>

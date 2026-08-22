@@ -85,9 +85,9 @@ export default function AdminAnnouncementsPage() {
         Object.entries(payload).forEach(([k, v]) => fd.append(k, v === undefined ? '' : v));
         fd.append('image', imageFile);
         if (editingId) {
-          await api.put(`/announcements/${editingId}`, fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+          await api.put(`/announcements/${editingId}`, fd);
         } else {
-          await api.post('/announcements', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+          await api.post('/announcements', fd);
         }
       } else if (editingId) {
         await api.put(`/announcements/${editingId}`, payload);

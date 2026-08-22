@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Download, Award, Medal, Shield, Star, Trophy, Clock, Search, FileCheck, Plus, Loader, CheckCircle } from 'lucide-react';
 import { getMyCertificates, generateCertificate } from '../../services/api';
+import { downloadFile } from '../../utils/download';
 
 const certificateMeta = {
   '1st Position': { icon: Trophy, color: 'text-gold', bg: 'bg-gold/10 text-gold border-gold/20' },
@@ -362,9 +363,9 @@ const MyCertificatesPage = () => {
 
                       <div className="px-6 pb-6">
                         {cert.fileUrl ? (
-                          <a href={cert.fileUrl} target="_blank" rel="noopener noreferrer" className="btn-primary w-full justify-center text-sm">
+                          <button onClick={() => downloadFile(cert.fileUrl, `Certificate-${cert.studentName || ''}`.trim())} className="btn-primary w-full justify-center text-sm">
                             <Download size={16} /> Download Certificate
-                          </a>
+                          </button>
                         ) : (
                           <button onClick={() => downloadCertificatePDF(cert)} className="btn-primary w-full justify-center text-sm">
                             <Download size={16} /> Download Certificate

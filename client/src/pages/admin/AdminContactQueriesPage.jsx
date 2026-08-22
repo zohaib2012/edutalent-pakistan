@@ -1,13 +1,15 @@
 import { useState, useEffect } from 'react';
-import { MessageSquare, Mail, Phone, Search, Loader2, MailOpen, Inbox } from 'lucide-react';
+import { MessageSquare, Mail, Phone, Search, Loader2, Reply, MailOpen, Inbox } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
-import { getContactMessages, markContactRead } from '../../services/api';
+import { getContactMessages, replyContactMessage, markContactRead } from '../../services/api';
 
 export default function AdminContactQueriesPage() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [selected, setSelected] = useState(null);
+  const [reply, setReply] = useState('');
+  const [replying, setReplying] = useState(false);
 
   useEffect(() => { fetchMessages(); }, []);
 
@@ -25,11 +27,27 @@ export default function AdminContactQueriesPage() {
 
   const openMessage = async (m) => {
     setSelected(m);
+    setReply(m.replyMessage || '');
     if (!m.isRead) {
       try {
         await markContactRead(m._id);
         fetchMessages();
       } catch { /* ignore */ }
+    }
+  };
+
+  const handleReply = async () => {
+    if (!selected || !reply.trim()) return;
+    setReplying(true);
+    try {
+      await replyContactMessage(selected._id, { replyMessage: reply });
+      setSelected(null);
+      setReply('');
+      fetchMessages();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to send reply');
+    } finally {
+      setReplying(false);
     }
   };
 
@@ -138,9 +156,25 @@ export default function AdminContactQueriesPage() {
                 <p className="flex items-center gap-2 mb-1 text-xs text-gray-400"><MessageSquare size={13} /> Message</p>
                 {selected.message}
               </div>
+              {selected.replyMessage && (
+                <div className="bg-green-50 border border-green-200 rounded-lg p-4 text-sm text-green-700">
+                  <p className="flex items-center gap-2 mb-1 text-xs text-green-600"><Reply size={13} /> Previous Reply</p>
+                  {selected.replyMessage}
+                </div>
+              )}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">Reply to Student</label>
+                <textarea rows={4} value={reply} onChange={(e) => setReply(e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg p-3 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8] resize-none"
+                  placeholder="Write a reply — it will be visible in the student's profile..." />
+              </div>
             </div>
             <div className="flex items-center justify-end gap-3 p-5 border-t border-gray-100">
               <button onClick={() => setSelected(null)} className="px-4 py-2.5 rounded-lg text-sm border border-gray-300 text-gray-700 hover:bg-gray-50">Close</button>
+              <button onClick={handleReply} disabled={replying || !reply.trim()}
+                className="flex items-center gap-2 bg-[#1A73E8] text-white px-5 py-2.5 rounded-lg text-sm font-medium hover:bg-[#1557B0] disabled:opacity-50">
+                {replying ? <Loader2 size={16} className="animate-spin" /> : <Reply size={16} />} Send Reply
+              </button>
             </div>
           </div>
         </div>

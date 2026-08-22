@@ -50,6 +50,7 @@ const RegisterPage = () => {
     residentialAddress: '', mobileNumber: '', email: '',
     password: '', confirmPassword: '',
     currentClass: '',
+    testMode: 'online',
     schoolName: '', currentQualification: '', totalMarks: '',
     obtainedMarks: '', lastQualification: '',
     studentMobile: '', fatherMobile: '', whatsappNumber: '',
@@ -90,6 +91,7 @@ const RegisterPage = () => {
             mobileNumber: data.mobileNumber || sd.mobileNumber || '',
             email: data.email || sd.email || '',
             currentClass: data.currentClass || '',
+            testMode: data.testMode || 'online',
             schoolName: data.schoolName || '',
             currentQualification: data.currentQualification || '',
             totalMarks: data.totalMarks || '',
@@ -575,6 +577,30 @@ const RegisterPage = () => {
 
       case 2: return (
         <div className="grid md:grid-cols-2 gap-5">
+          <div className="md:col-span-2">
+            <label className="block text-sm font-semibold text-gray-700 mb-2">Test Mode</label>
+            <p className="text-xs text-gray-500 mb-3">How would you like to take the EduTalent scholarship test?</p>
+            <div className="flex gap-3">
+              <button type="button" onClick={() => updateForm('testMode', 'physical')}
+                className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium border transition-all text-left ${
+                  form.testMode === 'physical'
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-primary'
+                }`}>
+                <span className="block font-semibold">Physical / In-Person Test</span>
+                <span className="text-xs opacity-80">Attend the test at a designated test center</span>
+              </button>
+              <button type="button" onClick={() => updateForm('testMode', 'online')}
+                className={`flex-1 px-4 py-3 rounded-lg text-sm font-medium border transition-all text-left ${
+                  form.testMode === 'online'
+                    ? 'bg-primary text-white border-primary'
+                    : 'bg-white text-gray-600 border-gray-200 hover:border-primary'
+                }`}>
+                <span className="block font-semibold">Online Test</span>
+                <span className="text-xs opacity-80">Attempt the test online from home</span>
+              </button>
+            </div>
+          </div>
           <div>
             <label className="block text-sm font-semibold text-gray-700 mb-1">Student Mobile Number</label>
             <input type="text" value={form.studentMobile} onChange={e => updateForm('studentMobile', e.target.value)}
@@ -693,6 +719,7 @@ const RegisterPage = () => {
                 ['Mobile', form.mobileNumber],
                 ['Email', form.email],
                 ['Current Class', form.currentClass],
+                ['Test Mode', form.testMode === 'physical' ? 'Physical / In-Person Test' : 'Online Test'],
               ].map(([label, value], i) => (
                 <div key={i} className="flex justify-between py-1 border-b border-gray-100 last:border-0">
                   <span className="text-xs text-gray-500">{label}</span>

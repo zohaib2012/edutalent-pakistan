@@ -34,7 +34,7 @@ export default function LogsReportsPage() {
   const statusLabel = (s) => ({
     registered: 'Registered', challan_issued: 'Challan Issued',
     payment_pending: 'Payment Pending', payment_verified: 'Verified',
-    slip_issued: 'Slip Issued', test_completed: 'Test Completed',
+    slip_issued: 'Slip Issued', test_issued: 'Test Issued', test_completed: 'Test Completed',
     result_published: 'Published'
   })[s] || s;
 

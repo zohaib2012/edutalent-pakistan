@@ -54,7 +54,7 @@ export default function AdminDashboardPage() {
     const labels = {
       registered: 'Registered', challan_issued: 'Challan Issued',
       payment_pending: 'Pending', payment_verified: 'Verified',
-      slip_issued: 'Slip Issued', test_completed: 'Test Completed',
+      slip_issued: 'Slip Issued', test_issued: 'Test Issued', test_completed: 'Test Completed',
       result_published: 'Published'
     };
     return labels[status] || status;

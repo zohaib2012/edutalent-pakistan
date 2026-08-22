@@ -1,7 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Calendar, ArrowRight, ChevronLeft, ChevronRight, Megaphone, Loader2 } from 'lucide-react';
+import { Calendar, ArrowRight, ChevronLeft, ChevronRight, Megaphone, Loader2, Download } from 'lucide-react';
 import { getAnnouncements } from '../../services/api';
+import { downloadFile } from '../../utils/download';
+
+const downloadImage = (url) => {
+  if (!url) return;
+  downloadFile(url, 'Announcement');
+};
 
 const ITEMS_PER_PAGE = 4;
 
@@ -49,8 +55,13 @@ const AnnouncementsPage = () => {
               {paginated.map((item) => (
                 <div key={item._id} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden hover:shadow-xl transition-shadow flex flex-col md:flex-row">
                   {item.imageUrl ? (
-                    <div className="md:w-56 flex-shrink-0">
+                    <div className="md:w-56 flex-shrink-0 relative group">
                       <img src={item.imageUrl} alt={item.title} className="w-full h-40 md:h-full object-cover" />
+                      <button onClick={() => downloadImage(item.imageUrl)}
+                        className="absolute bottom-2 right-2 p-2 bg-black/60 text-white rounded-lg hover:bg-black/80 transition-colors"
+                        title="Download image">
+                        <Download size={14} />
+                      </button>
                     </div>
                   ) : (
                     <div className="bg-gradient-to-r from-primary to-primary-600 md:w-48 flex items-center justify-center p-6 text-white">

@@ -97,6 +97,35 @@ exports.generateResults = async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 };
+exports.generateSingleResult = async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.studentId).populate('phaseId');
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+    const result = await TestResult.findOne({ studentId: student._id }).sort({ createdAt: -1 });
+    if (!result) return res.status(400).json({ message: 'No test result found for this student' });
+
+    const phaseResults = await TestResult.find({ phaseId: student.phaseId }).sort({ obtainedMarks: -1, createdAt: 1 });
+    const rank = phaseResults.findIndex((r) => r._id.equals(result._id)) + 1;
+
+    result.phaseRank = rank || null;
+    result.publishedAt = new Date();
+    await result.save();
+
+    student.status = 'result_published';
+    student.test = {
+      ...(student.test || {}),
+      resultId: result._id,
+      position: rank || null,
+      phaseWisePosition: rank || null,
+    };
+    await student.save();
+
+    res.json({ message: `Result published for ${student.fullName}`, studentId: student._id, rank, percentage: result.percentage, obtainedMarks: result.obtainedMarks });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.getAll = async (req, res) => {
   try { const results = await TestResult.find().populate('studentId', 'fullName').sort({ createdAt: -1 }); res.json(results); } catch (error) { res.status(500).json({ message: error.message }); }
 };

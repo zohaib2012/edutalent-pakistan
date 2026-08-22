@@ -6,10 +6,36 @@ exports.getInstructions = async (req, res) => {
   res.json({ instructions: 'Read all instructions carefully. You have 100 MCQs with 25 seconds each. Camera and mic must be ON.' });
 };
 
+exports.issueTest = async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.studentId);
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+    student.test.issued = true;
+    student.test.issuedAt = new Date();
+    if (student.status === 'slip_issued') {
+      student.status = 'test_issued';
+    }
+    await student.save();
+    res.json({ message: `Test issued to ${student.fullName}`, student: { id: student._id, name: student.fullName, status: student.status, testIssued: true } });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
+exports.revokeTest = async (req, res) => {
+  try {
+    const student = await Student.findById(req.params.studentId);
+    if (!student) return res.status(404).json({ message: 'Student not found' });
+    student.test.issued = false;
+    student.test.issuedAt = null;
+    await student.save();
+    res.json({ message: `Test access revoked for ${student.fullName}` });
+  } catch (error) { res.status(500).json({ message: error.message }); }
+};
+
 exports.startTest = async (req, res) => {
   try {
     const student = await Student.findById(req.studentId);
     if (!student || !student.rollNoSlip.rollNumber) return res.status(400).json({ message: 'No roll number slip found' });
+    if (!student.test.issued) return res.status(403).json({ message: 'Test has not been issued to you yet. Please contact the administration.' });
     const existingSession = await TestSession.findOne({ studentId: req.studentId, status: { $in: ['completed', 'disqualified', 'in_progress'] } });
     if (existingSession && existingSession.status === 'in_progress') {
       return res.json({ session: existingSession, message: 'Resuming test' });

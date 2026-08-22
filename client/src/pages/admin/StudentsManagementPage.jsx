@@ -9,6 +9,7 @@ const statusColors = {
   payment_pending: 'bg-yellow-50 text-yellow-700',
   payment_verified: 'bg-green-50 text-green-700',
   slip_issued: 'bg-purple-50 text-purple-700',
+  test_issued: 'bg-cyan-50 text-cyan-700',
   test_completed: 'bg-teal-50 text-teal-700',
   result_published: 'bg-emerald-50 text-emerald-700',
 };
@@ -19,6 +20,7 @@ const statusLabels = {
   payment_pending: 'Payment Pending',
   payment_verified: 'Payment Verified',
   slip_issued: 'Slip Issued',
+  test_issued: 'Test Issued',
   test_completed: 'Test Completed',
   result_published: 'Result Published',
 };
@@ -118,6 +120,7 @@ export default function StudentsManagementPage() {
                     <th className="text-left px-5 py-3 font-medium">Name</th>
                     <th className="text-left px-5 py-3 font-medium">Registration #</th>
                     <th className="text-left px-5 py-3 font-medium">Phase</th>
+                    <th className="text-left px-5 py-3 font-medium">Test Mode</th>
                     <th className="text-left px-5 py-3 font-medium">Province</th>
                     <th className="text-left px-5 py-3 font-medium">Status</th>
                     <th className="text-left px-5 py-3 font-medium">Reg. Date</th>
@@ -126,15 +129,22 @@ export default function StudentsManagementPage() {
                 </thead>
                 <tbody>
                   {loading ? (
-                    <tr><td colSpan={8} className="text-center py-10"><Loader2 size={24} className="animate-spin text-primary mx-auto" /></td></tr>
+                    <tr><td colSpan={9} className="text-center py-10"><Loader2 size={24} className="animate-spin text-primary mx-auto" /></td></tr>
                   ) : students.length === 0 ? (
-                    <tr><td colSpan={8} className="text-center py-10 text-gray-400">No students found.</td></tr>
+                    <tr><td colSpan={9} className="text-center py-10 text-gray-400">No students found.</td></tr>
                   ) : students.map((s, i) => (
                     <tr key={s._id} className="border-b border-gray-50 hover:bg-gray-50">
                       <td className="px-5 py-3 text-gray-500">{(currentPage - 1) * itemsPerPage + i + 1}</td>
                       <td className="px-5 py-3 font-medium text-gray-900">{s.fullName}</td>
                       <td className="px-5 py-3 font-mono text-xs text-gray-600">{s.registrationNumber}</td>
                       <td className="px-5 py-3 text-gray-600">{s.phaseId?.name || '-'}</td>
+                      <td className="px-5 py-3">
+                        <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${
+                          s.testMode === 'physical' ? 'bg-amber-50 text-amber-700' : 'bg-blue-50 text-blue-700'
+                        }`}>
+                          {s.testMode === 'physical' ? 'Physical' : s.testMode === 'online' ? 'Online' : '-'}
+                        </span>
+                      </td>
                       <td className="px-5 py-3 text-gray-600">{s.province || '-'}</td>
                       <td className="px-5 py-3">
                         <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${statusColors[s.status] || 'bg-gray-100 text-gray-700'}`}>

@@ -8,7 +8,7 @@ import logo from '../../assets/images/logo.jpeg';
 const navLinks = [
   { name: 'Home', path: '/' },
   { name: 'About', path: '/about' },
-  { name: 'Scholarships', path: '/scholarships' },
+  { name: 'Our Team', path: '/team' },
   { name: 'Syllabus', path: '/syllabus' },
   { name: 'Apply Now', path: '/apply' },
   { name: 'Results', path: '/results' },
@@ -16,7 +16,7 @@ const navLinks = [
 ];
 
 const dropdownLinks = [
-  { name: 'Our Team', path: '/team' },
+  { name: 'Scholarships', path: '/scholarships' },
   { name: 'Find Challan', path: '/find-challan' },
   { name: 'Track Journey', path: '/track-journey' },
   { name: 'Find Certificate', path: '/find-certificate' },

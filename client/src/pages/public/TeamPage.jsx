@@ -28,7 +28,7 @@ const teamMembers = [
   { name: 'Advocate Saeed Aman', role: 'Strategic Advisor – New Initiatives & Programs & Legal & Compliance Officer', photo: saeedAman },
   { name: 'Miss Sumaira', role: 'Head of Scholarship Programs', photo: sumaira },
   { name: 'Miss Naila Zulfiqar Ali', role: 'Head of Test Development & Examination Coordinator', photo: naila },
-  { name: 'Miss Faiza Abdul Ghaffar', role: 'Test Quality & Assessment Officer', photo: faiza },
+  { name: 'Miss Fiza Abdul Ghaffar', role: 'Test Quality & Assessment Officer', photo: faiza },
   { name: 'Miss Benazir Aijaz', role: 'Records & Documentation Officer', photo: benazir },
   { name: 'Miss Sakina Sajjad', role: 'Finance & Accounts Manager', photo: sakina },
   { name: 'Miss Azeesha Ali', role: 'IT & Web Platform Manager', photo: azesha },

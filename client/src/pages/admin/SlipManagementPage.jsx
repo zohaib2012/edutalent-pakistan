@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Download, Search, ChevronLeft, ChevronRight, Ticket, CheckCircle, Clock, Loader2 } from 'lucide-react';
+import { Download, Search, ChevronLeft, ChevronRight, Ticket, CheckCircle, Clock, Loader2, MonitorPlay } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 import api from '../../services/api';
 
@@ -34,13 +34,24 @@ export default function SlipManagementPage() {
     }
   };
 
-  const generateBulk = async () => {
+  const issueTest = async (studentId) => {
     try {
-      const res = await api.post('/slips/generate-bulk', {});
-      alert(res.data?.message || 'Bulk generation done');
+      const res = await api.post(`/test/issue/${studentId}`);
+      alert(res.data?.message || 'Test issued');
       fetchSlips();
     } catch (err) {
-      alert(err.response?.data?.message || 'Bulk generation failed');
+      alert(err.response?.data?.message || 'Failed to issue test');
+    }
+  };
+
+  const revokeTest = async (studentId) => {
+    if (!confirm('Revoke test access for this student?')) return;
+    try {
+      const res = await api.post(`/test/revoke/${studentId}`);
+      alert(res.data?.message || 'Test access revoked');
+      fetchSlips();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to revoke test');
     }
   };
 
@@ -56,10 +67,7 @@ export default function SlipManagementPage() {
       <div className="flex-1 overflow-auto">
         <div className="p-8">
           <div className="flex items-center justify-between mb-6">
-            <h1 className="text-2xl font-bold text-gray-900">Slip Management</h1>
-            <button onClick={generateBulk} className="flex items-center gap-2 bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1557B0] transition-colors">
-              <Ticket size={18} /> Generate All Slips
-            </button>
+            <h1 className="text-2xl font-bold text-gray-900">Slip & Test Management</h1>
           </div>
 
           <div className="flex items-center gap-4 mb-6">
@@ -111,14 +119,30 @@ export default function SlipManagementPage() {
                           )}
                         </td>
                         <td className="px-5 py-3">
-                          {hasSlip ? (
-                            <span className="text-xs text-green-600">Issued</span>
-                          ) : (
-                            <button onClick={() => generateSlip(s._id)}
-                              className="flex items-center gap-1 px-3 py-1.5 bg-[#1A73E8] text-white rounded-lg text-xs font-medium hover:bg-[#1557B0] transition-colors">
-                              <Ticket size={14} /> Generate
-                            </button>
-                          )}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {hasSlip ? (
+                              <span className="inline-flex items-center gap-1 text-xs text-green-600 font-medium">
+                                <CheckCircle size={12} /> Slip Issued
+                              </span>
+                            ) : (
+                              <button onClick={() => generateSlip(s._id)}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-[#1A73E8] text-white rounded-lg text-xs font-medium hover:bg-[#1557B0] transition-colors">
+                                <Ticket size={14} /> Generate Slip
+                              </button>
+                            )}
+                            {hasSlip && !s.test?.issued && (
+                              <button onClick={() => issueTest(s._id)}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-[#2ECC71] text-white rounded-lg text-xs font-medium hover:bg-[#27AE60] transition-colors">
+                                <MonitorPlay size={14} /> Issue Test
+                              </button>
+                            )}
+                            {s.test?.issued && (
+                              <button onClick={() => revokeTest(s._id)}
+                                className="flex items-center gap-1 px-3 py-1.5 bg-amber-500 text-white rounded-lg text-xs font-medium hover:bg-amber-600 transition-colors">
+                                <MonitorPlay size={14} /> Revoke Test
+                              </button>
+                            )}
+                          </div>
                         </td>
                       </tr>
                     );

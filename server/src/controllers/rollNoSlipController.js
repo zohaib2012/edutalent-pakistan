@@ -90,7 +90,10 @@ exports.download = async (req, res) => {
 
 exports.getAll = async (req, res) => {
   try {
-    const students = await Student.find({ 'rollNoSlip.rollNumber': { $ne: null } }).select('fullName registrationNumber rollNoSlip phaseId status').populate('phaseId');
+    const students = await Student.find({ status: { $in: ['payment_verified', 'slip_issued', 'test_issued'] } })
+      .select('fullName registrationNumber rollNoSlip phaseId status test')
+      .populate('phaseId')
+      .sort({ createdAt: -1 });
     res.json(students);
   } catch (error) { res.status(500).json({ message: error.message }); }
 };

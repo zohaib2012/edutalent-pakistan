@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Search, Award, Shield, FileCheck, Star, ThumbsUp, Users, CheckCircle, XCircle, Download, Loader2 } from 'lucide-react';
 import { searchCertificate } from '../../services/api';
+import { downloadFile } from '../../utils/download';
 
 const certificateTypes = [
   { icon: Award, title: '1st Position', desc: 'Top performer in the phase — Gold-tier certificate with highest distinction.', color: 'from-gold to-yellow-500', bg: 'bg-gold/10', text: 'text-gold' },
@@ -45,7 +46,7 @@ const FindCertificatePage = () => {
 
   const handleDownload = () => {
     if (!certData?.fileUrl) return;
-    window.open(certData.fileUrl, '_blank');
+    downloadFile(certData.fileUrl, `Certificate-${certData.studentName || ''}`.trim());
   };
 
   return (

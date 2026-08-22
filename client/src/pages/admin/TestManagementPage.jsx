@@ -70,7 +70,7 @@ export default function TestManagementPage() {
         timeLimit: Number(form.timeLimit) || 25,
       }).forEach(([k, v]) => fd.append(k, v));
       if (questionImage) fd.append('questionImage', questionImage);
-      await api.post('/questions', fd, { headers: { 'Content-Type': 'multipart/form-data' } });
+      await api.post('/questions', fd);
       setShowAddModal(false);
       setForm({ question: '', optionA: '', optionB: '', optionC: '', optionD: '', correctAnswer: '', subject: '', phase: '', difficulty: 'Medium', timeLimit: '25' });
       setQuestionImage(null);

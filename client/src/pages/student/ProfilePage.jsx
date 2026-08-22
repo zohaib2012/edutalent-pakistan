@@ -1,15 +1,31 @@
 import { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import {
-  User, Mail, Phone, MapPin, BookOpen, Award, FileText, Download,
-  CheckCircle, Clock, AlertCircle, ChevronRight, Camera, Shield,
-  GraduationCap, Calendar, Pencil, FileDown, ScrollText, Medal,
-  UserCheck, Building2, Globe, CreditCard, BadgeCheck,
-  ListChecks, UserRound, Hash, Home, School, MapPinned, Cake,
-  VenusAndMars, IdCard, ClipboardList, CircleCheck, CircleDot,
-  ArrowRight, Loader2, LogOut
+  User, LogOut, Key, ClipboardList, CreditCard, FileDown,
+  ScrollText, Award, Medal, Trophy, Star, BadgeCheck,
+  CheckCircle, Lock, AlertCircle, Calendar, MapPin, Mail,
+  Phone, School, Loader2, UserRound, GraduationCap, Camera,
+  ListChecks, MessageSquare, X, UserCheck,
+  Clock,
+  IdCard,
+  Cake,
+  Globe,
+  MapPinned,
+  Home,
+  School2,
+  ClipboardListIcon,
+  BookOpen,
+  Hash,
+  ChevronRight,
+  CircleCheck,
+  Shield,
+  ArrowRight,
+  CheckCircle2,
+  FileText,
+  ScrollTextIcon,
+  AwardIcon
 } from 'lucide-react';
-import { getStudentProfile, updateStudentProfile } from '../../services/api';
+import { getStudentProfile, updateStudentProfile, getMyContactReplies } from '../../services/api';
 
 const statusConfig = {
   registered: { label: 'Registered', color: 'bg-blue-100 text-blue-800', icon: UserCheck },
@@ -17,6 +33,7 @@ const statusConfig = {
   payment_pending: { label: 'Payment Pending', color: 'bg-yellow-100 text-yellow-800', icon: Clock },
   payment_verified: { label: 'Payment Verified', color: 'bg-green-100 text-green-800', icon: BadgeCheck },
   slip_issued: { label: 'Slip Issued', color: 'bg-indigo-100 text-indigo-800', icon: ScrollText },
+  test_issued: { label: 'Test Issued', color: 'bg-cyan-100 text-cyan-800', icon: GraduationCap },
   test_completed: { label: 'Test Completed', color: 'bg-cyan-100 text-cyan-800', icon: GraduationCap },
   result_published: { label: 'Result Published', color: 'bg-gold/20 text-gold-800', icon: Award },
 };
@@ -36,6 +53,7 @@ const statusTimelineMap = {
   payment_pending: 1,
   payment_verified: 2,
   slip_issued: 3,
+  test_issued: 3,
   test_completed: 4,
   result_published: 5,
 };
@@ -46,10 +64,36 @@ const ProfilePage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [replies, setReplies] = useState([]);
+  const [dismissedReplies, setDismissedReplies] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('dismissedReplies') || '[]');
+    } catch {
+      return [];
+    }
+  });
 
   useEffect(() => {
     fetchProfile();
+    fetchReplies();
   }, []);
+
+  const fetchReplies = async () => {
+    try {
+      const res = await getMyContactReplies();
+      setReplies(Array.isArray(res.data) ? res.data : []);
+    } catch {
+      setReplies([]);
+    }
+  };
+
+  const dismissReply = (id) => {
+    const updated = [...dismissedReplies, id];
+    setDismissedReplies(updated);
+    localStorage.setItem('dismissedReplies', JSON.stringify(updated));
+  };
+
+  const visibleReplies = replies.filter((r) => !dismissedReplies.includes(r._id));
 
   const fetchProfile = async () => {
     try {
@@ -128,13 +172,13 @@ const ProfilePage = () => {
     { icon: UserRound, label: "Father's/Guardian's Name", value: student.fatherName },
     { icon: IdCard, label: 'CNIC / B-Form Number', value: student.cnicOrBform },
     { icon: Cake, label: 'Date of Birth', value: student.dateOfBirth ? new Date(student.dateOfBirth).toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' }) : '-' },
-    { icon: VenusAndMars, label: 'Gender', value: student.gender || '-' },
+    { icon: Hash, label: 'Gender', value: student.gender || '-' },
     { icon: Globe, label: 'Province', value: student.province || '-' },
     { icon: MapPinned, label: 'District', value: student.district || '-' },
     { icon: MapPin, label: 'City', value: student.city || '-' },
     { icon: Home, label: 'Residential Address', value: student.address || '-' },
-    { icon: School, label: 'School/College/University', value: student.schoolOrCollege || student.institutionName || '-' },
-    { icon: ClipboardList, label: 'Scholarship Phase', value: phaseName },
+    { icon: School2, label: 'School/College/University', value: student.schoolOrCollege || student.institutionName || '-' },
+    { icon: ClipboardListIcon, label: 'Scholarship Phase', value: phaseName },
     { icon: BookOpen, label: 'Class/Grade/Semester', value: student.grade || '-' },
     { icon: Phone, label: 'Mobile Number', value: student.mobileNumber || '-' },
     { icon: Mail, label: 'Email Address', value: student.email || '-' },
@@ -150,7 +194,7 @@ const ProfilePage = () => {
     { label: 'Download Challan', icon: CreditCard, color: 'from-orange-500 to-orange-600', to: '/challan', show: !!challanAvailable },
     { label: 'Upload Challan', icon: BadgeCheck, color: 'from-emerald-500 to-emerald-600', to: '/challan', show: student.status === 'challan_issued' || student.status === 'payment_pending' },
     { label: 'Download Roll Slip', icon: ScrollText, color: 'from-indigo-500 to-indigo-600', to: '/slip', show: !!slipAvailable },
-    { label: 'Take Test', icon: GraduationCap, color: 'from-cyan-500 to-cyan-600', to: '/test', show: student.status === 'slip_issued' },
+    { label: 'Take Test', icon: GraduationCap, color: 'from-cyan-500 to-cyan-600', to: '/test', show: student.status === 'test_issued' },
     { label: 'My Results', icon: Award, color: 'from-gold to-yellow-600', to: '/my-results', show: student.status === 'test_completed' || student.status === 'result_published' },
     { label: 'Generate Certificate', icon: Award, color: 'from-gold to-yellow-600', to: '/my-certificates', show: !!certAvailable },
     { label: 'Check Merit List', icon: Medal, color: 'from-cyan-500 to-cyan-600', to: '/merit-list' },
@@ -206,6 +250,34 @@ const ProfilePage = () => {
       <section className="py-12 md:py-16 bg-gray-50">
         <div className="container-custom">
           <div className="max-w-5xl mx-auto space-y-8">
+
+            {visibleReplies.length > 0 && (
+              <div className="space-y-3">
+                <h2 className="text-lg font-heading font-bold text-gray-800 flex items-center gap-2">
+                  <MessageSquare size={18} className="text-primary" />
+                  Messages from Administration
+                </h2>
+                {visibleReplies.map((r) => (
+                  <div key={r._id} className="bg-blue-50 border border-blue-200 rounded-xl p-5 flex items-start gap-3">
+                    <div className="w-9 h-9 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
+                      <MessageSquare size={16} className="text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs text-blue-600 font-semibold uppercase tracking-wider">Reply to your query{r.subject ? `: ${r.subject}` : ''}</p>
+                      <p className="text-sm text-gray-800 mt-1 leading-relaxed">{r.replyMessage}</p>
+                      {r.repliedAt && (
+                        <p className="text-[11px] text-gray-400 mt-2">{new Date(r.repliedAt).toLocaleString()}</p>
+                      )}
+                    </div>
+                    <button onClick={() => dismissReply(r._id)}
+                      className="p-1.5 rounded-lg hover:bg-blue-100 text-blue-400 hover:text-blue-600 transition-colors flex-shrink-0"
+                      title="Dismiss message">
+                      <X size={18} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
               <div className="bg-gradient-to-r from-primary-50 to-blue-50 px-6 md:px-8 py-4 border-b border-primary-100">
@@ -302,7 +374,7 @@ const ProfilePage = () => {
                                 <p className={`text-sm font-semibold ${
                                   isCompleted ? 'text-gray-800' : isCurrent ? 'text-primary' : 'text-gray-400'
                                 }`}>
-                                  {step.label}
+                                  {step.key === 'test' && !isCompleted ? 'Take Test' : step.label}
                                 </p>
                                 {isCurrent && !isCompleted && (
                                   <p className="text-xs text-primary/70 mt-0.5 flex items-center gap-1">
@@ -352,7 +424,7 @@ const ProfilePage = () => {
                           {timelineProgress < timelineSteps.length - 1 && (
                             <div className="flex items-center gap-2 text-xs text-primary">
                               <ArrowRight size={12} />
-                              <span>Next: {timelineSteps[timelineProgress + 1]?.label}</span>
+                              <span>Next: {timelineSteps[timelineProgress + 1]?.key === 'test' && timelineProgress + 1 === 4 ? 'Take Test' : timelineSteps[timelineProgress + 1]?.label}</span>
                             </div>
                           )}
                         </div>
@@ -364,8 +436,8 @@ const ProfilePage = () => {
                       <div className="space-y-2">
                         {[
                           { label: 'Application Form', available: true, icon: FileText },
-                          { label: 'Roll No. Slip', available: !!slipAvailable, icon: ScrollText },
-                          { label: 'Certificate', available: !!certAvailable, icon: Award },
+                          { label: 'Roll No. Slip', available: !!slipAvailable, icon: ScrollTextIcon },
+                          { label: 'Certificate', available: !!certAvailable, icon: AwardIcon },
                         ].map((doc, i) => {
                           const DocIcon = doc.icon;
                           return (
@@ -375,7 +447,7 @@ const ProfilePage = () => {
                               <DocIcon size={16} />
                               <span className="flex-1 font-medium">{doc.label}</span>
                               {doc.available ? (
-                                <CheckCircle size={14} className="text-success" />
+                                <CheckCircle2 size={14} className="text-success" />
                               ) : (
                                 <Clock size={14} />
                               )}

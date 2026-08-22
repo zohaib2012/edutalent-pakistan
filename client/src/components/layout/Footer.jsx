@@ -1,8 +1,10 @@
 import { Link } from 'react-router-dom';
-import { Mail, Phone, MessageCircle, MapPin } from 'lucide-react';
+import { Mail, Phone, MessageCircle, MapPin, ShieldCheck } from 'lucide-react';
 import { FacebookIcon, InstagramIcon, TikTokIcon, WhatsAppIcon } from '../icons/SocialIcons';
 import DownloadAppButton from '../DownloadAppButton';
 import logo from '../../assets/images/logo.jpeg';
+import fbrRegisteration from '../../assets/images/fbrregisteration.png';
+import filerCertification from '../../assets/images/filer certification.png';
 
 const SOCIAL_LINKS = [
   { label: 'Facebook', url: 'https://www.facebook.com/share/1JY7SmAuEC/', Icon: FacebookIcon },
@@ -43,6 +45,17 @@ const Footer = () => {
             </div>
             <div className="mt-5">
               <DownloadAppButton variant="footer" />
+            </div>
+            <div className="mt-5 flex items-center gap-3">
+              <span className="text-gray-500 text-xs uppercase tracking-wider font-medium flex items-center gap-1">
+                <ShieldCheck size={13} /> Trusted &amp; Registered
+              </span>
+            </div>
+            <div className="mt-2 flex items-center gap-3">
+              <img src={fbrRegisteration} alt="FBR Registered" title="FBR Registered"
+                className="h-14 w-auto bg-white rounded-lg p-1.5 object-contain" />
+              <img src={filerCertification} alt="Filer Certification" title="NTN Filer Certification"
+                className="h-14 w-auto bg-white rounded-lg p-1.5 object-contain" />
             </div>
           </div>
 

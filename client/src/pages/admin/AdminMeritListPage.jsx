@@ -1,7 +1,7 @@
-import { useState, useEffect } from 'react';
-import { Plus, Pencil, Trash2, Loader2, X, CheckCircle } from 'lucide-react';
+import { useState, useEffect, useRef } from 'react';
+import { Plus, Pencil, Trash2, Loader2, X, CheckCircle, Upload, FileText, Image } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
-import { getAdminMeritList, createMeritEntry, updateMeritEntry, deleteMeritEntry, getPhases } from '../../services/api';
+import { getAdminMeritList, createMeritEntry, updateMeritEntry, deleteMeritEntry, getPhases, uploadMeritDocument, getAdminMeritDocuments, deleteMeritDocument, postFormData } from '../../services/api';
 
 const emptyForm = { phaseId: '', position: '', registrationNumber: '', studentName: '', fatherName: '', city: '', score: '', totalMarks: '100', percentage: '' };
 
@@ -15,10 +15,59 @@ export default function AdminMeritListPage() {
   const [form, setForm] = useState(emptyForm);
   const [filterPhase, setFilterPhase] = useState('');
 
+  // Document upload
+  const [documents, setDocuments] = useState([]);
+  const [docPhase, setDocPhase] = useState('');
+  const [docFileName, setDocFileName] = useState('');
+  const [uploadingDoc, setUploadingDoc] = useState(false);
+  const docFileInputRef = useRef(null);
+
   useEffect(() => {
     fetchEntries();
     fetchPhases();
+    fetchDocuments();
   }, []);
+
+  const fetchDocuments = async () => {
+    try {
+      const res = await getAdminMeritDocuments();
+      setDocuments(res.data?.data || []);
+    } catch {
+      setDocuments([]);
+    }
+  };
+
+  const handleDocUpload = async () => {
+    const input = docFileInputRef.current;
+    const file = input?.files?.[0] || null;
+    if (!docPhase) { alert('Select a phase'); return; }
+    if (!file) { alert('Select a PDF or image file'); return; }
+    setUploadingDoc(true);
+    try {
+      const fd = new FormData();
+      fd.append('phaseId', docPhase);
+      fd.append('file', file);
+      await postFormData('/merit-documents', fd);
+      setDocFileName('');
+      setDocPhase('');
+      if (input) input.value = '';
+      fetchDocuments();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Upload failed');
+    } finally {
+      setUploadingDoc(false);
+    }
+  };
+
+  const handleDocDelete = async (id) => {
+    if (!confirm('Delete this merit list document?')) return;
+    try {
+      await deleteMeritDocument(id);
+      fetchDocuments();
+    } catch {
+      alert('Delete failed');
+    }
+  };
 
   const fetchEntries = async () => {
     setLoading(true);
@@ -130,6 +179,55 @@ export default function AdminMeritListPage() {
                 <option key={p._id} value={p._id}>{p.name}</option>
               ))}
             </select>
+          </div>
+
+          <div className="bg-white rounded-xl border border-gray-200 p-5 mb-6">
+            <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+              <Upload size={16} className="text-[#1A73E8]" /> Upload Merit List Document (PDF / Image)
+            </h3>
+            <div className="flex flex-wrap items-end gap-4">
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">Phase</label>
+                <select value={docPhase} onChange={(e) => setDocPhase(e.target.value)}
+                  className="border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8] min-w-[180px]">
+                  <option value="">Select Phase</option>
+                  {phases.map((p) => (
+                    <option key={p._id} value={p._id}>{p.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-xs font-medium text-gray-500 mb-1">File</label>
+                <input ref={docFileInputRef} id="merit-doc-input" type="file" accept=".pdf,.jpg,.jpeg,.png,.webp,application/pdf" onChange={(e) => setDocFileName(e.target.files?.[0]?.name || '')}
+                  className="block w-full text-sm text-gray-500 file:mr-3 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-medium file:bg-[#1A73E8]/10 file:text-[#1A73E8] hover:file:bg-[#1A73E8]/20" />
+                {docFileName && <p className="text-xs text-green-600 mt-1 truncate max-w-[220px]">✓ {docFileName}</p>}
+              </div>
+              <button onClick={handleDocUpload} disabled={uploadingDoc}
+                className="bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1557B0] disabled:opacity-50 flex items-center gap-2">
+                {uploadingDoc ? <Loader2 size={16} className="animate-spin" /> : <Upload size={16} />} Upload
+              </button>
+            </div>
+            {documents.length > 0 && (
+              <div className="mt-4 space-y-2">
+                {documents.map((d) => {
+                  const isPdf = (d.fileUrl || '').toLowerCase().includes('.pdf') || (d.fileUrl || '').split('?')[0].endsWith('.pdf');
+                  return (
+                    <div key={d._id} className="flex items-center justify-between bg-gray-50 rounded-lg px-3 py-2">
+                      <div className="flex items-center gap-2 text-sm">
+                        {isPdf ? <FileText size={15} className="text-red-500" /> : <Image size={15} className="text-green-600" />}
+                        <span className="font-medium">{d.title || 'Merit List'}</span>
+                        <span className="text-xs text-gray-400">— {d.phaseId?.name || 'Unknown'}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <a href={d.fileUrl} target="_blank" rel="noopener noreferrer"
+                          className="text-xs text-[#1A73E8] hover:underline">View</a>
+                        <button onClick={() => handleDocDelete(d._id)} className="p-1 rounded hover:bg-red-50 text-red-500"><Trash2 size={14} /></button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
 
           {loading ? (

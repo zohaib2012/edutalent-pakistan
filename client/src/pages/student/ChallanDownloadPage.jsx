@@ -9,6 +9,7 @@ const statusConfig = {
   payment_pending: { label: 'Payment Pending', icon: Clock, color: 'text-yellow-600', bg: 'bg-yellow-50 border-yellow-200' },
   payment_verified: { label: 'Payment Verified', icon: CheckCircle, color: 'text-success', bg: 'bg-green-50 border-green-200' },
   slip_issued: { label: 'Slip Issued', icon: CheckCircle, color: 'text-success', bg: 'bg-green-50 border-green-200' },
+  test_issued: { label: 'Test Issued', icon: CheckCircle, color: 'text-success', bg: 'bg-green-50 border-green-200' },
   test_completed: { label: 'Test Completed', icon: CheckCircle, color: 'text-success', bg: 'bg-green-50 border-green-200' },
   result_published: { label: 'Result Published', icon: CheckCircle, color: 'text-success', bg: 'bg-green-50 border-green-200' },
 };
@@ -25,6 +26,7 @@ const ChallanDownloadPage = () => {
   const [loading, setLoading] = useState(true);
   const [paidChallan, setPaidChallan] = useState(null);
   const [uploading, setUploading] = useState(false);
+  const [uploadSuccess, setUploadSuccess] = useState(false);
 
   useEffect(() => { fetchStudentData(); }, []);
 
@@ -40,16 +42,20 @@ const ChallanDownloadPage = () => {
   const status = studentData?.status || 'challan_issued';
   const cfg = statusConfig[status] || statusConfig.challan_issued;
   const StatusIcon = cfg.icon;
+  const isChallanPaid = !!challan.isPaid;
 
   const handlePaidChallanUpload = async () => {
     if (!paidChallan) return;
     setUploading(true);
+    setUploadSuccess(false);
     try {
       const fd = new FormData();
       fd.append('challanImage', paidChallan);
       await uploadChallan(fd);
       await fetchStudentData();
       setPaidChallan(null);
+      setUploadSuccess(true);
+      setTimeout(() => setUploadSuccess(false), 6000);
     } catch (err) {
       alert(err.response?.data?.message || 'Upload failed');
     } finally { setUploading(false); }
@@ -150,28 +156,46 @@ const ChallanDownloadPage = () => {
               </div>
             </div>
 
-            {(status === 'challan_issued' || status === 'payment_pending') && (
-              <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
-                <div className="flex items-center gap-2 mb-2">
-                  <ImagePlus size={18} className="text-primary" />
-                  <h2 className="text-lg font-heading font-bold text-gray-800">Upload Paid Challan</h2>
-                </div>
-                <p className="text-sm text-gray-500 mb-5">After paying at the bank, upload the paid challan image here for verification</p>
-                <div className="space-y-4">
-                  <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-primary hover:bg-primary-50/40 transition-colors"
-                    onClick={() => document.getElementById('challan-upload').click()}>
-                    <Upload size={28} className="text-gray-400 mx-auto mb-2" />
-                    <p className="text-sm text-gray-600">{paidChallan ? paidChallan.name : 'Click to upload paid challan image'}</p>
-                    <p className="text-xs text-gray-400 mt-1">PDF or Image, max 5MB</p>
-                    <input id="challan-upload" type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
-                      onChange={e => setPaidChallan(e.target.files[0] || null)} />
-                  </div>
-                  <button onClick={handlePaidChallanUpload} disabled={!paidChallan || uploading}
-                    className="btn-primary w-full justify-center disabled:opacity-40 disabled:cursor-not-allowed">
-                    {uploading ? <><Loader2 size={18} className="animate-spin" /> Uploading...</> : 'Submit Paid Challan'}
-                  </button>
+            {uploadSuccess && (
+              <div className="bg-green-50 border border-green-200 rounded-xl p-4 flex items-center gap-3">
+                <CheckCircle size={20} className="text-success shrink-0" />
+                <div>
+                  <p className="text-sm font-semibold text-green-700">Challan Uploaded Successfully</p>
+                  <p className="text-xs text-green-600 mt-0.5">Your paid challan has been submitted. Status will be verified by the administration shortly.</p>
                 </div>
               </div>
+            )}
+
+            {isChallanPaid ? (
+              <div className="bg-green-50 rounded-xl p-6 text-center border border-green-200">
+                <CheckCircle size={40} className="text-success mx-auto mb-2" />
+                <p className="text-sm font-semibold text-green-700">Challan Uploaded</p>
+                <p className="text-xs text-green-600 mt-1">Your paid challan has been received and is awaiting verification.</p>
+              </div>
+            ) : (
+              (status === 'challan_issued' || status === 'payment_pending') && (
+                <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 md:p-8">
+                  <div className="flex items-center gap-2 mb-2">
+                    <ImagePlus size={18} className="text-primary" />
+                    <h2 className="text-lg font-heading font-bold text-gray-800">Upload Paid Challan</h2>
+                  </div>
+                  <p className="text-sm text-gray-500 mb-5">After paying at the bank, upload the paid challan image here for verification</p>
+                  <div className="space-y-4">
+                    <div className="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center cursor-pointer hover:border-primary hover:bg-primary-50/40 transition-colors"
+                      onClick={() => document.getElementById('challan-upload').click()}>
+                      <Upload size={28} className="text-gray-400 mx-auto mb-2" />
+                      <p className="text-sm text-gray-600">{paidChallan ? paidChallan.name : 'Click to upload paid challan image'}</p>
+                      <p className="text-xs text-gray-400 mt-1">PDF or Image, max 5MB</p>
+                      <input id="challan-upload" type="file" accept=".pdf,.jpg,.jpeg,.png" className="hidden"
+                        onChange={e => setPaidChallan(e.target.files[0] || null)} />
+                    </div>
+                    <button onClick={handlePaidChallanUpload} disabled={!paidChallan || uploading}
+                      className="btn-primary w-full justify-center disabled:opacity-40 disabled:cursor-not-allowed">
+                      {uploading ? <><Loader2 size={18} className="animate-spin" /> Uploading...</> : 'Submit Paid Challan'}
+                    </button>
+                  </div>
+                </div>
+              )
             )}
 
             {status === 'payment_verified' && (

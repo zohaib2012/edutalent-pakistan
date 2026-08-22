@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { BarChart3, TrendingUp, Award, Loader2 } from 'lucide-react';
+import { BarChart3, TrendingUp, Award, Loader2, Search, UserPlus, CheckCircle } from 'lucide-react';
 import AdminSidebar from './AdminSidebar';
 import api, { getSettings } from '../../services/api';
 
@@ -8,6 +8,13 @@ export default function AdminResultsPage() {
   const [loading, setLoading] = useState(true);
   const [phases, setPhases] = useState([]);
   const [phase, setPhase] = useState('');
+  const [generating, setGenerating] = useState(false);
+
+  // Single student result
+  const [studentQuery, setStudentQuery] = useState('');
+  const [studentResults, setStudentResults] = useState([]);
+  const [selectedStudent, setSelectedStudent] = useState('');
+  const [generatingSingle, setGeneratingSingle] = useState(false);
 
   useEffect(() => {
     fetchResults();
@@ -39,12 +46,43 @@ export default function AdminResultsPage() {
 
   const generateResults = async () => {
     if (!phase) { alert('Select a phase first'); return; }
+    setGenerating(true);
     try {
       const res = await api.post(`/results/generate/${phase}`);
       alert(res.data?.message || 'Results generated');
       fetchResults();
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to generate results');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
+  const searchStudents = async (q) => {
+    setStudentQuery(q);
+    if (!q.trim()) { setStudentResults([]); return; }
+    try {
+      const res = await api.get('/students', { params: { search: q, limit: 20 } });
+      setStudentResults(res.data?.students || []);
+    } catch {
+      setStudentResults([]);
+    }
+  };
+
+  const generateSingleResult = async () => {
+    if (!selectedStudent) { alert('Select a student first'); return; }
+    setGeneratingSingle(true);
+    try {
+      const res = await api.post(`/results/generate-single/${selectedStudent}`);
+      alert(res.data?.message || 'Result generated');
+      setSelectedStudent('');
+      setStudentQuery('');
+      setStudentResults([]);
+      fetchResults();
+    } catch (err) {
+      alert(err.response?.data?.message || 'Failed to generate result');
+    } finally {
+      setGeneratingSingle(false);
     }
   };
 
@@ -67,20 +105,56 @@ export default function AdminResultsPage() {
             <h1 className="text-2xl font-bold text-gray-900">Results Management</h1>
           </div>
 
-          <div className="flex items-center gap-4 mb-8">
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Phase</label>
-              <select value={phase} onChange={(e) => setPhase(e.target.value)}
-                className="border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8]">
-                <option value="">Select Phase</option>
-                {phases.map((p) => (
-                  <option key={p._id} value={p._id}>{p.name}</option>
-                ))}
-              </select>
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <BarChart3 size={16} className="text-[#1A73E8]" /> Generate Results — Phase-wise
+              </h3>
+              <div className="flex items-end gap-3">
+                <div className="flex-1">
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Phase</label>
+                  <select value={phase} onChange={(e) => setPhase(e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-[#1A73E8]">
+                    <option value="">Select Phase</option>
+                    {phases.map((p) => (
+                      <option key={p._id} value={p._id}>{p.name}</option>
+                    ))}
+                  </select>
+                </div>
+                <button onClick={generateResults} disabled={generating}
+                  className="bg-[#1A73E8] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#1557B0] disabled:opacity-50 flex items-center gap-2">
+                  {generating ? <Loader2 size={16} className="animate-spin" /> : <BarChart3 size={16} />} Generate
+                </button>
+              </div>
             </div>
-            <button onClick={generateResults} className="mt-5 bg-[#1A73E8] text-white px-5 py-2 rounded-lg text-sm font-medium hover:bg-[#1557B0] flex items-center gap-2">
-              <BarChart3 size={16} /> Generate Results
-            </button>
+
+            <div className="bg-white rounded-xl border border-gray-200 p-5">
+              <h3 className="text-sm font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                <UserPlus size={16} className="text-[#2ECC71]" /> Generate Result — Single Student
+              </h3>
+              <div className="relative">
+                <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <input type="text" placeholder="Search student by name / registration / CNIC..."
+                  value={studentQuery}
+                  onChange={(e) => searchStudents(e.target.value)}
+                  className="w-full pl-9 pr-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-[#2ECC71]" />
+                {studentQuery && studentResults.length > 0 && (
+                  <div className="absolute z-20 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg max-h-48 overflow-y-auto">
+                    {studentResults.map((s) => (
+                      <button key={s._id} onClick={() => { setSelectedStudent(s._id); setStudentQuery(`${s.fullName} — ${s.registrationNumber}`); setStudentResults([]); }}
+                        className="w-full text-left px-3 py-2 text-sm hover:bg-green-50 transition-colors">
+                        <span className="font-medium">{s.fullName}</span>
+                        <span className="text-xs text-gray-500 ml-2 font-mono">{s.registrationNumber}</span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+              <button onClick={generateSingleResult} disabled={!selectedStudent || generatingSingle}
+                className="mt-3 w-full bg-[#2ECC71] text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-[#27AE60] disabled:opacity-50 flex items-center justify-center gap-2">
+                {generatingSingle ? <Loader2 size={16} className="animate-spin" /> : <CheckCircle size={16} />} Generate Result for Selected Student
+              </button>
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-6 mb-8">
@@ -91,7 +165,7 @@ export default function AdminResultsPage() {
             </div>
             <div className="bg-white rounded-xl border border-gray-200 p-5">
               <div className="p-2 bg-green-50 rounded-lg w-fit mb-2"><TrendingUp size={20} className="text-[#2ECC71]" /></div>
-              <p className="text-2xl font-bold text-gray-900">{results.length > 0 ? Math.round((results.filter(r => (r.percentage || 0) >= 50).length / results.length) * 100) : 0}%</p>
+              <p className="text-2xl font-bold text-gray-900">{filteredResults.length > 0 ? Math.round((filteredResults.filter(r => (r.percentage || 0) >= 50).length / filteredResults.length) * 100) : 0}%</p>
               <p className="text-sm text-gray-500">Pass Rate</p>
             </div>
             <div className="bg-white rounded-xl border border-gray-200 p-5">
@@ -110,7 +184,7 @@ export default function AdminResultsPage() {
                     <th className="text-left px-5 py-3 font-medium">Roll No</th>
                     <th className="text-left px-5 py-3 font-medium">Score</th>
                     <th className="text-left px-5 py-3 font-medium">Percentage</th>
-                    <th className="text-left px-5 py-3 font-medium">Award</th>
+                    <th className="text-left px-5 py-3 font-medium">Status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -132,8 +206,8 @@ export default function AdminResultsPage() {
                         </div>
                       </td>
                       <td className="px-5 py-3">
-                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
-                          {r.awardCategory || '-'}
+                        <span className="px-2.5 py-1 rounded-full text-xs font-medium bg-green-50 text-green-700">
+                          Published
                         </span>
                       </td>
                     </tr>
