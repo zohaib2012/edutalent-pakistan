@@ -52,10 +52,14 @@ const Footer = () => {
               </span>
             </div>
             <div className="mt-2 flex items-center gap-3">
-              <img src={fbrRegisteration} alt="FBR Registered" title="FBR Registered"
-                className="h-14 w-auto bg-white rounded-lg p-1.5 object-contain" />
-              <img src={filerCertification} alt="Filer Certification" title="NTN Filer Certification"
-                className="h-14 w-auto bg-white rounded-lg p-1.5 object-contain" />
+              <a href={fbrRegisteration} target="_blank" rel="noopener noreferrer" title="View FBR Registration">
+                <img src={fbrRegisteration} alt="FBR Registered" title="FBR Registered"
+                  className="h-14 w-auto bg-white rounded-lg p-1.5 object-contain hover:opacity-80 transition-opacity" />
+              </a>
+              <a href={filerCertification} target="_blank" rel="noopener noreferrer" title="View NTN Filer Certification">
+                <img src={filerCertification} alt="Filer Certification" title="NTN Filer Certification"
+                  className="h-14 w-auto bg-white rounded-lg p-1.5 object-contain hover:opacity-80 transition-opacity" />
+              </a>
             </div>
           </div>
 

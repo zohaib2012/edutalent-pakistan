@@ -102,10 +102,14 @@ const HomePage = () => {
             <span className="font-medium">FBR Registered &amp; Verified Platform</span>
           </div>
           <div className="flex items-center gap-4">
-            <img src={fbrRegisteration} alt="FBR Registration" title="FBR Registration"
-              className="h-16 w-auto bg-white rounded-lg border border-gray-200 p-1.5 object-contain" />
-            <img src={filerCertification} alt="NTN Filer Certification" title="NTN Filer Certification"
-              className="h-16 w-auto bg-white rounded-lg border border-gray-200 p-1.5 object-contain" />
+            <a href={fbrRegisteration} target="_blank" rel="noopener noreferrer" title="View FBR Registration">
+              <img src={fbrRegisteration} alt="FBR Registration" title="FBR Registration"
+                className="h-16 w-auto bg-white rounded-lg border border-gray-200 p-1.5 object-contain hover:shadow-md hover:scale-105 transition-all cursor-pointer" />
+            </a>
+            <a href={filerCertification} target="_blank" rel="noopener noreferrer" title="View NTN Filer Certification">
+              <img src={filerCertification} alt="NTN Filer Certification" title="NTN Filer Certification"
+                className="h-16 w-auto bg-white rounded-lg border border-gray-200 p-1.5 object-contain hover:shadow-md hover:scale-105 transition-all cursor-pointer" />
+            </a>
           </div>
         </div>
       </section>
@@ -167,16 +171,18 @@ const HomePage = () => {
             <h2 className="section-title">How It Works</h2>
             <p className="section-subtitle">5 simple steps to earn your scholarship award.</p>
           </div>
-          <div className="grid md:grid-cols-5 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-6">
             {steps.map((step, i) => (
-              <div key={i} className="text-center relative">
+              <div key={i} className="text-center relative px-4">
                 <div className="w-16 h-16 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4 relative z-10 shadow-lg">
                   <step.icon size={28} className="text-white" />
                 </div>
-                <div className="absolute top-8 left-[60%] w-full h-0.5 bg-primary-200 hidden md:block" style={{ display: i < 4 ? 'block' : 'none' }} />
+                {i < 4 && (
+                  <div className="hidden lg:block absolute top-8 left-[60%] w-[calc(100%-1.5rem)] h-0.5 bg-primary-200" />
+                )}
                 <div className="text-gold font-heading font-bold text-sm mb-1">{step.step}</div>
                 <h3 className="font-heading font-semibold text-sm mb-1">{step.title}</h3>
-                <p className="text-gray-500 text-xs">{step.desc}</p>
+                <p className="text-gray-500 text-xs leading-relaxed">{step.desc}</p>
               </div>
             ))}
           </div>
